@@ -12,7 +12,7 @@ public class PlayerController
     public bool crouch;
     public bool dodge;
     public bool climb;
-    public bool climbStairs;
+    public float climbStairs;
     public bool takeOfCamera;
 
     public bool revokeControl;
@@ -46,6 +46,7 @@ public class PlayerController
             jog = Input.GetButtonUp("Jogging/Running");
             crouch = Input.GetButton("Crouching");
             takeOfCamera = Input.GetButtonDown("Take Of Camera");
+            climbStairs = Input.GetAxisRaw("Vertical");
         }
         else
         {

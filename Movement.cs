@@ -31,16 +31,37 @@ public class Movement : MonoBehaviour
         JOGGING = 2,
         RUNNING = 3,
         CROUCHING = 4,
-        JUMPING = 5,
-        FALLING = 6,
-        DODGING = 7,
+        ON_AIR = 5,
+        DODGING = 6,
+        CLIMBING_STAIRS = 7,
     }
 
+    public struct RaycastPoints
+    {
+        public Vector2 bottomRight;
+        public Vector2 bottomLeft;
+        public Vector2 bottomMid;
+    }
+
+    public struct RaycastHit2DPoints
+    {
+        public RaycastHit2D bottomLeftRay;
+        public RaycastHit2D bottomRightRay;
+        public RaycastHit2D bottomMidRay;
+    }
+
+    public RaycastHit2DPoints raycastHit2DPoints;
+
+    public RaycastPoints raycastPoints;
     public bool isJogging;
-    public bool isFalling;
+    public bool isOnAir;
+    public bool climbingStairs;
     private bool isCrouching;
     private bool isDodging;
+    public bool isOnStairs;
     public bool facingRight;
+
+    private float currentGravityScale;
 
     private float runningPressingTime;
 
@@ -54,13 +75,12 @@ public class Movement : MonoBehaviour
     private float characterHeigth;
 
     public LayerMask jumpLayer;
-    public Transform groundCheckPosition;
 
     private Vector2 forceApplied;
 
 
-    Rigidbody2D rigidBody;
-    BoxCollider2D boxCollider;
+    public Rigidbody2D rigidBody;
+    public BoxCollider2D boxCollider;
 
     PlayerController playerController;
 
@@ -84,15 +104,31 @@ public class Movement : MonoBehaviour
         characterHeigth = boxCollider.size.y;
 
         facingRight = true;
+        currentGravityScale = rigidBody.gravityScale;
+
     }
 
     private void Update()
     {
-
-        playerController.checkForPlayerInput();
         facingRight = checkFacingDirection();
-        RaycastHit2D canJumpRaycast = Physics2D.Raycast(groundCheckPosition.position, Vector2.down);
-        canJump = (canJumpRaycast.collider != null && canJumpRaycast.distance <= 0.20f) ? true : false;
+        flip();
+        playerController.checkForPlayerInput();
+        setRaycastPoints();
+        castRays();
+
+        canJump = checkGroundForJump();
+
+
+
+        if (!canJump && !climbingStairs)
+        {
+            isOnAir = true;
+        }
+
+        if (canJump && climbingStairs)
+        {
+            climbingStairs = false;
+        }
 
         if (playerController.jump && canJump)
         {
@@ -138,7 +174,26 @@ public class Movement : MonoBehaviour
 
         }
 
-        if (!isFalling && !isDodging)
+
+        if (isOnStairs && playerController.climbStairs != 0 && !isOnAir)
+        {
+            climbingStairs = true;
+            switchGravity(false);
+            resetVelocityX();
+            movementState = (int)MovementStateENUM.CLIMBING_STAIRS;
+        }
+        else if (!isOnStairs || !climbingStairs)
+        {
+            switchGravity(true);
+        }
+
+        if (climbingStairs && playerController.climbStairs == 0 && rigidBody.velocity.y != 0)
+        {
+            resetVelocityY();
+        }
+
+
+        if (!isOnAir && !isDodging && !climbingStairs)
         {
 
             if (playerController.move != 0)
@@ -169,9 +224,9 @@ public class Movement : MonoBehaviour
                 movementState = (int)MovementStateENUM.IDLE;
             }
         }
-        else if (isFalling)
+        else if (isOnAir)
         {
-            movementState = (int)MovementStateENUM.FALLING;
+            movementState = (int)MovementStateENUM.ON_AIR;
         }
         else if (isDodging)
         {
@@ -206,6 +261,9 @@ public class Movement : MonoBehaviour
             case (int)MovementStateENUM.DODGING:
                 forceApplied = dodge();
                 break;
+            case (int)MovementStateENUM.CLIMBING_STAIRS:
+                forceApplied = climbStairs(playerController.climbStairs);
+                break;
         }
 
 
@@ -218,11 +276,12 @@ public class Movement : MonoBehaviour
 
     void LateUpdate()
     {
-        if (rigidBody.velocity.y == 0 && isFalling)
+        if (rigidBody.velocity.y == 0 && isOnAir)
         {
-            isFalling = false;
-            playerController.giveMovementPlayerControlWithCooldown(0.2f, this);
+            isOnAir = false;
+            playerController.giveMovementPlayerControlWithCooldown(0.1f, this);
         }
+
     }
 
 
@@ -230,6 +289,23 @@ public class Movement : MonoBehaviour
 
     #region Métodos Gerais
 
+    public void snapToPosition(Vector2 position)
+    {
+
+        StartCoroutine(snapToPositionCoroutine(position));
+
+
+    }
+
+    private IEnumerator snapToPositionCoroutine(Vector2 position)
+    {
+        while (!Mathf.Approximately(rigidBody.position.x, position.x))
+        {
+            rigidBody.position = Vector2.Lerp(rigidBody.position, new Vector2(position.x, rigidBody.position.y), 0.10f);
+            yield return new WaitForEndOfFrame();
+
+        }
+    }
 
     public bool checkFacingDirection()
     {
@@ -253,6 +329,20 @@ public class Movement : MonoBehaviour
 
     }
 
+    public void switchGravity(bool on)
+    {
+        if (on)
+        {
+            rigidBody.gravityScale = currentGravityScale;
+        }
+        else
+        {
+            rigidBody.gravityScale = 0;
+
+        }
+
+    }
+
     public void takeOfCamera()
     {
 
@@ -263,21 +353,21 @@ public class Movement : MonoBehaviour
     Vector2 walk(float move)
     {
 
-        return Physics.movementByForce(force, 1f, maxVelocity, move, this.rigidBody);
+        return Physics.movementByForce(force, 1f, maxVelocity, move, this.rigidBody, false);
 
     }
 
     Vector2 jog(float move)
     {
 
-        return Physics.movementByForce(force, 1.5f, maxVelocity, move, this.rigidBody);
+        return Physics.movementByForce(force, 1.5f, maxVelocity, move, this.rigidBody, false);
 
     }
 
     Vector2 run(float move)
     {
 
-        return Physics.movementByForce(force, 2f, maxVelocity, move, this.rigidBody);
+        return Physics.movementByForce(force, 2f, maxVelocity, move, this.rigidBody, false);
 
     }
 
@@ -285,7 +375,7 @@ public class Movement : MonoBehaviour
     Vector2 crouchWalk(float move)
     {
 
-        return Physics.movementByForce(force, 0.75f, maxVelocity, move, this.rigidBody);
+        return Physics.movementByForce(force, 0.75f, maxVelocity, move, this.rigidBody, false);
 
     }
 
@@ -322,8 +412,22 @@ public class Movement : MonoBehaviour
     {
 
         Physics.jump(jumpForce, rigidBody);
-        isFalling = true;
+        isOnAir = true;
         playerController.revokeMovementPlayerControl();
+
+    }
+
+    public void flip()
+    {
+        if (!facingRight)
+        {
+            GetComponent<SpriteRenderer>().flipX = true;
+        }
+        else
+        {
+            GetComponent<SpriteRenderer>().flipX = false;
+
+        }
 
     }
 
@@ -331,16 +435,63 @@ public class Movement : MonoBehaviour
     {
         //Adicionar a colisão com inimigos depois
 
+        //Zerar velocidade para desviar a mesma distância
+        resetVelocityX();
+
         Vector2 forceApplied = Physics.addImpulseForce(dodgeForce, rigidBody, facingRight);
         isDodging = false;
         return forceApplied;
 
     }
 
-    public void climbStairs()
+    public Vector2 climbStairs(float move)
     {
+        return Physics.movementByForce(force, 0.75f, maxVelocity, move, this.rigidBody, true);
+    }
+
+    public void resetVelocityY()
+    {
+        rigidBody.velocity = new Vector2(rigidBody.velocity.x, 0);
+    }
+
+    public void resetVelocityX()
+    {
+        rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
+    }
+
+    public void setRaycastPoints()
+    {
+        raycastPoints.bottomLeft = new Vector2(boxCollider.bounds.min.x, boxCollider.bounds.min.y);
+        raycastPoints.bottomRight = new Vector2(boxCollider.bounds.max.x, boxCollider.bounds.min.y);
+        raycastPoints.bottomMid = raycastPoints.bottomLeft + (Vector2.right * boxCollider.size.x / 2);
+
+
+        Debug.DrawRay(raycastPoints.bottomLeft, Vector2.down, Color.green);
+        Debug.DrawRay(raycastPoints.bottomRight, Vector2.down, Color.red);
+        Debug.DrawRay(raycastPoints.bottomMid, Vector2.down, Color.blue);
 
     }
+
+    public void castRays()
+    {
+
+        raycastHit2DPoints.bottomLeftRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down);
+        raycastHit2DPoints.bottomRightRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down);
+        raycastHit2DPoints.bottomMidRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down);
+
+    }
+
+    public bool checkGroundForJump()
+    {
+        if (raycastHit2DPoints.bottomMidRay.collider != null && raycastHit2DPoints.bottomMidRay.distance <= 0.10f)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+
 
     #endregion
 

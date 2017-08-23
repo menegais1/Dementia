@@ -7,9 +7,15 @@ public static class Physics
 
 
     public static Vector2 movementByForce(float force, float constant,
-        float maxVelocity, float direction, Rigidbody2D rigidBody)
+        float maxVelocity, float direction, Rigidbody2D rigidBody, bool vertical)
     {
         Vector2 forceApplied = new Vector2((force * constant), 0) * direction;
+
+        if (vertical)
+        {
+            forceApplied = new Vector2(0, (force * constant)) * direction;
+        }
+
 
         if (rigidBody.velocity.x > (maxVelocity * constant) || rigidBody.velocity.x < -(maxVelocity * constant))
         {
