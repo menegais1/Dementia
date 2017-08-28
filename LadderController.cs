@@ -9,11 +9,19 @@ public class LadderController : MonoBehaviour
     public string tag;
     private Movement playerMovement;
     public Collider2D adjacentCollider;
+    public enum LadderType
+    {
+        LADDER = 0,
+        BOTTOM_LADDER = 1,
+        MIDDLE_LADDER = 2,
+        TOP_LADDER = 3,
+    }
+
+    public LadderType ladder;
     // Use this for initialization
 
     void Start()
     {
-
     }
 
     public void OnTriggerEnter2D(Collider2D other)

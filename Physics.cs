@@ -62,6 +62,17 @@ public static class Physics
         return forceApplied;
     }
 
+    public static Vector2 addImpulseForce(float force, Rigidbody2D rigidBody)
+    {
+
+        Vector2 forceApplied = new Vector2(force, 0);
+
+
+        rigidBody.AddForce(forceApplied, ForceMode2D.Impulse);
+
+
+        return forceApplied;
+    }
 
     public static void jump(float force, Rigidbody2D rigidBody)
     {

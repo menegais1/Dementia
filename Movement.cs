@@ -56,6 +56,7 @@ public class Movement : MonoBehaviour
     public bool isJogging;
     public bool isOnAir;
     public bool climbingStairs;
+    public float forceOnEdge;
     private bool isCrouching;
     private bool isDodging;
     public bool isOnStairs;
@@ -350,21 +351,21 @@ public class Movement : MonoBehaviour
 
     }
 
-    Vector2 walk(float move)
+    public Vector2 walk(float move)
     {
 
         return Physics.movementByForce(force, 1f, maxVelocity, move, this.rigidBody, false);
 
     }
 
-    Vector2 jog(float move)
+    public Vector2 jog(float move)
     {
 
         return Physics.movementByForce(force, 1.5f, maxVelocity, move, this.rigidBody, false);
 
     }
 
-    Vector2 run(float move)
+    public Vector2 run(float move)
     {
 
         return Physics.movementByForce(force, 2f, maxVelocity, move, this.rigidBody, false);
@@ -372,7 +373,7 @@ public class Movement : MonoBehaviour
     }
 
 
-    Vector2 crouchWalk(float move)
+    public Vector2 crouchWalk(float move)
     {
 
         return Physics.movementByForce(force, 0.75f, maxVelocity, move, this.rigidBody, false);
@@ -380,7 +381,7 @@ public class Movement : MonoBehaviour
     }
 
 
-    void crouch()
+    public void crouch()
     {
 
         if (boxCollider.size.y > crouchHeigth)
@@ -393,7 +394,7 @@ public class Movement : MonoBehaviour
 
     }
 
-    void raise()
+    public void raise()
     {
         if (boxCollider.size.y < characterHeigth)
         {
@@ -476,21 +477,40 @@ public class Movement : MonoBehaviour
     {
 
         raycastHit2DPoints.bottomLeftRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down);
-        raycastHit2DPoints.bottomRightRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down);
-        raycastHit2DPoints.bottomMidRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down);
+        raycastHit2DPoints.bottomRightRay = Physics2D.Raycast(raycastPoints.bottomRight, Vector2.down);
+        raycastHit2DPoints.bottomMidRay = Physics2D.Raycast(raycastPoints.bottomMid, Vector2.down);
 
     }
 
     public bool checkGroundForJump()
     {
+
         if (raycastHit2DPoints.bottomMidRay.collider != null && raycastHit2DPoints.bottomMidRay.distance <= 0.10f)
         {
             return true;
+        }
+        else if (raycastHit2DPoints.bottomLeftRay.collider != null && raycastHit2DPoints.bottomLeftRay.distance <= 0.10f)
+        {
+            Vector2 forceApplied = Physics.addImpulseForce(forceOnEdge, rigidBody);
+        }
+        else if (raycastHit2DPoints.bottomRightRay.collider != null && raycastHit2DPoints.bottomRightRay.distance <= 0.10f)
+        {
+            Vector2 forceApplied = Physics.addImpulseForce(-forceOnEdge, rigidBody);
         }
 
         return false;
     }
 
+
+    public void revokeControlOnStairs()
+    {
+        playerController.revokeMovementPlayerControl();
+    }
+
+    public void giveControlOnStairs()
+    {
+        playerController.revokeMovementPlayerControl(0.5f, this);
+    }
 
 
     #endregion
