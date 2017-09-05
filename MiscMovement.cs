@@ -2,16 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MiscMovement : MonoBehaviour {
-   
-    
+public class MiscMovement : MonoBehaviour
+{
+
+
     #region Váriaveis Gerais
 
-    private bool existItem;
+    private bool canTakeItem;
     private bool existNote;
     private bool canReadNote;
+    private bool canInteractWithScenery;
+    public bool isInteractingWithScenery;
+    public bool isTakingItem;
+
     private bool readingNote;
 
+    private PlayerController playerController;
     #endregion
 
 
@@ -23,12 +29,32 @@ public class MiscMovement : MonoBehaviour {
     void Start()
     {
 
+        playerController = PlayerController.getInstance();
+
     }
 
     // Update is called once per frame
     void Update()
     {
 
+        if (playerController.interactWithScenery && canInteractWithScenery)
+        {
+            interactScenery();
+        }
+        else if (!canInteractWithScenery)
+        {
+            isInteractingWithScenery = false;
+        }
+
+
+        if (canTakeItem && playerController.takeItem)
+        {
+            takeItem();
+        }
+        else if (!canTakeItem)
+        {
+            isTakingItem = false;
+        }
     }
 
     #endregion
@@ -42,15 +68,23 @@ public class MiscMovement : MonoBehaviour {
 
     public void interactScenery()
     {
-
+        isInteractingWithScenery = true;
     }
 
     public void takeItem()
     {
-
+        isTakingItem = true;
     }
 
-    
+    public void setCanInteractWithScenery(bool canInteractWithScenery)
+    {
+        this.canInteractWithScenery = canInteractWithScenery;
+    }
+
+    public void setCanTakeItem(bool canTakeItem)
+    {
+        this.canTakeItem = canTakeItem;
+    }
 
     #endregion
 

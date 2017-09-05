@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class LadderController : MonoBehaviour
 {
-
-
-    public string tag;
-    private Movement playerMovement;
-    public Collider2D adjacentCollider;
     public enum LadderType
     {
         LADDER = 0,
@@ -17,20 +12,22 @@ public class LadderController : MonoBehaviour
         TOP_LADDER = 3,
     }
 
-    public LadderType ladder;
-    // Use this for initialization
 
-    void Start()
-    {
-    }
+    public string tag;
+    private Movement playerMovement;
+    public Collider2D adjacentCollider;
+    public LadderType ladder;
 
     public void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.tag.Equals(tag))
         {
-            playerMovement = other.GetComponent<Movement>();
-            playerMovement.isOnStairs = true;
 
+            playerMovement = other.GetComponent<Movement>();
+            if (ladder != LadderType.LADDER)
+            {
+                adjacentCollider = transform.parent.GetComponent<LadderController>().adjacentCollider;
+            }
         }
     }
 
@@ -38,14 +35,33 @@ public class LadderController : MonoBehaviour
     {
         if (other.gameObject.tag.Equals(tag))
         {
-            if (playerMovement != null)
+            if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
             {
-                if (playerMovement.climbingStairs)
+                playerMovement.setCanClimbStairs(true);
+
+                if (playerMovement.isClimbingStairs)
                 {
-                    playerMovement.snapToPosition(transform.position);
-                    Physics2D.IgnoreCollision(adjacentCollider, playerMovement.boxCollider, true);
+                    if (!playerMovement.snapToPositionRan)
+                    {
+                        Vector2 position = transform.GetChild(0).position;
+                        playerMovement.snapToPositionStairs(position);
+                        playerMovement.ignoreCollision(adjacentCollider, true);
+
+                    }
+                }
+                else if (playerMovement.leaveStairs)
+                {
+                    playerMovement.ignoreCollision(adjacentCollider, false);
+                    playerMovement.leaveStairs = false;
                 }
             }
+
+            //if (ladder == LadderType.LADDER)
+            //{
+            //    playerMovement.ignoreCollision(adjacentCollider, true);
+
+            //}
+
         }
     }
 
@@ -57,13 +73,15 @@ public class LadderController : MonoBehaviour
         {
             if (playerMovement != null)
             {
-                playerMovement.isOnStairs = false;
-                if (playerMovement.climbingStairs)
+                if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
                 {
-                    playerMovement.resetVelocityY();
-                    playerMovement.climbingStairs = false;
-                    Physics2D.IgnoreCollision(adjacentCollider, playerMovement.boxCollider, false);
+                    playerMovement.setCanClimbStairs(false);
 
+                }
+
+                if (ladder == LadderType.LADDER)
+                {
+                    playerMovement.ignoreCollision(adjacentCollider, false);
                 }
             }
 

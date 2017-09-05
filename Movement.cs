@@ -19,6 +19,7 @@ public class Movement : MonoBehaviour
     private bool canClimbStairs;
     public int movementState;
 
+    public CoroutineManager coroutineManager;
     #endregion
 
     #region Váriaveis Adicionadas
@@ -34,6 +35,7 @@ public class Movement : MonoBehaviour
         ON_AIR = 5,
         DODGING = 6,
         CLIMBING_STAIRS = 7,
+        JUMPING = 8,
     }
 
     public struct RaycastPoints
@@ -55,13 +57,20 @@ public class Movement : MonoBehaviour
     public RaycastPoints raycastPoints;
     public bool isJogging;
     public bool isOnAir;
-    public bool climbingStairs;
+    public bool isJumping;
+    public bool isClimbingStairs;
+    public bool snapToPositionRan;
+    public bool isClimbingObject;
+    public bool canClimbObject;
+    public bool coroutineEndedRunning;
+    public bool leaveStairs;
+    public float baseStaminaSpent;
     public float forceOnEdge;
     private bool isCrouching;
     private bool isDodging;
     public bool isOnStairs;
     public bool facingRight;
-
+    public float stairsSmoothness;
     private float currentGravityScale;
 
     private float runningPressingTime;
@@ -75,15 +84,15 @@ public class Movement : MonoBehaviour
     public float crouchHeigth;
     private float characterHeigth;
 
-    public LayerMask jumpLayer;
+    public float detectionDistance;
 
     private Vector2 forceApplied;
 
 
     public Rigidbody2D rigidBody;
     public BoxCollider2D boxCollider;
-
-    PlayerController playerController;
+    public Player player;
+    public PlayerController playerController;
 
     #endregion
 
@@ -96,7 +105,7 @@ public class Movement : MonoBehaviour
 
         rigidBody = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
-
+        player = GetComponent<Player>();
         movementState = (int)MovementStateENUM.IDLE;
 
         forceApplied = new Vector2(0, 0);
@@ -107,39 +116,59 @@ public class Movement : MonoBehaviour
         facingRight = true;
         currentGravityScale = rigidBody.gravityScale;
 
+        coroutineManager = CoroutineManager.getInstance();
+        coroutineManager.insertNewCoroutine(teste(), "teste");
+    }
+
+    private IEnumerator teste()
+    {
+        while (Time.time < 10)
+        {
+            print("Eu Sou uma coroutine");
+            yield return new WaitForSeconds(3);
+        }
+
+        coroutineManager.findCoroutine("teste").setIsRunning(false);
     }
 
     private void Update()
     {
-        facingRight = checkFacingDirection();
-        flip();
+
+        checkFacingDirection();
         playerController.checkForPlayerInput();
         setRaycastPoints();
         castRays();
 
         canJump = checkGroundForJump();
+        isDodging = testForDodging();
+        isJumping = testForJumping();
+        isOnAir = !canJump && !isClimbingStairs && !isClimbingObject ? true : isOnAir;
 
-
-
-        if (!canJump && !climbingStairs)
+        if (canClimbStairs)
         {
-            isOnAir = true;
+            if (playerController.climbStairsPress && !isClimbingStairs)
+            {
+                isClimbingStairs = true;
+                playerController.changeMovementPlayerControl(true);
+            }
         }
 
-        if (canJump && climbingStairs)
+
+        if (isClimbingStairs && playerController.climbStairsMovement == 0f)
         {
-            climbingStairs = false;
+            resetVelocityY();
         }
 
-        if (playerController.jump && canJump)
+        if (isClimbingStairs && canJump && coroutineEndedRunning)
         {
-            jump();
-        }
-
-        if (playerController.dodge)
-        {
-            playerController.revokeMovementPlayerControl(0.5f, this);
-            isDodging = true;
+            leaveStairs = true;
+            isClimbingStairs = false;
+            switchGravity(true);
+            coroutineEndedRunning = false;
+            snapToPositionRan = false;
+            playerController.changeMovementPlayerControl(false);
+            revokeControlOnStairs(0.5f);
+            resetVelocityY();
         }
 
         if (playerController.takeOfCamera)
@@ -148,6 +177,28 @@ public class Movement : MonoBehaviour
             takeOfCamera();
         }
 
+        if (isJumping)
+        {
+            if (player.checkStamina(baseStaminaSpent * 4f))
+            {
+                jump();
+                player.spendStamina(baseStaminaSpent * 4f);
+            }
+        }
+
+        if (canClimbObject && playerController.jump)
+        {
+            isClimbingObject = true;
+            switchGravity(false);
+        }
+
+        if (isClimbingObject && coroutineEndedRunning)
+        {
+            isClimbingObject = false;
+            coroutineEndedRunning = false;
+            snapToPositionRan = false;
+            switchGravity(true);
+        }
 
         if (playerController.jog && runningPressingTime <= 0.5)
         {
@@ -176,25 +227,8 @@ public class Movement : MonoBehaviour
         }
 
 
-        if (isOnStairs && playerController.climbStairs != 0 && !isOnAir)
-        {
-            climbingStairs = true;
-            switchGravity(false);
-            resetVelocityX();
-            movementState = (int)MovementStateENUM.CLIMBING_STAIRS;
-        }
-        else if (!isOnStairs || !climbingStairs)
-        {
-            switchGravity(true);
-        }
 
-        if (climbingStairs && playerController.climbStairs == 0 && rigidBody.velocity.y != 0)
-        {
-            resetVelocityY();
-        }
-
-
-        if (!isOnAir && !isDodging && !climbingStairs)
+        if (!isOnAir && !isDodging && !isClimbingStairs)
         {
 
             if (playerController.move != 0)
@@ -205,12 +239,26 @@ public class Movement : MonoBehaviour
                 }
                 else if (isJogging)
                 {
-                    movementState = (int)MovementStateENUM.JOGGING;
+                    if (player.checkStamina(baseStaminaSpent * 1.5f))
+                    {
+                        movementState = (int)MovementStateENUM.JOGGING;
+                    }
+                    else
+                    {
+                        movementState = (int)MovementStateENUM.WALKING;
+                    }
                 }
                 if (playerController.run)
                 {
                     movementState = (runningPressingTime >= 0.5 || movementState == (int)MovementStateENUM.IDLE) ? (int)MovementStateENUM.RUNNING : movementState;
                     runningPressingTime += Time.deltaTime;
+                    if (movementState == (int)MovementStateENUM.RUNNING)
+                    {
+                        if (!player.checkStamina(baseStaminaSpent * 2f))
+                        {
+                            movementState = (int)MovementStateENUM.WALKING;
+                        }
+                    }
                 }
 
                 if (!isJogging && !isCrouching && !playerController.run)
@@ -225,6 +273,11 @@ public class Movement : MonoBehaviour
                 movementState = (int)MovementStateENUM.IDLE;
             }
         }
+        else if (isClimbingStairs)
+        {
+            switchGravity(false);
+            movementState = (int)MovementStateENUM.CLIMBING_STAIRS;
+        }
         else if (isOnAir)
         {
             movementState = (int)MovementStateENUM.ON_AIR;
@@ -232,11 +285,7 @@ public class Movement : MonoBehaviour
         else if (isDodging)
         {
             movementState = (int)MovementStateENUM.DODGING;
-
         }
-
-
-
 
 
     }
@@ -252,18 +301,30 @@ public class Movement : MonoBehaviour
                 break;
             case (int)MovementStateENUM.JOGGING:
                 forceApplied = jog(playerController.move);
+                player.spendStamina(baseStaminaSpent * 1.5f * Time.deltaTime);
                 break;
             case (int)MovementStateENUM.RUNNING:
                 forceApplied = run(playerController.move);
+                player.spendStamina(baseStaminaSpent * 2f * Time.deltaTime);
                 break;
             case (int)MovementStateENUM.CROUCHING:
                 forceApplied = crouchWalk(playerController.move);
                 break;
             case (int)MovementStateENUM.DODGING:
-                forceApplied = dodge();
+                if (player.checkStamina(player.maxStamina))
+                {
+                    forceApplied = dodge();
+                    player.spendStamina(player.maxStamina);
+                }
                 break;
             case (int)MovementStateENUM.CLIMBING_STAIRS:
-                forceApplied = climbStairs(playerController.climbStairs);
+                forceApplied = climbStairs(playerController.climbStairsMovement);
+                break;
+            //case (int)MovementStateENUM.JUMPING:
+            //    jump();
+            //    break;
+            case (int)MovementStateENUM.ON_AIR:
+                playerController.revokeMovementPlayerControl();
                 break;
         }
 
@@ -277,7 +338,7 @@ public class Movement : MonoBehaviour
 
     void LateUpdate()
     {
-        if (rigidBody.velocity.y == 0 && isOnAir)
+        if (rigidBody.velocity.y == 0 && isOnAir && canJump)
         {
             isOnAir = false;
             playerController.giveMovementPlayerControlWithCooldown(0.1f, this);
@@ -290,37 +351,98 @@ public class Movement : MonoBehaviour
 
     #region Métodos Gerais
 
-    public void snapToPosition(Vector2 position)
+    public void snapToPositionStairs(Vector2 position)
     {
-
-        StartCoroutine(snapToPositionCoroutine(position));
-
+        resetVelocityX();
+        resetVelocityY();
+        playerController.revokeMovementPlayerControl();
+        StartCoroutine(snapToPositionStairsCoroutine(position));
+        snapToPositionRan = true;
 
     }
 
-    private IEnumerator snapToPositionCoroutine(Vector2 position)
+    public void snapToPositionObject(Vector2 position)
     {
-        while (!Mathf.Approximately(rigidBody.position.x, position.x))
+        resetVelocityX();
+        resetVelocityY();
+        playerController.revokeMovementPlayerControl();
+        StartCoroutine(snapToPositionObjectCoroutine(position));
+        snapToPositionRan = true;
+
+    }
+
+    public bool checkPositionX(Vector2 position)
+    {
+        if (Mathf.Abs(rigidBody.position.x - position.x) <= 0.1)
         {
-            rigidBody.position = Vector2.Lerp(rigidBody.position, new Vector2(position.x, rigidBody.position.y), 0.10f);
-            yield return new WaitForEndOfFrame();
-
+            return true;
         }
+        return false;
     }
 
-    public bool checkFacingDirection()
+
+    private IEnumerator snapToPositionStairsCoroutine(Vector2 position)
+    {
+        while (Mathf.Abs(rigidBody.position.x - position.x) >= 0.01 || Mathf.Abs(rigidBody.position.y - position.y) >= 0.01)
+        {
+
+            rigidBody.position = Vector2.Lerp(rigidBody.position, new Vector2(position.x, position.y), stairsSmoothness);
+            yield return new WaitForEndOfFrame();
+        }
+        coroutineEndedRunning = true;
+        playerController.giveMovementPlayerControl();
+    }
+
+    private IEnumerator snapToPositionObjectCoroutine(Vector2 position)
+    {
+        float localScale = (position.x > rigidBody.position.x) ? +transform.localScale.x : -transform.localScale.x;
+        while (Mathf.Abs(rigidBody.position.x - (position.x + localScale)) >= 0.01 || Mathf.Abs(rigidBody.position.y - (position.y + transform.localScale.y)) >= 0.01)
+        {
+            if (Mathf.Abs(rigidBody.position.y - (position.y + transform.localScale.y)) >= 0.01)
+            {
+                rigidBody.position = Vector2.Lerp(rigidBody.position, new Vector2(rigidBody.position.x, (position.y + transform.localScale.y)), stairsSmoothness);
+            }
+            else
+            {
+
+                rigidBody.position = Vector2.Lerp(rigidBody.position, new Vector2(position.x + localScale, rigidBody.position.y), stairsSmoothness);
+            }
+            yield return new WaitForEndOfFrame();
+        }
+        coroutineEndedRunning = true;
+        playerController.giveMovementPlayerControl();
+    }
+
+
+    public void ignoreCollision(Collider2D collider, bool ignore)
+    {
+        Physics2D.IgnoreCollision(boxCollider, collider, ignore);
+    }
+
+    public void checkFacingDirection()
     {
 
         if (playerController.move == 1)
         {
-            return true;
+            facingRight = true;
         }
         else if (playerController.move == -1)
         {
-            return false;
+            facingRight = false;
         }
 
-        return facingRight;
+
+        if (!facingRight)
+        {
+            GetComponent<SpriteRenderer>().flipX = true;
+        }
+        else
+        {
+            GetComponent<SpriteRenderer>().flipX = false;
+
+        }
+
+
     }
 
 
@@ -329,6 +451,28 @@ public class Movement : MonoBehaviour
     {
 
     }
+
+    public bool testForDodging()
+    {
+
+        if (playerController.dodge)
+        {
+            playerController.revokeMovementPlayerControl(0.5f, this);
+            return true;
+        }
+        return false;
+    }
+
+    public bool testForJumping()
+    {
+        if (playerController.jump && canJump && !canClimbObject)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
 
     public void switchGravity(bool on)
     {
@@ -414,23 +558,11 @@ public class Movement : MonoBehaviour
 
         Physics.jump(jumpForce, rigidBody);
         isOnAir = true;
-        playerController.revokeMovementPlayerControl();
+        //playerController.revokeMovementPlayerControl();
 
     }
 
-    public void flip()
-    {
-        if (!facingRight)
-        {
-            GetComponent<SpriteRenderer>().flipX = true;
-        }
-        else
-        {
-            GetComponent<SpriteRenderer>().flipX = false;
 
-        }
-
-    }
 
     public Vector2 dodge()
     {
@@ -447,7 +579,7 @@ public class Movement : MonoBehaviour
 
     public Vector2 climbStairs(float move)
     {
-        return Physics.movementByForce(force, 0.75f, maxVelocity, move, this.rigidBody, true);
+        return Physics.movementByForce(force, 0.50f, maxVelocity, move, this.rigidBody, true);
     }
 
     public void resetVelocityY()
@@ -476,9 +608,10 @@ public class Movement : MonoBehaviour
     public void castRays()
     {
 
-        raycastHit2DPoints.bottomLeftRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down);
-        raycastHit2DPoints.bottomRightRay = Physics2D.Raycast(raycastPoints.bottomRight, Vector2.down);
-        raycastHit2DPoints.bottomMidRay = Physics2D.Raycast(raycastPoints.bottomMid, Vector2.down);
+        int layerMask = LayerMask.GetMask(new string[] { "Ground" });
+        raycastHit2DPoints.bottomLeftRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down, 0.1f, layerMask);
+        raycastHit2DPoints.bottomRightRay = Physics2D.Raycast(raycastPoints.bottomRight, Vector2.down, 0.1f, layerMask);
+        raycastHit2DPoints.bottomMidRay = Physics2D.Raycast(raycastPoints.bottomMid, Vector2.down, 0.1f, layerMask);
 
     }
 
@@ -491,20 +624,20 @@ public class Movement : MonoBehaviour
         }
         else if (raycastHit2DPoints.bottomLeftRay.collider != null && raycastHit2DPoints.bottomLeftRay.distance <= 0.10f)
         {
-            Vector2 forceApplied = Physics.addImpulseForce(forceOnEdge, rigidBody);
+            Physics.addImpulseForce(forceOnEdge, rigidBody);
         }
         else if (raycastHit2DPoints.bottomRightRay.collider != null && raycastHit2DPoints.bottomRightRay.distance <= 0.10f)
         {
-            Vector2 forceApplied = Physics.addImpulseForce(-forceOnEdge, rigidBody);
+            Physics.addImpulseForce(-forceOnEdge, rigidBody);
         }
 
         return false;
     }
 
 
-    public void revokeControlOnStairs()
+    public void revokeControlOnStairs(float time)
     {
-        playerController.revokeMovementPlayerControl();
+        playerController.revokeMovementPlayerControl(time, this);
     }
 
     public void giveControlOnStairs()
@@ -512,7 +645,20 @@ public class Movement : MonoBehaviour
         playerController.revokeMovementPlayerControl(0.5f, this);
     }
 
+    public void setOnStairs(bool isOnStairs)
+    {
+        this.isOnStairs = isOnStairs;
+    }
 
+    public void setCanClimbStairs(bool canClimbStairs)
+    {
+        this.canClimbStairs = canClimbStairs;
+    }
+
+    public void setCanClimbObject(bool canClimbObject)
+    {
+        this.canClimbObject = canClimbObject;
+    }
     #endregion
 
 

@@ -2,24 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InteractiveScenery : MonoBehaviour
+public class ItemInteraction : MonoBehaviour
 {
 
 
     public MiscMovement playerMovement;
 
-    #region Métodos Unity
-
-
     public void OnTriggerEnter2D(Collider2D other)
     {
+
         if (other.gameObject.tag == "Player")
         {
-
             playerMovement = other.GetComponent<MiscMovement>();
         }
     }
-
 
     public void OnTriggerStay2D(Collider2D other)
     {
@@ -27,17 +23,16 @@ public class InteractiveScenery : MonoBehaviour
         {
             if (playerMovement != null)
             {
-                playerMovement.setCanInteractWithScenery(true);
+                playerMovement.setCanTakeItem(true);
 
-                if (playerMovement.isInteractingWithScenery)
+                if (playerMovement.isTakingItem)
                 {
-                    interaction();
-                    playerMovement.isInteractingWithScenery = false;
+                    print("Item Taken");
+                    Destroy(this.gameObject);
                 }
             }
         }
     }
-
 
     public void OnTriggerExit2D(Collider2D other)
     {
@@ -45,20 +40,8 @@ public class InteractiveScenery : MonoBehaviour
         {
             if (playerMovement != null)
             {
-                playerMovement.setCanInteractWithScenery(false);
-
+                playerMovement.setCanTakeItem(false);
             }
         }
     }
-    #endregion
-
-    #region Métodos Gerais
-
-    public void interaction()
-    {
-        print("Interação");
-    }
-
-    #endregion
-
 }

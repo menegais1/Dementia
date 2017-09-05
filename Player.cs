@@ -9,7 +9,17 @@ public class Player : MonoBehaviour
     #region Váriaveis Gerais
 
     private bool canSave;
-    private float stamina;
+
+    [SerializeField]
+    private float currentStamina;
+    [SerializeField]
+    public float maxStamina;
+    [SerializeField]
+    private float staminaRegenRate;
+    [SerializeField]
+    private float timeToStartStaminaRegen;
+    private float currentTimeToStartStaminaRegen;
+
     private float life;
     private bool activeMorphin;
     private bool activeAdrenaline;
@@ -26,13 +36,14 @@ public class Player : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
+        currentStamina = maxStamina;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        //print(currentStamina);
+        regenStamina();
     }
 
     #endregion
@@ -41,72 +52,119 @@ public class Player : MonoBehaviour
 
     public void saveGame()
     {
-        
+
     }
 
     public void archiveNotes()
     {
-        
+
     }
 
     public void loadGame()
     {
-        
+
     }
 
-    public void spentStamina()
+    public void spendStamina(float staminaToSpent)
     {
-        
+        if (currentStamina >= staminaToSpent)
+        {
+            currentStamina -= staminaToSpent;
+            if (currentStamina < 0)
+            {
+                currentStamina = 0;
+            }
+            currentTimeToStartStaminaRegen = Time.time + timeToStartStaminaRegen;
+        }
     }
+
+    public void spendStaminaOnTime(float time, float staminaToSpent, int currentMovementState, int movementStateToCheck)
+    {
+
+        if (currentMovementState == movementStateToCheck)
+        {
+            //Coroutine currentCoroutine = StartCoroutine(spendStaminaOnTimeCoroutine());
+        }
+
+    }
+
+
+    //private IEnumerator spendStaminaOnTimeCoroutine()
+    //{
+
+
+
+    //}
+
+    //private IEnumerator lerpCoroutine()
+    //{
+
+    //}
 
     public void regenStamina()
     {
-        
+        if (currentStamina < maxStamina)
+        {
+
+            if (Time.time >= currentTimeToStartStaminaRegen)
+            {
+                currentStamina += staminaRegenRate * Time.deltaTime;
+                if (currentStamina > maxStamina)
+                {
+                    currentStamina = maxStamina;
+                }
+            }
+        }
     }
 
     public void takeDamage()
     {
-        
+
     }
 
     public void regenLife()
     {
-        
+
     }
 
     public void useDiary()
     {
-        
+
     }
 
     public void checkSaveItem()
     {
-        
+
     }
 
-    public void checkStamina()
+    public bool checkStamina(float staminaToUseAction)
     {
-        
+        if (currentStamina < staminaToUseAction)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public void checkLife()
     {
-        
+
     }
 
     public void checkBullets()
     {
-        
+
     }
 
     public void selectItens()
     {
-        
+
     }
 
     public void loseLife()
     {
-        
+
     }
 
     #endregion
