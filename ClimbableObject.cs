@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class ClimbableObject : MonoBehaviour
 {
-
     private Movement playerMovement;
 
     public void OnTriggerEnter2D(Collider2D other)
@@ -23,9 +22,9 @@ public class ClimbableObject : MonoBehaviour
             {
                 playerMovement.setCanClimbObject(true);
 
-                if (playerMovement.isClimbingObject)
+                if (playerMovement.StatusVariables.IsClimbingObject)
                 {
-                    if (!playerMovement.snapToPositionRan)
+                    if (!playerMovement.SnapToPositionRan)
                     {
                         BoxCollider2D parentCollider = transform.parent.GetComponent<BoxCollider2D>();
                         Vector2 position = Vector2.zero;
@@ -53,6 +52,5 @@ public class ClimbableObject : MonoBehaviour
                 playerMovement.setCanClimbObject(false);
             }
         }
-
     }
 }

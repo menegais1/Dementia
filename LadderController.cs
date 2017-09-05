@@ -39,9 +39,9 @@ public class LadderController : MonoBehaviour
             {
                 playerMovement.setCanClimbStairs(true);
 
-                if (playerMovement.isClimbingStairs)
+                if (playerMovement.StatusVariables.IsClimbingStairs)
                 {
-                    if (!playerMovement.snapToPositionRan)
+                    if (!playerMovement.SnapToPositionRan)
                     {
                         Vector2 position = transform.GetChild(0).position;
                         playerMovement.snapToPositionStairs(position);
@@ -49,10 +49,10 @@ public class LadderController : MonoBehaviour
 
                     }
                 }
-                else if (playerMovement.leaveStairs)
+                else if (playerMovement.LeaveStairs)
                 {
                     playerMovement.ignoreCollision(adjacentCollider, false);
-                    playerMovement.leaveStairs = false;
+                    playerMovement.LeaveStairs = false;
                 }
             }
 

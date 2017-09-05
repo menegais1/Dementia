@@ -9,7 +9,7 @@ public class CameraController : MonoBehaviour
     public float smoothing;
     Vector3 offset;
     private const float timeToTakeOf = 2f;
-    private float initialSize;
+    private static float initialSize;
 
 
     // Use this for initialization
@@ -29,7 +29,7 @@ public class CameraController : MonoBehaviour
 
     }
 
-    public IEnumerator takeOfCamera(float zoomSize, float steps, bool zoomOut)
+    public static IEnumerator takeOfCamera(float zoomSize, float steps, bool zoomOut)
     {
         float f = 0;
 

@@ -31,7 +31,7 @@ public static class Physics
     public static Vector2 addContraryForce(Vector2 forceApplied, Rigidbody2D rigidBody, int movementState)
     {
 
-        if (movementState == (int)Movement.MovementStateENUM.IDLE && rigidBody.velocity.x != 0f)
+        if (movementState == (int)MovementStateENUM.IDLE && rigidBody.velocity.x != 0f)
         {
             if (Mathf.Abs(rigidBody.velocity.x) < 0.1f)
             {

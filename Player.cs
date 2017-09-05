@@ -78,28 +78,6 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void spendStaminaOnTime(float time, float staminaToSpent, int currentMovementState, int movementStateToCheck)
-    {
-
-        if (currentMovementState == movementStateToCheck)
-        {
-            //Coroutine currentCoroutine = StartCoroutine(spendStaminaOnTimeCoroutine());
-        }
-
-    }
-
-
-    //private IEnumerator spendStaminaOnTimeCoroutine()
-    //{
-
-
-
-    //}
-
-    //private IEnumerator lerpCoroutine()
-    //{
-
-    //}
 
     public void regenStamina()
     {
