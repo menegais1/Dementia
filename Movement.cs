@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
@@ -178,13 +177,13 @@ public class Movement : MonoBehaviour
         PlayerController.checkForPlayerInput();
         setRaycastPoints();
         castRays();
+        //   checkGround();
 
         CanJump = checkGroundForJump();
         StatusVariables.IsDodging = testForDodging();
         StatusVariables.IsJumping = testForJumping();
-        StatusVariables.IsOnAir = !CanJump && !StatusVariables.IsClimbingStairs && !StatusVariables.IsClimbingObject
-            ? true
-            : StatusVariables.IsOnAir;
+        StatusVariables.IsOnAir = !CanJump && !StatusVariables.IsClimbingStairs &&
+                                  !StatusVariables.IsClimbingObject || StatusVariables.IsOnAir;
 
         if (CanClimbStairs)
         {
@@ -195,8 +194,8 @@ public class Movement : MonoBehaviour
             }
         }
 
-
-        if (StatusVariables.IsClimbingStairs && PlayerController.climbStairsMovement == 0f)
+        if (StatusVariables.IsClimbingStairs &&
+            MathHelpers.Approximately(PlayerController.climbStairsMovement, 0, float.Epsilon))
         {
             resetVelocityY();
         }
@@ -255,7 +254,7 @@ public class Movement : MonoBehaviour
         if (PlayerController.crouch)
         {
             crouch();
-            if (BoxCollider.size.y == CrouchHeigth)
+            if (MathHelpers.Approximately(BoxCollider.size.y, CrouchHeigth, float.Epsilon))
             {
                 MovementState = (int) MovementStateENUM.CROUCHING;
             }
@@ -269,7 +268,7 @@ public class Movement : MonoBehaviour
 
         if (!StatusVariables.IsOnAir && !StatusVariables.IsDodging && !StatusVariables.IsClimbingStairs)
         {
-            if (PlayerController.move != 0)
+            if (!MathHelpers.Approximately(PlayerController.move, 0, float.Epsilon))
             {
                 if (StatusVariables.IsCrouching)
                 {
@@ -369,7 +368,7 @@ public class Movement : MonoBehaviour
 
     void LateUpdate()
     {
-        if (RigidBody.velocity.y == 0 && StatusVariables.IsOnAir && CanJump)
+        if (MathHelpers.Approximately(RigidBody.velocity.y, 0, float.Epsilon) && StatusVariables.IsOnAir && CanJump)
         {
             StatusVariables.IsOnAir = false;
             PlayerController.giveMovementPlayerControlWithCooldown(0.1f, this);
@@ -443,31 +442,24 @@ public class Movement : MonoBehaviour
         PlayerController.giveMovementPlayerControl();
     }
 
-    public void ignoreCollision(Collider2D collider, bool ignore)
+    public void ignoreCollision(Collider2D other, bool ignore)
     {
-        Physics2D.IgnoreCollision(BoxCollider, collider, ignore);
+        Physics2D.IgnoreCollision(BoxCollider, other, ignore);
     }
 
     public void checkFacingDirection()
     {
-        if (PlayerController.move == 1)
+        if (MathHelpers.Approximately(PlayerController.move, 1, float.Epsilon))
         {
             FacingRight = true;
         }
-        else if (PlayerController.move == -1)
+        else if (MathHelpers.Approximately(PlayerController.move, -1, float.Epsilon))
         {
             FacingRight = false;
         }
 
 
-        if (!FacingRight)
-        {
-            GetComponent<SpriteRenderer>().flipX = true;
-        }
-        else
-        {
-            GetComponent<SpriteRenderer>().flipX = false;
-        }
+        GetComponent<SpriteRenderer>().flipX = !FacingRight;
     }
 
     public void climb()
@@ -496,14 +488,7 @@ public class Movement : MonoBehaviour
 
     public void switchGravity(bool on)
     {
-        if (on)
-        {
-            RigidBody.gravityScale = CurrentGravityScale;
-        }
-        else
-        {
-            RigidBody.gravityScale = 0;
-        }
+        RigidBody.gravityScale = on ? CurrentGravityScale : 0;
     }
 
     public void takeOfCamera()
@@ -513,22 +498,22 @@ public class Movement : MonoBehaviour
 
     public Vector2 walk(float move)
     {
-        return Physics.movementByForce(Force, 1f, MaxVelocity, move, this.RigidBody, false);
+        return Physics.movementByForce(Force, 1f, MaxVelocity, move, RigidBody, false);
     }
 
     public Vector2 jog(float move)
     {
-        return Physics.movementByForce(Force, 1.5f, MaxVelocity, move, this.RigidBody, false);
+        return Physics.movementByForce(Force, 1.5f, MaxVelocity, move, RigidBody, false);
     }
 
     public Vector2 run(float move)
     {
-        return Physics.movementByForce(Force, 2f, MaxVelocity, move, this.RigidBody, false);
+        return Physics.movementByForce(Force, 2f, MaxVelocity, move, RigidBody, false);
     }
 
     public Vector2 crouchWalk(float move)
     {
-        return Physics.movementByForce(Force, 0.75f, MaxVelocity, move, this.RigidBody, false);
+        return Physics.movementByForce(Force, 0.75f, MaxVelocity, move, RigidBody, false);
     }
 
     public void crouch()
@@ -576,7 +561,7 @@ public class Movement : MonoBehaviour
 
     public Vector2 climbStairs(float move)
     {
-        return Physics.movementByForce(Force, 0.50f, MaxVelocity, move, this.RigidBody, true);
+        return Physics.movementByForce(Force, 0.50f, MaxVelocity, move, RigidBody, true);
     }
 
     public void resetVelocityY()
@@ -603,7 +588,7 @@ public class Movement : MonoBehaviour
 
     public void castRays()
     {
-        int layerMask = LayerMask.GetMask(new string[] {"Ground"});
+        int layerMask = LayerMask.GetMask("Ground");
         raycastHit2DPoints.bottomLeftRay = Physics2D.Raycast(raycastPoints.bottomLeft, Vector2.down, 0.1f, layerMask);
         raycastHit2DPoints.bottomRightRay = Physics2D.Raycast(raycastPoints.bottomRight, Vector2.down, 0.1f, layerMask);
         raycastHit2DPoints.bottomMidRay = Physics2D.Raycast(raycastPoints.bottomMid, Vector2.down, 0.1f, layerMask);
@@ -615,17 +600,20 @@ public class Movement : MonoBehaviour
         {
             return true;
         }
-        else if (raycastHit2DPoints.bottomLeftRay.collider != null &&
-                 raycastHit2DPoints.bottomLeftRay.distance <= 0.10f)
+        return false;
+    }
+
+    public void checkGround()
+    {
+        if (raycastHit2DPoints.bottomMidRay.collider != null) return;
+        if (raycastHit2DPoints.bottomLeftRay.collider != null)
         {
             Physics.addImpulseForce(ForceOnEdge, RigidBody);
         }
-        else if (raycastHit2DPoints.bottomRightRay.collider != null &&
-                 raycastHit2DPoints.bottomRightRay.distance <= 0.10f)
+        else if (raycastHit2DPoints.bottomRightRay.collider != null)
         {
             Physics.addImpulseForce(-ForceOnEdge, RigidBody);
         }
-        return false;
     }
 
     public void revokeControlOnStairs(float time)
@@ -636,21 +624,6 @@ public class Movement : MonoBehaviour
     public void giveControlOnStairs()
     {
         PlayerController.revokeMovementPlayerControl(0.5f, this);
-    }
-
-    public void setOnStairs(bool isOnStairs)
-    {
-        StatusVariables.IsOnStairs = isOnStairs;
-    }
-
-    public void setCanClimbStairs(bool canClimbStairs)
-    {
-        this.CanClimbStairs = canClimbStairs;
-    }
-
-    public void setCanClimbObject(bool canClimbObject)
-    {
-        this.CanClimbObject = canClimbObject;
     }
 
     #endregion

@@ -20,7 +20,7 @@ public class ClimbableObject : MonoBehaviour
         {
             if (playerMovement != null)
             {
-                playerMovement.setCanClimbObject(true);
+                playerMovement.CanClimbObject = true;
 
                 if (playerMovement.StatusVariables.IsClimbingObject)
                 {
@@ -49,7 +49,7 @@ public class ClimbableObject : MonoBehaviour
         {
             if (playerMovement != null)
             {
-                playerMovement.setCanClimbObject(false);
+                playerMovement.CanClimbObject = false;
             }
         }
     }

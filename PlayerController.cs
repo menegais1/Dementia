@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class PlayerController
 {
-
     public float move;
     public float climbStairsMovement;
 
@@ -32,7 +32,6 @@ public class PlayerController
         }
 
         return instance;
-
     }
 
     private PlayerController()
@@ -51,11 +50,9 @@ public class PlayerController
             jog = Input.GetButtonUp("Jogging/Running");
             crouch = Input.GetButton("Crouching");
             takeOfCamera = Input.GetButtonDown("Take Of Camera");
-            climbStairsMovement = Input.GetAxisRaw("Vertical");
             climbStairsPress = Input.GetButtonDown("Climb Stairs");
             interactWithScenery = Input.GetButtonDown("Interact Scenery");
             takeItem = Input.GetButtonDown("Take Item");
-
         }
         else if (onStairsControl && !revokeControl)
         {
@@ -68,9 +65,8 @@ public class PlayerController
             takeOfCamera = false;
             interactWithScenery = false;
             takeItem = false;
-            climbStairsMovement = Input.GetAxisRaw("Vertical");
+            climbStairsMovement = getVerticalMovement();
             climbStairsPress = Input.GetButtonDown("Climb Stairs");
-
         }
         else
         {
@@ -86,25 +82,39 @@ public class PlayerController
             interactWithScenery = false;
             takeItem = false;
         }
+    }
 
+    //Para não poluir o código
+    private float getVerticalMovement()
+    {
+        if ((Input.GetKey("w") && Input.GetKey("s")) || (!Input.GetKey("w") && !Input.GetKey("s")))
+        {
+            return 0;
+        }
+        if (Input.GetKey("w"))
+        {
+            return !MathHelpers.Approximately(climbStairsMovement, -1, float.Epsilon) ? 1 : 0;
+        }
+        if (Input.GetKey("s"))
+        {
+            return !MathHelpers.Approximately(climbStairsMovement, 1, float.Epsilon) ? -1 : 0;
+        }
+        return 0;
     }
 
     public void revokeMovementPlayerControl(float timeToRevoke, MonoBehaviour monoBehaviour)
     {
-
         if (!runningCoroutine)
             monoBehaviour.StartCoroutine(waitForSeconds(timeToRevoke, true));
     }
 
     public void revokeMovementPlayerControl()
     {
-
         revokeControl = true;
     }
 
     public void changeMovementPlayerControl(bool onStairs)
     {
-
         onStairsControl = onStairs;
     }
 
@@ -123,17 +133,12 @@ public class PlayerController
 
     private IEnumerator waitForSeconds(float time, bool revoke)
     {
-
         runningCoroutine = true;
         for (int i = 0; i <= 1; i++)
         {
-
             revokeControl = !revokeControl;
             yield return new WaitForSeconds(time);
-
         }
         runningCoroutine = false;
-
     }
-
 }

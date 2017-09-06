@@ -35,7 +35,7 @@ public class CoroutineManager
     {
 
         if (coroutine != null && name != null)
-        {
+        {          
             monoBehaviourInstance.StartCoroutine(coroutine);
             CoroutineContainer coroutineContainer = new CoroutineContainer(name, coroutine, true);
             runningCoroutines.Add(coroutineContainer);

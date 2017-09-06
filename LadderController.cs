@@ -22,7 +22,6 @@ public class LadderController : MonoBehaviour
     {
         if (other.gameObject.tag.Equals(tag))
         {
-
             playerMovement = other.GetComponent<Movement>();
             if (ladder != LadderType.LADDER)
             {
@@ -37,7 +36,7 @@ public class LadderController : MonoBehaviour
         {
             if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
             {
-                playerMovement.setCanClimbStairs(true);
+                playerMovement.CanClimbStairs = true;
 
                 if (playerMovement.StatusVariables.IsClimbingStairs)
                 {
@@ -46,7 +45,6 @@ public class LadderController : MonoBehaviour
                         Vector2 position = transform.GetChild(0).position;
                         playerMovement.snapToPositionStairs(position);
                         playerMovement.ignoreCollision(adjacentCollider, true);
-
                     }
                 }
                 else if (playerMovement.LeaveStairs)
@@ -61,10 +59,8 @@ public class LadderController : MonoBehaviour
             //    playerMovement.ignoreCollision(adjacentCollider, true);
 
             //}
-
         }
     }
-
 
 
     public void OnTriggerExit2D(Collider2D other)
@@ -75,8 +71,7 @@ public class LadderController : MonoBehaviour
             {
                 if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
                 {
-                    playerMovement.setCanClimbStairs(false);
-
+                    playerMovement.CanClimbStairs = false;
                 }
 
                 if (ladder == LadderType.LADDER)
@@ -84,8 +79,6 @@ public class LadderController : MonoBehaviour
                     playerMovement.ignoreCollision(adjacentCollider, false);
                 }
             }
-
         }
     }
-
 }
