@@ -1,39 +1,18 @@
-﻿public class PlayerStatusVariables
+﻿public static class PlayerStatusVariables
 {
-    private static PlayerStatusVariables instance;
+    public static bool isJogging;
 
-    public bool IsJogging { get; set; }
+    public static bool isOnAir;
 
-    public bool IsOnAir { get; set; }
+    public static bool isJumping;
 
-    public bool IsJumping { get; set; }
+    public static bool isClimbingStairs;
 
-    public bool IsClimbingStairs { get; set; }
+    public static bool isClimbingObject;
 
-    public bool IsClimbingObject { get; set; }
+    public static bool isCrouching;
 
-    public bool IsCrouching { get; set; }
+    public static bool isDodging;
 
-    public bool IsDodging { get; set; }
-
-    public bool IsOnStairs { get; set; }
-
-
-    public static PlayerStatusVariables getInstance()
-    {
-        if (instance == null)
-        {
-            instance = new PlayerStatusVariables();
-        }
-
-        return instance;
-    }
-
-    private PlayerStatusVariables()
-    {
-        IsJogging = IsClimbingObject =
-            IsClimbingStairs = IsCrouching =
-                IsDodging = IsOnStairs =
-                    IsOnAir = IsJumping = false;
-    }
+    public static bool isOnStairs;
 }

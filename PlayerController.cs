@@ -1,91 +1,77 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
-public class PlayerController
+public static class PlayerController
 {
-    public float move;
-    public float climbStairsMovement;
-
-    public bool jump;
-    public bool jog;
-    public bool run;
-    public bool crouch;
-    public bool dodge;
-    public bool climb;
-    public bool climbStairsPress;
-    public bool takeOfCamera;
-    public bool interactWithScenery;
-    public bool takeItem;
-    public bool revokeControl;
-    public bool onStairsControl;
-    public bool runningCoroutine;
-
-    private static PlayerController instance;
-
-    public static PlayerController getInstance()
+    private struct RevokeControlVariables
     {
-        if (instance == null)
-        {
-            new PlayerController();
-        }
-
-        return instance;
+        public bool horizontalMovementControl;
+        public bool verticalMovementControl;
+        public bool miscellaneousMovementControl;
+        public bool allMovementControl;
     }
 
-    private PlayerController()
-    {
-        instance = this;
-    }
+    public static float HorizontalMove { get; private set; }
+    public static bool Jog { get; private set; }
+    public static bool Run { get; private set; }
+    public static bool Crouch { get; private set; }
+    public static bool Dodge { get; private set; }
+    public static float ClimbLadderMovement { get; private set; }
+    public static bool Jump { get; private set; }
+    public static bool ClimbObstacles { get; private set; }
+    public static bool ClimbLadderPress { get; private set; }
 
-    public void checkForPlayerInput()
+
+    private static RevokeControlVariables revokeControlVariables;
+
+
+/*    public static bool takeOfCamera;
+    public static bool interactWithScenery;
+    public static bool takeItem;
+    public static bool onStairsControl;
+    public static bool runningCoroutine;*/
+
+    public static void CheckForHorizontalPlayerInput()
     {
-        if (!revokeControl && !onStairsControl)
+        if (!revokeControlVariables.horizontalMovementControl)
         {
-            move = Input.GetAxisRaw("Horizontal");
-            jump = Input.GetButtonDown("Jump");
-            dodge = Input.GetButtonDown("Dodge");
-            run = Input.GetButton("Jogging/Running");
-            jog = Input.GetButtonUp("Jogging/Running");
-            crouch = Input.GetButton("Crouching");
-            takeOfCamera = Input.GetButtonDown("Take Of Camera");
-            climbStairsPress = Input.GetButtonDown("Climb Stairs");
-            interactWithScenery = Input.GetButtonDown("Interact Scenery");
-            takeItem = Input.GetButtonDown("Take Item");
-        }
-        else if (onStairsControl && !revokeControl)
-        {
-            move = 0;
-            jump = false;
-            dodge = false;
-            run = false;
-            jog = false;
-            crouch = false;
-            takeOfCamera = false;
-            interactWithScenery = false;
-            takeItem = false;
-            climbStairsMovement = getVerticalMovement();
-            climbStairsPress = Input.GetButtonDown("Climb Stairs");
+            HorizontalMove = Input.GetAxisRaw("Horizontal");
+            Dodge = Input.GetButtonDown("Dodge");
+            Run = Input.GetButton("Running");
+            Jog = Input.GetButtonDown("Jogging");
+            Crouch = Input.GetButton("Crouching");
         }
         else
         {
-            move = 0;
-            jump = false;
-            dodge = false;
-            run = false;
-            jog = false;
-            crouch = false;
-            takeOfCamera = false;
-            climbStairsMovement = 0;
-            climbStairsPress = false;
-            interactWithScenery = false;
-            takeItem = false;
+            HorizontalMove = 0;
+            Dodge = false;
+            Run = false;
+            Jog = false;
+            Crouch = false;
         }
     }
 
-    //Para não poluir o código
-    private float getVerticalMovement()
+    public static void CheckForVerticalPlayerInput()
+    {
+        if (!revokeControlVariables.verticalMovementControl)
+        {
+            Jump = Input.GetButtonDown("Jump");
+            ClimbObstacles = Input.GetButtonDown("Climb Obstacles");
+            ClimbLadderPress = Input.GetButtonDown("Climb Ladder");
+            ClimbLadderMovement = GetClimbStairsMovement();
+        }
+        else
+        {
+            Jump = false;
+            ClimbObstacles = false;
+            ClimbLadderPress = false;
+            ClimbLadderMovement = 0;
+        }
+    }
+
+    //Para não poluir o código - Revisar isso mais tarde
+    private static float GetClimbStairsMovement()
     {
         if ((Input.GetKey("w") && Input.GetKey("s")) || (!Input.GetKey("w") && !Input.GetKey("s")))
         {
@@ -93,52 +79,105 @@ public class PlayerController
         }
         if (Input.GetKey("w"))
         {
-            return !MathHelpers.Approximately(climbStairsMovement, -1, float.Epsilon) ? 1 : 0;
+            return !MathHelpers.Approximately(ClimbLadderMovement, -1, float.Epsilon) ? 1 : 0;
         }
         if (Input.GetKey("s"))
         {
-            return !MathHelpers.Approximately(climbStairsMovement, 1, float.Epsilon) ? -1 : 0;
+            return !MathHelpers.Approximately(ClimbLadderMovement, 1, float.Epsilon) ? -1 : 0;
         }
         return 0;
     }
 
-    public void revokeMovementPlayerControl(float timeToRevoke, MonoBehaviour monoBehaviour)
+    public static void RevokePlayerControl(float timeToRevoke,
+        ControlTypeToRevoke controlTypeToRevoke, MonoBehaviour monoBehaviour)
     {
-        if (!runningCoroutine)
-            monoBehaviour.StartCoroutine(waitForSeconds(timeToRevoke, true));
-    }
-
-    public void revokeMovementPlayerControl()
-    {
-        revokeControl = true;
-    }
-
-    public void changeMovementPlayerControl(bool onStairs)
-    {
-        onStairsControl = onStairs;
-    }
-
-    public void giveMovementPlayerControl()
-    {
-        revokeControl = false;
-    }
-
-    public void giveMovementPlayerControlWithCooldown(float timeToCooldown, MonoBehaviour monoBehaviour)
-    {
-        revokeControl = false;
-        move = 0;
-        if (!runningCoroutine)
-            monoBehaviour.StartCoroutine(waitForSeconds(timeToCooldown, false));
-    }
-
-    private IEnumerator waitForSeconds(float time, bool revoke)
-    {
-        runningCoroutine = true;
-        for (int i = 0; i <= 1; i++)
+        var coroutine = CoroutineManager.findCoroutine("RevokeControlCoroutine");
+        if (coroutine == null)
         {
-            revokeControl = !revokeControl;
+            CoroutineManager.insertNewCoroutine(RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, true),
+                "RevokeControlCoroutine");
+        }
+        else if (!coroutine.getIsRunning())
+        {
+            CoroutineManager.deleteCoroutine("RevokeControlCoroutine");
+            CoroutineManager.insertNewCoroutine(RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, true),
+                "RevokeControlCoroutine");
+        }
+    }
+
+    /* public void revokeMovementPlayerControl()
+     {
+         revokeControl = true;
+     }
+ 
+     public void changeMovementPlayerControl(bool onStairs)
+     {
+         onStairsControl = onStairs;
+     }
+ 
+     public void giveMovementPlayerControl()
+     {
+         revokeControl = false;
+     }
+ 
+     public void giveMovementPlayerControlWithCooldown(float timeToCooldown, MonoBehaviour monoBehaviour)
+     {
+         revokeControl = false;
+         horizontalMove = 0;
+         if (!runningCoroutine)
+             monoBehaviour.StartCoroutine(waitForSeconds(timeToCooldown, false));
+     }
+ 
+     private IEnumerator waitForSeconds(float time, bool revoke)
+     {
+         runningCoroutine = true;
+         for (var i = 0; i <= 1; i++)
+         {
+             revokeControl = !revokeControl;
+             yield return new WaitForSeconds(time);
+         }
+         runningCoroutine = false;
+     }*/
+
+    private static IEnumerator RevokeControlCoroutine(float time, ControlTypeToRevoke controlTypeToRevoke,
+        bool revoke)
+    {
+        for (var i = 0; i < 1; i++)
+        {
+            revokeControlSelection(revoke, controlTypeToRevoke, false);
             yield return new WaitForSeconds(time);
         }
-        runningCoroutine = false;
+        revokeControlSelection(revoke, controlTypeToRevoke, true);
+        CoroutineManager.findCoroutine("RevokeControlCoroutine").setIsRunning(false);
+    }
+
+
+    private static void revokeControlSelection(bool revoke, ControlTypeToRevoke controlTypeToRevoke, bool negate)
+    {
+        if (negate)
+        {
+            revoke = !revoke;
+        }
+
+        switch (controlTypeToRevoke)
+        {
+            case ControlTypeToRevoke.HorizontalMovement:
+                revokeControlVariables.horizontalMovementControl = revoke;
+                break;
+            case ControlTypeToRevoke.VerticalMovement:
+                revokeControlVariables.verticalMovementControl = revoke;
+                break;
+            case ControlTypeToRevoke.MiscellaneousMovement:
+                revokeControlVariables.miscellaneousMovementControl = revoke;
+                break;
+            case ControlTypeToRevoke.AllMovement:
+                revokeControlVariables.horizontalMovementControl = revoke;
+                revokeControlVariables.verticalMovementControl = revoke;
+                revokeControlVariables.miscellaneousMovementControl = revoke;
+                break;
+            default:
+                Debug.Log("ERROR");
+                break;
+        }
     }
 }

@@ -2,40 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CoroutineManager
+public static class CoroutineManager
 {
-
-    private static List<CoroutineContainer> runningCoroutines;
-    private static CoroutineManager instance;
+    private static List<CoroutineContainer> runningCoroutines = new List<CoroutineContainer>();
     private static MonoBehaviour monoBehaviourInstance;
 
-    public static CoroutineManager getInstance()
-    {
-        if (instance == null)
-        {
-            new CoroutineManager();
-        }
 
-        return instance;
-
-    }
-
-    private CoroutineManager()
-    {
-        instance = this;
-        runningCoroutines = new List<CoroutineContainer>();
-    }
-
-    public void setMonoBehaviourInstance(MonoBehaviour instance)
+    public static void setMonoBehaviourInstance(MonoBehaviour instance)
     {
         monoBehaviourInstance = instance;
     }
 
-    public CoroutineContainer insertNewCoroutine(IEnumerator coroutine, string name)
+    public static CoroutineContainer insertNewCoroutine(IEnumerator coroutine, string name)
     {
-
         if (coroutine != null && name != null)
-        {          
+        {
             monoBehaviourInstance.StartCoroutine(coroutine);
             CoroutineContainer coroutineContainer = new CoroutineContainer(name, coroutine, true);
             runningCoroutines.Add(coroutineContainer);
@@ -43,10 +24,9 @@ public class CoroutineManager
         }
 
         return null;
-
     }
 
-    public bool deleteCoroutine(string name)
+    public static bool deleteCoroutine(string name)
     {
         CoroutineContainer coroutine = findCoroutine(name);
         if (coroutine != null)
@@ -60,25 +40,23 @@ public class CoroutineManager
     }
 
 
-    public void deleteAllCoroutines()
+    public static void deleteAllCoroutines()
     {
-
         monoBehaviourInstance.StopAllCoroutines();
         runningCoroutines = new List<CoroutineContainer>();
-
     }
 
-    public CoroutineContainer findCoroutine(string name)
+    public static CoroutineContainer findCoroutine(string name)
     {
         return runningCoroutines.Find(coroutine => coroutine.getName() == name);
     }
 
-    public bool existsCoroutine(string name)
+    public static bool existsCoroutine(string name)
     {
         return runningCoroutines.Exists(coroutine => coroutine.getName() == name);
     }
 
-    public bool coroutineIsRunning(string name)
+    public static bool coroutineIsRunning(string name)
     {
         if (existsCoroutine(name))
         {
@@ -88,21 +66,20 @@ public class CoroutineManager
         return false;
     }
 
-    public List<CoroutineContainer> findAllCoroutines()
+    public static List<CoroutineContainer> findAllCoroutines()
     {
         return runningCoroutines;
     }
 
-    public void coroutineStatus(string name)
+    public static void coroutineStatus(string name)
     {
         if (existsCoroutine(name))
         {
-            Debug.Log("A Coroutine Existe e Está: " + ((coroutineIsRunning("teste")) ? "Executando" : "Terminada"));
+            Debug.Log("A Coroutine Existe e Está: " + (coroutineIsRunning(name) ? "Executando" : "Terminada"));
         }
         else
         {
             Debug.Log("A Coroutine Não Existe");
         }
     }
-
 }

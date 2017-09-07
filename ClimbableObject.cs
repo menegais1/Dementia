@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,7 +22,7 @@ public class ClimbableObject : MonoBehaviour
             {
                 playerMovement.CanClimbObject = true;
 
-                if (playerMovement.StatusVariables.IsClimbingObject)
+                if (PlayerStatusVariables.isClimbingObject)
                 {
                     if (!playerMovement.SnapToPositionRan)
                     {
@@ -53,4 +53,4 @@ public class ClimbableObject : MonoBehaviour
             }
         }
     }
-}
+}*/

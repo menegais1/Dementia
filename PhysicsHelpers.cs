@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
-public static class Physics
+public static class PhysicsHelpers
 {
-
-
     public static Vector2 movementByForce(float force, float constant,
         float maxVelocity, float direction, Rigidbody2D rigidBody, bool vertical)
     {
@@ -25,15 +24,33 @@ public static class Physics
         rigidBody.AddRelativeForce(forceApplied);
 
         return forceApplied;
-
     }
 
-    public static Vector2 addContraryForce(Vector2 forceApplied, Rigidbody2D rigidBody, int movementState)
+    public static Vector2 HorizontalMovementByForce(float acceleration, float constant,
+        float maxSpeed, float direction, Rigidbody2D rigidBody)
     {
+        var velocity = (maxSpeed / 3.6f) * constant;
 
-        if (movementState == (int)MovementStateENUM.IDLE && rigidBody.velocity.x != 0f)
+        var force = ForceCalcByAcceleration(acceleration, rigidBody.mass) +
+                    FrictionForceCalc(0.4f, Physics2D.gravity.y, rigidBody.mass);
+
+        var forceApplied = new Vector2(force * constant, 0) * direction;
+
+        if (Mathf.Abs(rigidBody.velocity.x) > velocity)
         {
-            if (Mathf.Abs(rigidBody.velocity.x) < 0.1f)
+            rigidBody.AddRelativeForce(-forceApplied);
+        }
+
+        rigidBody.AddRelativeForce(forceApplied);
+
+        return forceApplied;
+    }
+
+    public static Vector2 PreventSlide(Vector2 forceApplied, Rigidbody2D rigidBody)
+    {
+        if (!MathHelpers.Approximately(rigidBody.velocity.x, 0, 0))
+        {
+            if (MathHelpers.Approximately(rigidBody.velocity.x, 0, 0.1f))
             {
                 rigidBody.velocity = Vector2.zero;
             }
@@ -42,15 +59,13 @@ public static class Physics
         }
 
         return forceApplied;
-
     }
 
-    public static Vector2 addImpulseForce(float force, Rigidbody2D rigidBody, bool facingRight)
+    public static Vector2 AddImpulseForce(float force, Rigidbody2D rigidBody, FacingDirection facingDirection)
     {
+        var forceApplied = new Vector2(force, 0);
 
-        Vector2 forceApplied = new Vector2(force, 0);
-
-        if (facingRight)
+        if (facingDirection == FacingDirection.Right)
         {
             rigidBody.AddForce(forceApplied, ForceMode2D.Impulse);
         }
@@ -64,7 +79,6 @@ public static class Physics
 
     public static Vector2 addImpulseForce(float force, Rigidbody2D rigidBody)
     {
-
         Vector2 forceApplied = new Vector2(force, 0);
 
 
@@ -79,4 +93,14 @@ public static class Physics
         rigidBody.AddForce(new Vector2(0, force), ForceMode2D.Impulse);
     }
 
+
+    public static float FrictionForceCalc(float frictionCoefficient, float gravity, float mass)
+    {
+        return frictionCoefficient * (-gravity) * mass;
+    }
+
+    public static float ForceCalcByAcceleration(float acceleration, float mass)
+    {
+        return acceleration * mass;
+    }
 }

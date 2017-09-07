@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,7 +38,7 @@ public class LadderController : MonoBehaviour
             {
                 playerMovement.CanClimbStairs = true;
 
-                if (playerMovement.StatusVariables.IsClimbingStairs)
+                if (PlayerStatusVariables.isClimbingStairs)
                 {
                     if (!playerMovement.SnapToPositionRan)
                     {
@@ -81,4 +81,4 @@ public class LadderController : MonoBehaviour
             }
         }
     }
-}
+}*/

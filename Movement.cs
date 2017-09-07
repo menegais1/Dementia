@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿/*using System.Collections;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
@@ -38,7 +38,6 @@ public class Movement : MonoBehaviour
     [SerializeField] private float _crouchingSpeed;
     [SerializeField] private float _crouchHeigth;
 
-    public PlayerStatusVariables StatusVariables { get; set; }
 
     public bool SnapToPositionRan { get; set; }
 
@@ -53,8 +52,6 @@ public class Movement : MonoBehaviour
     public bool CanClimbStairs { get; set; }
 
     public int MovementState { get; set; }
-
-    public CoroutineManager CoroutineManager { get; set; }
 
     public bool CanClimbObject { get; set; }
 
@@ -159,8 +156,6 @@ public class Movement : MonoBehaviour
         RigidBody = GetComponent<Rigidbody2D>();
         BoxCollider = GetComponent<BoxCollider2D>();
         Player = GetComponent<Player>();
-        CoroutineManager = CoroutineManager.getInstance();
-        StatusVariables = PlayerStatusVariables.getInstance();
         MovementState = (int) MovementStateENUM.IDLE;
 
         ForceApplied = new Vector2(0, 0);
@@ -180,30 +175,30 @@ public class Movement : MonoBehaviour
         //   checkGround();
 
         CanJump = checkGroundForJump();
-        StatusVariables.IsDodging = testForDodging();
-        StatusVariables.IsJumping = testForJumping();
-        StatusVariables.IsOnAir = !CanJump && !StatusVariables.IsClimbingStairs &&
-                                  !StatusVariables.IsClimbingObject || StatusVariables.IsOnAir;
+        PlayerStatusVariables.isDodging = testForDodging();
+        PlayerStatusVariables.isJumping = testForJumping();
+        PlayerStatusVariables.isOnAir = !CanJump && !PlayerStatusVariables.isClimbingStairs &&
+                                        !PlayerStatusVariables.isClimbingObject || PlayerStatusVariables.isOnAir;
 
         if (CanClimbStairs)
         {
-            if (PlayerController.climbStairsPress && !StatusVariables.IsClimbingStairs)
+            if (PlayerController.climbStairsPress && !PlayerStatusVariables.isClimbingStairs)
             {
-                StatusVariables.IsClimbingStairs = true;
+                PlayerStatusVariables.isClimbingStairs = true;
                 PlayerController.changeMovementPlayerControl(true);
             }
         }
 
-        if (StatusVariables.IsClimbingStairs &&
+        if (PlayerStatusVariables.isClimbingStairs &&
             MathHelpers.Approximately(PlayerController.climbStairsMovement, 0, float.Epsilon))
         {
             resetVelocityY();
         }
 
-        if (StatusVariables.IsClimbingStairs && CanJump && CoroutineEndedRunning)
+        if (PlayerStatusVariables.isClimbingStairs && CanJump && CoroutineEndedRunning)
         {
             LeaveStairs = true;
-            StatusVariables.IsClimbingStairs = false;
+            PlayerStatusVariables.isClimbingStairs = false;
             switchGravity(true);
             CoroutineEndedRunning = false;
             SnapToPositionRan = false;
@@ -218,7 +213,7 @@ public class Movement : MonoBehaviour
             takeOfCamera();
         }
 
-        if (StatusVariables.IsJumping)
+        if (PlayerStatusVariables.isJumping)
         {
             if (Player.checkStamina(BaseStaminaSpent * 4f))
             {
@@ -229,13 +224,13 @@ public class Movement : MonoBehaviour
 
         if (CanClimbObject && PlayerController.jump)
         {
-            StatusVariables.IsClimbingObject = true;
+            PlayerStatusVariables.isClimbingObject = true;
             switchGravity(false);
         }
 
-        if (StatusVariables.IsClimbingObject && CoroutineEndedRunning)
+        if (PlayerStatusVariables.isClimbingObject && CoroutineEndedRunning)
         {
-            StatusVariables.IsClimbingObject = false;
+            PlayerStatusVariables.isClimbingObject = false;
             CoroutineEndedRunning = false;
             SnapToPositionRan = false;
             switchGravity(true);
@@ -243,7 +238,7 @@ public class Movement : MonoBehaviour
 
         if (PlayerController.jog && RunningPressingTime <= 0.5)
         {
-            StatusVariables.IsJogging = !StatusVariables.IsJogging;
+            PlayerStatusVariables.isJogging = !PlayerStatusVariables.isJogging;
             RunningPressingTime = 0;
         }
         else if (PlayerController.jog)
@@ -259,22 +254,23 @@ public class Movement : MonoBehaviour
                 MovementState = (int) MovementStateENUM.CROUCHING;
             }
         }
-        else if (StatusVariables.IsCrouching)
+        else if (PlayerStatusVariables.isCrouching)
         {
             raise();
             MovementState = (int) MovementStateENUM.IDLE;
         }
 
 
-        if (!StatusVariables.IsOnAir && !StatusVariables.IsDodging && !StatusVariables.IsClimbingStairs)
+        if (!PlayerStatusVariables.isOnAir && !PlayerStatusVariables.isDodging &&
+            !PlayerStatusVariables.isClimbingStairs)
         {
-            if (!MathHelpers.Approximately(PlayerController.move, 0, float.Epsilon))
+            if (!MathHelpers.Approximately(PlayerController.horizontalMove, 0, float.Epsilon))
             {
-                if (StatusVariables.IsCrouching)
+                if (PlayerStatusVariables.isCrouching)
                 {
                     MovementState = (int) MovementStateENUM.CROUCHING;
                 }
-                else if (StatusVariables.IsJogging)
+                else if (PlayerStatusVariables.isJogging)
                 {
                     if (Player.checkStamina(BaseStaminaSpent * 1.5f))
                     {
@@ -300,7 +296,7 @@ public class Movement : MonoBehaviour
                     }
                 }
 
-                if (!StatusVariables.IsJogging && !StatusVariables.IsCrouching && !PlayerController.run)
+                if (!PlayerStatusVariables.isJogging && !PlayerStatusVariables.isCrouching && !PlayerController.run)
                 {
                     MovementState = (int) MovementStateENUM.WALKING;
                 }
@@ -310,16 +306,16 @@ public class Movement : MonoBehaviour
                 MovementState = (int) MovementStateENUM.IDLE;
             }
         }
-        else if (StatusVariables.IsClimbingStairs)
+        else if (PlayerStatusVariables.isClimbingStairs)
         {
             switchGravity(false);
             MovementState = (int) MovementStateENUM.CLIMBING_STAIRS;
         }
-        else if (StatusVariables.IsOnAir)
+        else if (PlayerStatusVariables.isOnAir)
         {
             MovementState = (int) MovementStateENUM.ON_AIR;
         }
-        else if (StatusVariables.IsDodging)
+        else if (PlayerStatusVariables.isDodging)
         {
             MovementState = (int) MovementStateENUM.DODGING;
         }
@@ -330,18 +326,18 @@ public class Movement : MonoBehaviour
         switch (MovementState)
         {
             case (int) MovementStateENUM.WALKING:
-                ForceApplied = walk(PlayerController.move);
+                ForceApplied = walk(PlayerController.horizontalMove);
                 break;
             case (int) MovementStateENUM.JOGGING:
-                ForceApplied = jog(PlayerController.move);
+                ForceApplied = jog(PlayerController.horizontalMove);
                 Player.spendStamina(BaseStaminaSpent * 1.5f * Time.deltaTime);
                 break;
             case (int) MovementStateENUM.RUNNING:
-                ForceApplied = run(PlayerController.move);
+                ForceApplied = run(PlayerController.horizontalMove);
                 Player.spendStamina(BaseStaminaSpent * 2f * Time.deltaTime);
                 break;
             case (int) MovementStateENUM.CROUCHING:
-                ForceApplied = crouchWalk(PlayerController.move);
+                ForceApplied = crouchWalk(PlayerController.horizontalMove);
                 break;
             case (int) MovementStateENUM.DODGING:
                 if (Player.checkStamina(Player.maxStamina))
@@ -363,14 +359,15 @@ public class Movement : MonoBehaviour
 
 
         //Diminuir deslizada
-        Physics.addContraryForce(ForceApplied, RigidBody, MovementState);
+        PhysicsHelpers.addContraryForce(ForceApplied, RigidBody, MovementState);
     }
 
     void LateUpdate()
     {
-        if (MathHelpers.Approximately(RigidBody.velocity.y, 0, float.Epsilon) && StatusVariables.IsOnAir && CanJump)
+        if (MathHelpers.Approximately(RigidBody.velocity.y, 0, float.Epsilon) && PlayerStatusVariables.isOnAir &&
+            CanJump)
         {
-            StatusVariables.IsOnAir = false;
+            PlayerStatusVariables.isOnAir = false;
             PlayerController.giveMovementPlayerControlWithCooldown(0.1f, this);
         }
     }
@@ -449,11 +446,11 @@ public class Movement : MonoBehaviour
 
     public void checkFacingDirection()
     {
-        if (MathHelpers.Approximately(PlayerController.move, 1, float.Epsilon))
+        if (MathHelpers.Approximately(PlayerController.horizontalMove, 1, float.Epsilon))
         {
             FacingRight = true;
         }
-        else if (MathHelpers.Approximately(PlayerController.move, -1, float.Epsilon))
+        else if (MathHelpers.Approximately(PlayerController.horizontalMove, -1, float.Epsilon))
         {
             FacingRight = false;
         }
@@ -470,7 +467,7 @@ public class Movement : MonoBehaviour
     {
         if (PlayerController.dodge)
         {
-            PlayerController.revokeMovementPlayerControl(0.5f, this);
+            PlayerController.RevokeHorizontalMovementPlayerControl(0.5f, this);
             return true;
         }
         return false;
@@ -496,24 +493,24 @@ public class Movement : MonoBehaviour
         StartCoroutine(CameraController.takeOfCamera(CameraZoomSize, 100, CameraState));
     }
 
-    public Vector2 walk(float move)
+    public Vector2 walk(float horizontalMove)
     {
-        return Physics.movementByForce(Force, 1f, MaxVelocity, move, RigidBody, false);
+        return PhysicsHelpers.movementByForce(Force, 1f, MaxVelocity, horizontalMove, RigidBody, false);
     }
 
-    public Vector2 jog(float move)
+    public Vector2 jog(float horizontalMove)
     {
-        return Physics.movementByForce(Force, 1.5f, MaxVelocity, move, RigidBody, false);
+        return PhysicsHelpers.movementByForce(Force, 1.5f, MaxVelocity, horizontalMove, RigidBody, false);
     }
 
-    public Vector2 run(float move)
+    public Vector2 run(float horizontalMove)
     {
-        return Physics.movementByForce(Force, 2f, MaxVelocity, move, RigidBody, false);
+        return PhysicsHelpers.movementByForce(Force, 2f, MaxVelocity, horizontalMove, RigidBody, false);
     }
 
-    public Vector2 crouchWalk(float move)
+    public Vector2 crouchWalk(float horizontalMove)
     {
-        return Physics.movementByForce(Force, 0.75f, MaxVelocity, move, RigidBody, false);
+        return PhysicsHelpers.movementByForce(Force, 0.75f, MaxVelocity, horizontalMove, RigidBody, false);
     }
 
     public void crouch()
@@ -522,7 +519,7 @@ public class Movement : MonoBehaviour
         {
             BoxCollider.size = new Vector2(BoxCollider.size.x, BoxCollider.size.y - CrouchingSpeed);
             BoxCollider.offset = new Vector2(BoxCollider.offset.x, BoxCollider.offset.y - (CrouchingSpeed / 2));
-            StatusVariables.IsCrouching = true;
+            PlayerStatusVariables.isCrouching = true;
         }
     }
 
@@ -535,15 +532,15 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            StatusVariables.IsCrouching = false;
+            PlayerStatusVariables.isCrouching = false;
         }
     }
 
 
     public void jump()
     {
-        Physics.jump(JumpForce, RigidBody);
-        StatusVariables.IsOnAir = true;
+        PhysicsHelpers.jump(JumpForce, RigidBody);
+        PlayerStatusVariables.isOnAir = true;
         //playerController.revokeMovementPlayerControl();
     }
 
@@ -554,14 +551,15 @@ public class Movement : MonoBehaviour
         //Zerar velocidade para desviar a mesma distância
         resetVelocityX();
 
-        Vector2 forceApplied = Physics.addImpulseForce(DodgeForce, RigidBody, FacingRight);
-        StatusVariables.IsDodging = false;
-        return forceApplied;
+        //Vector2 forceApplied = PhysicsHelpers.AddImpulseForce(DodgeForce, RigidBody, FacingRight);
+        PlayerStatusVariables.isDodging = false;
+        //return forceApplied;
+        return Vector2.zero;
     }
 
-    public Vector2 climbStairs(float move)
+    public Vector2 climbStairs(float horizontalMove)
     {
-        return Physics.movementByForce(Force, 0.50f, MaxVelocity, move, RigidBody, true);
+        return PhysicsHelpers.movementByForce(Force, 0.50f, MaxVelocity, horizontalMove, RigidBody, true);
     }
 
     public void resetVelocityY()
@@ -608,22 +606,22 @@ public class Movement : MonoBehaviour
         if (raycastHit2DPoints.bottomMidRay.collider != null) return;
         if (raycastHit2DPoints.bottomLeftRay.collider != null)
         {
-            Physics.addImpulseForce(ForceOnEdge, RigidBody);
+            PhysicsHelpers.addImpulseForce(ForceOnEdge, RigidBody);
         }
         else if (raycastHit2DPoints.bottomRightRay.collider != null)
         {
-            Physics.addImpulseForce(-ForceOnEdge, RigidBody);
+            PhysicsHelpers.addImpulseForce(-ForceOnEdge, RigidBody);
         }
     }
 
     public void revokeControlOnStairs(float time)
     {
-        PlayerController.revokeMovementPlayerControl(time, this);
+        PlayerController.RevokeHorizontalMovementPlayerControl(time, this);
     }
 
     public void giveControlOnStairs()
     {
-        PlayerController.revokeMovementPlayerControl(0.5f, this);
+        PlayerController.RevokeHorizontalMovementPlayerControl(0.5f, this);
     }
 
     #endregion
@@ -640,9 +638,9 @@ public class Movement : MonoBehaviour
     //{
     //    //float angle = Vector2.Angle(isSlope.normal, Vector2.up);
     //    //angle = (angle != 0f) ? angle : 1f;
-    //    //move = move * (angle / 10);
+    //    //horizontalMove = horizontalMove * (angle / 10);
     //}
 
     //Debug.DrawRay(new Vector2(boxCollider.bounds.max.x, boxCollider.bounds.min.y), Vector2.down, Color.red);
     ////Fim da Revisão
-}
+}*/

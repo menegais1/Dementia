@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿/*
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,7 +18,6 @@ public class MiscMovement : MonoBehaviour
 
     private bool readingNote;
 
-    private PlayerController playerController;
     #endregion
 
 
@@ -29,7 +29,6 @@ public class MiscMovement : MonoBehaviour
     void Start()
     {
 
-        playerController = PlayerController.getInstance();
 
     }
 
@@ -37,7 +36,7 @@ public class MiscMovement : MonoBehaviour
     void Update()
     {
 
-        if (playerController.interactWithScenery && canInteractWithScenery)
+        if (PlayerController.interactWithScenery && canInteractWithScenery)
         {
             interactScenery();
         }
@@ -89,3 +88,4 @@ public class MiscMovement : MonoBehaviour
     #endregion
 
 }
+*/

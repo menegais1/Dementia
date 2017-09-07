@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour
     private List<Weapon> initializeWeapons;
     private List<Note> initializeNotes;
     private List<Enemy> initializeEnemies;
-    private CoroutineManager coroutineManager;
     #endregion
 
     #region Váriaveis Adicionadas
@@ -28,8 +27,7 @@ public class GameManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        coroutineManager = CoroutineManager.getInstance();
-        coroutineManager.setMonoBehaviourInstance(this);
+        CoroutineManager.setMonoBehaviourInstance(this);
     }
 
     // Update is called once per frame
