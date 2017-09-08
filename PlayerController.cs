@@ -8,6 +8,7 @@ public static class PlayerController
     {
         public bool horizontalMovementControl;
         public bool verticalMovementControl;
+        public bool stairsMovementControl;
         public bool miscellaneousMovementControl;
         public bool allMovementControl;
     }
@@ -19,7 +20,7 @@ public static class PlayerController
     public static bool Dodge { get; private set; }
     public static float ClimbLadderMovement { get; private set; }
     public static bool Jump { get; private set; }
-    public static bool ClimbObstacles { get; private set; }
+    public static bool ClimbObstaclePress { get; private set; }
     public static bool ClimbLadderPress { get; private set; }
 
 
@@ -57,16 +58,16 @@ public static class PlayerController
         if (!revokeControlVariables.verticalMovementControl)
         {
             Jump = Input.GetButtonDown("Jump");
-            ClimbObstacles = Input.GetButtonDown("Climb Obstacles");
+            ClimbObstaclePress = Input.GetButtonDown("Climb Obstacles");
             ClimbLadderPress = Input.GetButtonDown("Climb Ladder");
             ClimbLadderMovement = GetClimbStairsMovement();
         }
         else
         {
             Jump = false;
-            ClimbObstacles = false;
+            ClimbObstaclePress = false;
             ClimbLadderPress = false;
-            ClimbLadderMovement = 0;
+            ClimbLadderMovement = !revokeControlVariables.stairsMovementControl ? GetClimbStairsMovement() : 0;
         }
     }
 
@@ -88,7 +89,8 @@ public static class PlayerController
         return 0;
     }
 
-    public static void RevokePlayerControl(float timeToRevoke,
+    //bool revoke somente ajuda a ler o código
+    public static void RevokePlayerControl(float timeToRevoke, bool revoke,
         ControlTypeToRevoke controlTypeToRevoke, MonoBehaviour monoBehaviour)
     {
         var coroutine = CoroutineManager.findCoroutine("RevokeControlCoroutine");
@@ -105,54 +107,25 @@ public static class PlayerController
         }
     }
 
-    /* public void revokeMovementPlayerControl()
-     {
-         revokeControl = true;
-     }
- 
-     public void changeMovementPlayerControl(bool onStairs)
-     {
-         onStairsControl = onStairs;
-     }
- 
-     public void giveMovementPlayerControl()
-     {
-         revokeControl = false;
-     }
- 
-     public void giveMovementPlayerControlWithCooldown(float timeToCooldown, MonoBehaviour monoBehaviour)
-     {
-         revokeControl = false;
-         horizontalMove = 0;
-         if (!runningCoroutine)
-             monoBehaviour.StartCoroutine(waitForSeconds(timeToCooldown, false));
-     }
- 
-     private IEnumerator waitForSeconds(float time, bool revoke)
-     {
-         runningCoroutine = true;
-         for (var i = 0; i <= 1; i++)
-         {
-             revokeControl = !revokeControl;
-             yield return new WaitForSeconds(time);
-         }
-         runningCoroutine = false;
-     }*/
+    public static void RevokePlayerControl(bool revoke, ControlTypeToRevoke controlTypeToRevoke)
+    {
+        RevokeControlSelection(revoke, controlTypeToRevoke, false);
+    }
 
     private static IEnumerator RevokeControlCoroutine(float time, ControlTypeToRevoke controlTypeToRevoke,
         bool revoke)
     {
         for (var i = 0; i < 1; i++)
         {
-            revokeControlSelection(revoke, controlTypeToRevoke, false);
+            RevokeControlSelection(revoke, controlTypeToRevoke, false);
             yield return new WaitForSeconds(time);
         }
-        revokeControlSelection(revoke, controlTypeToRevoke, true);
+        RevokeControlSelection(revoke, controlTypeToRevoke, true);
         CoroutineManager.findCoroutine("RevokeControlCoroutine").setIsRunning(false);
     }
 
 
-    private static void revokeControlSelection(bool revoke, ControlTypeToRevoke controlTypeToRevoke, bool negate)
+    private static void RevokeControlSelection(bool revoke, ControlTypeToRevoke controlTypeToRevoke, bool negate)
     {
         if (negate)
         {
@@ -167,12 +140,16 @@ public static class PlayerController
             case ControlTypeToRevoke.VerticalMovement:
                 revokeControlVariables.verticalMovementControl = revoke;
                 break;
+            case ControlTypeToRevoke.StairsMovement:
+                revokeControlVariables.stairsMovementControl = revoke;
+                break;
             case ControlTypeToRevoke.MiscellaneousMovement:
                 revokeControlVariables.miscellaneousMovementControl = revoke;
                 break;
             case ControlTypeToRevoke.AllMovement:
                 revokeControlVariables.horizontalMovementControl = revoke;
                 revokeControlVariables.verticalMovementControl = revoke;
+                revokeControlVariables.stairsMovementControl = revoke;
                 revokeControlVariables.miscellaneousMovementControl = revoke;
                 break;
             default:

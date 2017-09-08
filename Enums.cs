@@ -6,22 +6,35 @@ public enum HorizontalMovementState
     Running,
     CrouchIdle,
     CrouchWalking,
-    Dodging,
+}
+
+public enum HorizontalPressMovementState
+{
+    None,
+    Dodge,
 }
 
 public enum VerticalMovementState
 {
-    Idle,
-    Jumping,
+    Grounded,
     OnAir,
     ClimbingLadder,
     ClimbingObstacle,
+}
+
+public enum VerticalPressMovementState
+{
+    None,
+    Jump,
+    ClimbLadder,
+    ClimbObstacle,
 }
 
 public enum ControlTypeToRevoke
 {
     HorizontalMovement,
     VerticalMovement,
+    StairsMovement,
     MiscellaneousMovement,
     AllMovement,
 }

@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class HorizontalMovement
 {
     public HorizontalMovementState horizontalMovementState;
+    public HorizontalPressMovementState horizontalPressMovementState;
     public FacingDirection facingDirection;
 
     private static HorizontalMovement instance;
@@ -94,7 +96,7 @@ public class HorizontalMovement
         }
         else if (PlayerStatusVariables.isDodging)
         {
-            horizontalMovementState = HorizontalMovementState.Dodging;
+            horizontalPressMovementState = HorizontalPressMovementState.Dodge;
         }
         else if (PlayerStatusVariables.isCrouching)
         {
@@ -103,6 +105,51 @@ public class HorizontalMovement
         else
         {
             horizontalMovementState = HorizontalMovementState.Idle;
+        }
+    }
+
+    public void PressMovementHandler()
+    {
+        switch (horizontalPressMovementState)
+        {
+            case HorizontalPressMovementState.Dodge:
+                Dodge();
+                break;
+            case HorizontalPressMovementState.None:
+                break;
+            default:
+                Debug.Log("Error");
+                break;
+        }
+
+        horizontalPressMovementState = HorizontalPressMovementState.None;
+    }
+
+    public void HoldMovementHandler(ref Vector2 forceApplied)
+    {
+        switch (horizontalMovementState)
+        {
+            case HorizontalMovementState.Idle:
+                PreventSlide(forceApplied);
+                break;
+            case HorizontalMovementState.Walking:
+                forceApplied = Walk(PlayerController.HorizontalMove, 1);
+                break;
+            case HorizontalMovementState.Jogging:
+                forceApplied = Jog(PlayerController.HorizontalMove, 1.5f);
+                break;
+            case HorizontalMovementState.Running:
+                forceApplied = Run(PlayerController.HorizontalMove, 2f);
+                break;
+            case HorizontalMovementState.CrouchIdle:
+                PreventSlide(forceApplied);
+                break;
+            case HorizontalMovementState.CrouchWalking:
+                forceApplied = CrouchWalk(PlayerController.HorizontalMove, 1f);
+                break;
+            default:
+                Debug.Log("ERRO");
+                break;
         }
     }
 
@@ -138,7 +185,7 @@ public class HorizontalMovement
 
         var forceApplied = PhysicsHelpers.AddImpulseForce(dodgeForce, rigidbody2D, facingDirection);
         PlayerStatusVariables.isDodging = false;
-        PlayerController.RevokePlayerControl(1f, ControlTypeToRevoke.AllMovement, monoBehaviour);
+        PlayerController.RevokePlayerControl(0.6f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
         return forceApplied;
     }
 

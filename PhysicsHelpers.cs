@@ -26,6 +26,11 @@ public static class PhysicsHelpers
         return forceApplied;
     }
 
+    public static void ClimbLadder(float climbLadderVelocity, float climbLadderMovement, Rigidbody2D rigidbody2D)
+    {
+        rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, climbLadderVelocity * climbLadderMovement);
+    }
+
     public static Vector2 HorizontalMovementByForce(float acceleration, float constant,
         float maxSpeed, float direction, Rigidbody2D rigidBody)
     {
@@ -48,11 +53,12 @@ public static class PhysicsHelpers
 
     public static Vector2 PreventSlide(Vector2 forceApplied, Rigidbody2D rigidBody)
     {
-        if (!MathHelpers.Approximately(rigidBody.velocity.x, 0, 0))
+        if (!MathHelpers.Approximately(rigidBody.velocity.x, 0, 0) &&
+            MathHelpers.Approximately(rigidBody.velocity.y, 0, 0))
         {
             if (MathHelpers.Approximately(rigidBody.velocity.x, 0, 0.1f))
             {
-                rigidBody.velocity = Vector2.zero;
+                rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
             }
 
             rigidBody.AddRelativeForce(forceApplied.magnitude * -rigidBody.velocity.normalized);
@@ -88,7 +94,7 @@ public static class PhysicsHelpers
         return forceApplied;
     }
 
-    public static void jump(float force, Rigidbody2D rigidBody)
+    public static void Jump(float force, Rigidbody2D rigidBody)
     {
         rigidBody.AddForce(new Vector2(0, force), ForceMode2D.Impulse);
     }

@@ -1,4 +1,4 @@
-﻿/*using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,72 +13,54 @@ public class LadderController : MonoBehaviour
     }
 
 
-    public string tag;
-    private Movement playerMovement;
     public Collider2D adjacentCollider;
     public LadderType ladder;
 
     public void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.tag.Equals(tag))
+        if (!other.gameObject.tag.Equals("Player")) return;
+        if (ladder != LadderType.LADDER)
         {
-            playerMovement = other.GetComponent<Movement>();
-            if (ladder != LadderType.LADDER)
-            {
-                adjacentCollider = transform.parent.GetComponent<LadderController>().adjacentCollider;
-            }
+            adjacentCollider = transform.parent.GetComponent<LadderController>().adjacentCollider;
         }
     }
 
     public void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject.tag.Equals(tag))
+        if (!other.gameObject.tag.Equals("Player")) return;
+        if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
         {
-            if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
-            {
-                playerMovement.CanClimbStairs = true;
+            PlayerStatusVariables.canClimbLadder = true;
 
-                if (PlayerStatusVariables.isClimbingStairs)
+            /*if (PlayerStatusVariables.isClimbingLadder)
+            {
+                if (!playerMovement.SnapToPositionRan)
                 {
-                    if (!playerMovement.SnapToPositionRan)
-                    {
-                        Vector2 position = transform.GetChild(0).position;
-                        playerMovement.snapToPositionStairs(position);
-                        playerMovement.ignoreCollision(adjacentCollider, true);
-                    }
-                }
-                else if (playerMovement.LeaveStairs)
-                {
-                    playerMovement.ignoreCollision(adjacentCollider, false);
-                    playerMovement.LeaveStairs = false;
+                    Vector2 position = transform.GetChild(0).position;
+                    playerMovement.snapToPositionStairs(position);
+                    playerMovement.ignoreCollision(adjacentCollider, true);
                 }
             }
-
-            //if (ladder == LadderType.LADDER)
-            //{
-            //    playerMovement.ignoreCollision(adjacentCollider, true);
-
-            //}
+            else if (playerMovement.LeaveStairs)
+            {
+                playerMovement.ignoreCollision(adjacentCollider, false);
+                playerMovement.LeaveStairs = false;
+            }*/
         }
     }
 
 
     public void OnTriggerExit2D(Collider2D other)
     {
-        if (other.gameObject.tag.Equals(tag))
+        if (!other.gameObject.tag.Equals("Player")) return;
+        if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
         {
-            if (playerMovement != null)
-            {
-                if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
-                {
-                    playerMovement.CanClimbStairs = false;
-                }
-
-                if (ladder == LadderType.LADDER)
-                {
-                    playerMovement.ignoreCollision(adjacentCollider, false);
-                }
-            }
+            PlayerStatusVariables.canClimbLadder = false;
         }
+
+       /* if (ladder == LadderType.LADDER)
+        {
+            playerMovement.ignoreCollision(adjacentCollider, false);
+        }*/
     }
-}*/
+}
