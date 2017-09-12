@@ -51,20 +51,27 @@ public class VerticalMovement
     public void StartVerticalMovement()
     {
         PlayerController.CheckForVerticalPlayerInput();
+
         PlayerStatusVariables.canJump = CheckGroundForJump();
         PlayerStatusVariables.isOnAir = PlayerStatusVariables.CheckIsOnAir();
 
+        //Checar amanha
         if (PlayerStatusVariables.canClimbLadder && PlayerController.ClimbLadderPress)
         {
-            PlayerStatusVariables.isClimbingLadder = true;
+            PlayerStatusVariables.isClimbingLadder =
+                PlayerStatusVariables.canClimbLadder && PlayerController.ClimbLadderPress ||
+                PlayerStatusVariables.isClimbingLadder;
         }
 
         if (PlayerStatusVariables.canClimbObstacle && PlayerController.ClimbObstaclePress)
         {
-            PlayerStatusVariables.isClimbingObstacle = true;
+            PlayerStatusVariables.isClimbingObstacle =
+                PlayerStatusVariables.canClimbObstacle && PlayerController.ClimbObstaclePress ||
+                PlayerStatusVariables.isClimbingObstacle;
         }
 
-        PlayerStatusVariables.isJumping = PlayerStatusVariables.canJump && PlayerController.Jump;
+        PlayerStatusVariables.isJumping = PlayerStatusVariables.canJump && PlayerController.Jump &&
+                                          !PlayerStatusVariables.isClimbingObstacle;
 
 
         //Para velocidades ridiculamente altas, vai bugar
@@ -79,6 +86,18 @@ public class VerticalMovement
                 SwitchGravity(true);
                 ResetVelocityY();
                 CoroutineManager.deleteCoroutine("ClimbOntoLadderCoroutine");
+            }
+        }
+
+        if (PlayerStatusVariables.isClimbingObstacle && PlayerStatusVariables.canJump)
+        {
+            var coroutine = CoroutineManager.findCoroutine("ClimbOntoObstacleCoroutine");
+            if (coroutine != null && !coroutine.getIsRunning())
+            {
+                PlayerStatusVariables.isClimbingObstacle = false;
+                PlayerController.RevokePlayerControl(0.3f, false, ControlTypeToRevoke.AllMovement, monoBehaviour);
+                SwitchGravity(true);
+                CoroutineManager.deleteCoroutine("ClimbOntoObstacleCoroutine");
             }
         }
 
@@ -134,10 +153,9 @@ public class VerticalMovement
                 ClimbOntoLadder(GetLadderPosition());
                 break;
             case VerticalPressMovementState.ClimbObstacle:
-
+                ClimbOntoObstacle(GetObstaclePosition());
                 break;
             case VerticalPressMovementState.None:
-
                 break;
             default:
                 Debug.Log("Error");
@@ -151,13 +169,13 @@ public class VerticalMovement
     {
         switch (verticalMovementState)
         {
-            case VerticalMovementState.Grounded:
-                break;
             case VerticalMovementState.OnAir:
                 PlayerController.RevokePlayerControl(true, ControlTypeToRevoke.AllMovement);
                 break;
             case VerticalMovementState.ClimbingLadder:
                 ClimbLadder(PlayerController.ClimbLadderMovement);
+                break;
+            case VerticalMovementState.Grounded:
                 break;
             case VerticalMovementState.ClimbingObstacle:
                 break;
@@ -200,15 +218,50 @@ public class VerticalMovement
             layerMask = LayerMask.GetMask("Bottom Ladder", "Top Ladder")
         };
 
-        var stairColliders = new Collider2D[1];
-        boxCollider2D.GetContacts(contactFilter2D, stairColliders);
-        return stairColliders[0].transform;
+        var ladderColliders = new Collider2D[1];
+        boxCollider2D.GetContacts(contactFilter2D, ladderColliders);
+        return ladderColliders[0].transform;
+    }
+
+    private Vector2 GetObstaclePosition()
+    {
+        var contactFilter2D = new ContactFilter2D
+        {
+            useTriggers = true,
+            useLayerMask = true,
+            layerMask = LayerMask.GetMask("Obstacle Trigger"),
+        };
+
+        var obstacleColliders = new Collider2D[1];
+        boxCollider2D.GetContacts(contactFilter2D, obstacleColliders);
+
+        var parentCollider = obstacleColliders[0].transform.parent.GetComponent<BoxCollider2D>();
+        var position = obstacleColliders[0].transform.position.x > parentCollider.transform.position.x
+            ? new Vector2(parentCollider.bounds.max.x, parentCollider.bounds.max.y)
+            : new Vector2(parentCollider.bounds.min.x, parentCollider.bounds.max.y);
+
+        return position;
     }
 
 
     public void Jump()
     {
         PhysicsHelpers.Jump(jumpForce, rigidbody2D);
+    }
+
+    public void ClimbOntoObstacle(Vector2 position)
+    {
+        SwitchGravity(false);
+        ResetVelocityX();
+        ResetVelocityY();
+        PlayerController.RevokePlayerControl(true, ControlTypeToRevoke.AllMovement);
+
+        var coroutine = CoroutineManager.findCoroutine("ClimbOntoObstacleCoroutine");
+        if (coroutine == null)
+        {
+            CoroutineManager.insertNewCoroutine(ClimbOntoObstacleCoroutine(position),
+                "ClimbOntoObstacleCoroutine");
+        }
     }
 
     public void ClimbOntoLadder(Transform ladderTransform)
@@ -229,15 +282,42 @@ public class VerticalMovement
 
     private IEnumerator ClimbOntoLadderCoroutine(Vector2 position)
     {
-        while (Mathf.Abs(rigidbody2D.position.x - position.x) >= 0.01 ||
-               Mathf.Abs(rigidbody2D.position.y - position.y) >= 0.01)
+        /*  Mathf.Abs(rigidbody2D.position.x - position.x) >= 0.01 ||
+              Mathf.Abs(rigidbody2D.position.y - position.y) >= 0.01)*/
+        while (!MathHelpers.Approximately(rigidbody2D.position.x, position.x, 0.01f) ||
+               !MathHelpers.Approximately(rigidbody2D.position.y, position.y, 0.01f))
         {
             rigidbody2D.position =
-                Vector2.Lerp(rigidbody2D.position, new Vector2(position.x, position.y), climbingLadderSmoothness);
+                Vector2.Lerp(rigidbody2D.position, new Vector2(position.x, position.y),
+                    climbingLadderSmoothness);
             yield return new WaitForEndOfFrame();
         }
+
         CoroutineManager.findCoroutine("ClimbOntoLadderCoroutine").setIsRunning(false);
         PlayerController.RevokePlayerControl(false, ControlTypeToRevoke.StairsMovement);
+    }
+
+    private IEnumerator ClimbOntoObstacleCoroutine(Vector2 position)
+    {
+        var playerSizeX = (position.x > rigidbody2D.position.x) ? boxCollider2D.size.x / 2 : -boxCollider2D.size.x / 2;
+        var playerSizeY = boxCollider2D.size.y / 2;
+        var desiredPositionX = position.x + playerSizeX;
+        var desiredPositionY = position.y + playerSizeY;
+
+        /* Mathf.Abs(rigidbody2D.position.x - (position.x + playerSizeX)) >= 0.01 ||
+           Mathf.Abs(rigidbody2D.position.y - (position.y + playerSizeY)) >= 0.01)*/
+        while (!MathHelpers.Approximately(rigidbody2D.position.x, desiredPositionX, 0.01f) ||
+               !MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, 0.01f))
+        {
+            rigidbody2D.position = Vector2.Lerp(rigidbody2D.position,
+                !MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, 0.01f)
+                    ? new Vector2(rigidbody2D.position.x, desiredPositionY)
+                    : new Vector2(desiredPositionX, rigidbody2D.position.y),
+                climbingObstacleSmoothness);
+            yield return new WaitForEndOfFrame();
+        }
+        CoroutineManager.findCoroutine("ClimbOntoObstacleCoroutine").setIsRunning(false);
+        PlayerController.RevokePlayerControl(false, ControlTypeToRevoke.AllMovement);
     }
 
     public void IgnoreCollision(Collider2D other, bool ignore)
@@ -249,49 +329,6 @@ public class VerticalMovement
     {
         PhysicsHelpers.ClimbLadder(climbLadderVelocity, climbLadderMovement, rigidbody2D);
     }
-
-/*
-   
-
-    public void snapToPositionObject(Vector2 position)
-    {
-        resetVelocityX();
-        resetVelocityY();
-        PlayerController.revokeMovementPlayerControl();
-        StartCoroutine(snapToPositionObjectCoroutine(position));
-        SnapToPositionRan = true;
-    }
-    
-   
-
-    private IEnumerator snapToPositionObjectCoroutine(Vector2 position)
-    {
-        float localScale = (position.x > RigidBody.position.x) ? +transform.localScale.x : -transform.localScale.x;
-        while (Mathf.Abs(RigidBody.position.x - (position.x + localScale)) >= 0.01 ||
-               Mathf.Abs(RigidBody.position.y - (position.y + transform.localScale.y)) >= 0.01)
-        {
-            if (Mathf.Abs(RigidBody.position.y - (position.y + transform.localScale.y)) >= 0.01)
-            {
-                RigidBody.position = Vector2.Lerp(RigidBody.position,
-                    new Vector2(RigidBody.position.x, (position.y + transform.localScale.y)), StairsSmoothness);
-            }
-            else
-            {
-                RigidBody.position = Vector2.Lerp(RigidBody.position,
-                    new Vector2(position.x + localScale, RigidBody.position.y), StairsSmoothness);
-            }
-            yield return new WaitForEndOfFrame();
-        }
-        CoroutineEndedRunning = true;
-        PlayerController.giveMovementPlayerControl();
-    }
-
-   
-  
-    
-    
-    
-    */
 
 
     public void SwitchGravity(bool on)

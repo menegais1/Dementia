@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ItemInteraction : MonoBehaviour
+public class SceneryInteraction : MonoBehaviour
 {
     private MiscellaneousMovement miscellaneousMovement;
 
@@ -15,11 +15,11 @@ public class ItemInteraction : MonoBehaviour
     {
         if (!other.gameObject.CompareTag("Player")) return;
 
-        PlayerStatusVariables.canTakeItem = true;
+        PlayerStatusVariables.canInteractWithScenery = true;
 
-        if (PlayerStatusVariables.isTakingItem)
+        if (PlayerStatusVariables.isInteractingWithScenery)
         {
-            miscellaneousMovement.SubscribeItemEffect(Interaction);
+            miscellaneousMovement.SubscribeInteractiveScenery(Interaction);
         }
     }
 
@@ -28,7 +28,7 @@ public class ItemInteraction : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            PlayerStatusVariables.canTakeItem = false;
+            PlayerStatusVariables.canInteractWithScenery = false;
         }
     }
 
@@ -38,8 +38,7 @@ public class ItemInteraction : MonoBehaviour
 
     public void Interaction()
     {
-        print("Item");
-        Destroy(this.gameObject);
+        print("Teste");
     }
 
     #endregion

@@ -22,7 +22,9 @@ public static class PlayerController
     public static bool Jump { get; private set; }
     public static bool ClimbObstaclePress { get; private set; }
     public static bool ClimbLadderPress { get; private set; }
-
+    public static bool TakeItemPress { get; private set; }
+    public static bool InteractWithSceneryPress { get; private set; }
+    public static bool ZoomCameraPress { get; private set; }
 
     private static RevokeControlVariables revokeControlVariables;
 
@@ -68,6 +70,22 @@ public static class PlayerController
             ClimbObstaclePress = false;
             ClimbLadderPress = false;
             ClimbLadderMovement = !revokeControlVariables.stairsMovementControl ? GetClimbStairsMovement() : 0;
+        }
+    }
+
+    public static void CheckForMiscellaneousPlayerInput()
+    {
+        if (!revokeControlVariables.miscellaneousMovementControl)
+        {
+            TakeItemPress = Input.GetButtonDown("Take Item");
+            InteractWithSceneryPress = Input.GetButtonDown("Interact With Scenery");
+            ZoomCameraPress = Input.GetButtonDown("Zoom Camera");
+        }
+        else
+        {
+            TakeItemPress = false;
+            InteractWithSceneryPress = false;
+            ZoomCameraPress = false;
         }
     }
 

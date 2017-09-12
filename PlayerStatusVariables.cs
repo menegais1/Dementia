@@ -18,11 +18,21 @@ public static class PlayerStatusVariables
 
     public static bool isOnStairs;
 
+    public static bool isCameraZoomed;
+
     public static bool canJump;
 
     public static bool canClimbLadder;
 
     public static bool canClimbObstacle;
+
+    public static bool canTakeItem;
+
+    public static bool canInteractWithScenery;
+
+    public static bool isInteractingWithScenery;
+
+    public static bool isTakingItem;
 
     public static bool CheckIsOnAir()
     {

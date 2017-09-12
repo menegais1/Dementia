@@ -30,6 +30,14 @@ public enum VerticalPressMovementState
     ClimbObstacle,
 }
 
+public enum MiscellaneousPressMovementState
+{
+    None,
+    TakeItem,
+    InteractWithScenery,
+    ZoomCamera,
+}
+
 public enum ControlTypeToRevoke
 {
     HorizontalMovement,

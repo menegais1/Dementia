@@ -13,12 +13,14 @@ public class TemporaryMovement : MonoBehaviour
     [SerializeField] private float climbingLadderSmoothness;
     [SerializeField] private float climbingObstacleSmoothness;
     [SerializeField] private float climbLadderVelocity;
+    [SerializeField] private float cameraZoomSize;
     [SerializeField] private LayerMask layerMaskForCollisions;
 
     private Vector2 forceApplied;
 
     private HorizontalMovement horizontalMovement;
     private VerticalMovement verticalMovement;
+    private MiscellaneousMovement miscellaneousMovement;
     private PlayerCollisions playerCollisions;
     private Rigidbody2D rigidbody2D;
     private BoxCollider2D boxCollider2D;
@@ -33,6 +35,9 @@ public class TemporaryMovement : MonoBehaviour
         verticalMovement.FillInstance(this, jumpForce, climbingLadderSmoothness,
             climbingObstacleSmoothness, climbLadderVelocity);
 
+        miscellaneousMovement = MiscellaneousMovement.GetInstance();
+        miscellaneousMovement.FillInstance(this, cameraZoomSize);
+
         playerCollisions = PlayerCollisions.GetInstance();
         playerCollisions.InitializeCollisions(this);
     }
@@ -44,6 +49,8 @@ public class TemporaryMovement : MonoBehaviour
         horizontalMovement.PressMovementHandler();
         verticalMovement.StartVerticalMovement();
         verticalMovement.PressMovementHandler();
+        miscellaneousMovement.StartMiscellaneousMovement();
+        miscellaneousMovement.PressMovementHandler();
         // print(horizontalMovement.horizontalMovementState);
     }
 

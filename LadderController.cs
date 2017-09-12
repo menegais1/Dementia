@@ -31,21 +31,6 @@ public class LadderController : MonoBehaviour
         if (ladder == LadderType.BOTTOM_LADDER || ladder == LadderType.TOP_LADDER)
         {
             PlayerStatusVariables.canClimbLadder = true;
-
-            /*if (PlayerStatusVariables.isClimbingLadder)
-            {
-                if (!playerMovement.SnapToPositionRan)
-                {
-                    Vector2 position = transform.GetChild(0).position;
-                    playerMovement.snapToPositionStairs(position);
-                    playerMovement.ignoreCollision(adjacentCollider, true);
-                }
-            }
-            else if (playerMovement.LeaveStairs)
-            {
-                playerMovement.ignoreCollision(adjacentCollider, false);
-                playerMovement.LeaveStairs = false;
-            }*/
         }
     }
 
@@ -57,10 +42,5 @@ public class LadderController : MonoBehaviour
         {
             PlayerStatusVariables.canClimbLadder = false;
         }
-
-       /* if (ladder == LadderType.LADDER)
-        {
-            playerMovement.ignoreCollision(adjacentCollider, false);
-        }*/
     }
 }
