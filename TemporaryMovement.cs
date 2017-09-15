@@ -14,6 +14,7 @@ public class TemporaryMovement : MonoBehaviour
     [SerializeField] private float climbingObstacleSmoothness;
     [SerializeField] private float climbLadderVelocity;
     [SerializeField] private float cameraZoomSize;
+    [SerializeField] private float maxAngle;
     [SerializeField] private LayerMask layerMaskForCollisions;
 
     private Vector2 forceApplied;
@@ -39,7 +40,7 @@ public class TemporaryMovement : MonoBehaviour
         miscellaneousMovement.FillInstance(this, cameraZoomSize);
 
         playerCollisions = PlayerCollisions.GetInstance();
-        playerCollisions.InitializeCollisions(this);
+        playerCollisions.InitializeCollisions(this, maxAngle);
     }
 
     void Update()

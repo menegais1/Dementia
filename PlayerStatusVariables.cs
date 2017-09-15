@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Security.Policy;
+using UnityEngine;
 
 public static class PlayerStatusVariables
 {
@@ -33,6 +34,8 @@ public static class PlayerStatusVariables
     public static bool isInteractingWithScenery;
 
     public static bool isTakingItem;
+
+    public static FacingDirection facingDirection;
 
     public static bool CheckIsOnAir()
     {

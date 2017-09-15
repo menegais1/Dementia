@@ -5,7 +5,6 @@ public class HorizontalMovement
 {
     public HorizontalMovementState horizontalMovementState;
     public HorizontalPressMovementState horizontalPressMovementState;
-    public FacingDirection facingDirection;
 
     private static HorizontalMovement instance;
 
@@ -18,6 +17,8 @@ public class HorizontalMovement
     private MonoBehaviour monoBehaviour;
     private Rigidbody2D rigidbody2D;
     private BoxCollider2D boxCollider2D;
+    private PlayerCollisions playerCollisions;
+    private VerticalMovement verticalMovement;
 
     private SpriteRenderer spriteRenderer;
     //private CoroutineManager coroutineManager;
@@ -41,6 +42,8 @@ public class HorizontalMovement
         float maxSpeed, float acceleration,
         float dodgeForce, float crouchingSpeed)
     {
+        playerCollisions = PlayerCollisions.GetInstance();
+        verticalMovement = VerticalMovement.GetInstance();
         this.monoBehaviour = monoBehaviour;
         this.maxSpeed = maxSpeed;
         this.acceleration = acceleration;
@@ -49,7 +52,7 @@ public class HorizontalMovement
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
         this.boxCollider2D = monoBehaviour.GetComponent<BoxCollider2D>();
         this.characterHeight = boxCollider2D.bounds.size.y;
-        facingDirection = FacingDirection.Right;
+        PlayerStatusVariables.facingDirection = FacingDirection.Right;
         this.spriteRenderer = monoBehaviour.GetComponent<SpriteRenderer>();
     }
 
@@ -155,22 +158,26 @@ public class HorizontalMovement
 
     public Vector2 Walk(float horizontalMove, float constant)
     {
-        return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D);
+        return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
+            playerCollisions.SurfaceAngle, playerCollisions.SurfaceNormal);
     }
 
     public Vector2 Jog(float horizontalMove, float constant)
     {
-        return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D);
+        return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
+            playerCollisions.SurfaceAngle, playerCollisions.SurfaceNormal);
     }
 
     public Vector2 Run(float horizontalMove, float constant)
     {
-        return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D);
+        return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
+            playerCollisions.SurfaceAngle, playerCollisions.SurfaceNormal);
     }
 
     public Vector2 CrouchWalk(float horizontalMove, float constant)
     {
-        return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D);
+        return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
+            playerCollisions.SurfaceAngle, playerCollisions.SurfaceNormal);
     }
 
     public Vector2 PreventSlide(Vector2 forceApplied)
@@ -183,7 +190,8 @@ public class HorizontalMovement
         //Adicionar a colisão com inimigos depois
         ResetVelocityX();
 
-        var forceApplied = PhysicsHelpers.AddImpulseForce(dodgeForce, rigidbody2D, facingDirection);
+        var forceApplied =
+            PhysicsHelpers.AddImpulseForce(dodgeForce, rigidbody2D, PlayerStatusVariables.facingDirection);
         PlayerStatusVariables.isDodging = false;
         PlayerController.RevokePlayerControl(0.6f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
         return forceApplied;
@@ -221,14 +229,14 @@ public class HorizontalMovement
     {
         if (MathHelpers.Approximately(PlayerController.HorizontalMove, 1, float.Epsilon))
         {
-            facingDirection = FacingDirection.Right;
+            PlayerStatusVariables.facingDirection = FacingDirection.Right;
         }
         else if (MathHelpers.Approximately(PlayerController.HorizontalMove, -1, float.Epsilon))
         {
-            facingDirection = FacingDirection.Left;
+            PlayerStatusVariables.facingDirection = FacingDirection.Left;
         }
 
 
-        spriteRenderer.flipX = (facingDirection != FacingDirection.Right);
+        spriteRenderer.flipX = (PlayerStatusVariables.facingDirection != FacingDirection.Right);
     }
 }

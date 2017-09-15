@@ -187,7 +187,7 @@ public class VerticalMovement
 
     public void ResolvePendencies()
     {
-        if (MathHelpers.Approximately(rigidbody2D.velocity.y, 0, float.Epsilon) && PlayerStatusVariables.isOnAir &&
+        if (MathHelpers.Approximately(rigidbody2D.velocity.y, 0, 0.1f) && PlayerStatusVariables.isOnAir &&
             PlayerStatusVariables.canJump)
         {
             PlayerStatusVariables.isOnAir = false;
@@ -259,7 +259,7 @@ public class VerticalMovement
         var coroutine = CoroutineManager.findCoroutine("ClimbOntoObstacleCoroutine");
         if (coroutine == null)
         {
-            CoroutineManager.insertNewCoroutine(ClimbOntoObstacleCoroutine(position),
+            CoroutineManager.insertNewCoroutine(ClimbOntoObstacleCoroutine(position, climbingObstacleSmoothness),
                 "ClimbOntoObstacleCoroutine");
         }
     }
@@ -275,46 +275,74 @@ public class VerticalMovement
         var coroutine = CoroutineManager.findCoroutine("ClimbOntoLadderCoroutine");
         if (coroutine == null)
         {
-            CoroutineManager.insertNewCoroutine(ClimbOntoLadderCoroutine(ladderTransform.GetChild(0).position),
+            CoroutineManager.insertNewCoroutine(
+                ladderTransform.gameObject.layer != LayerMask.NameToLayer("Top Ladder")
+                    ? ClimbOntoLadderCoroutine(ladderTransform.GetChild(0).position, climbingLadderSmoothness)
+                    : ClimbOntoLadderCoroutine(ladderTransform.GetChild(0).position, climbingLadderSmoothness * 0.50f),
                 "ClimbOntoLadderCoroutine");
         }
     }
 
-    private IEnumerator ClimbOntoLadderCoroutine(Vector2 position)
+    private IEnumerator ClimbOntoLadderCoroutine(Vector2 position, float changeRate)
     {
         /*  Mathf.Abs(rigidbody2D.position.x - position.x) >= 0.01 ||
               Mathf.Abs(rigidbody2D.position.y - position.y) >= 0.01)*/
+        var f = 0.0f;
+        var initialPosition = rigidbody2D.position;
         while (!MathHelpers.Approximately(rigidbody2D.position.x, position.x, 0.01f) ||
                !MathHelpers.Approximately(rigidbody2D.position.y, position.y, 0.01f))
         {
-            rigidbody2D.position =
-                Vector2.Lerp(rigidbody2D.position, new Vector2(position.x, position.y),
-                    climbingLadderSmoothness);
-            yield return new WaitForEndOfFrame();
+            f += changeRate;
+            /*rigidbody2D.MovePosition(Vector2.Lerp(rigidbody2D.position, new Vector2(position.x, position.y),
+                climbingLadderSmoothness));*/
+            rigidbody2D.MovePosition(Vector2.Lerp(initialPosition, new Vector2(position.x, position.y), f));
+            yield return new WaitForFixedUpdate();
         }
 
         CoroutineManager.findCoroutine("ClimbOntoLadderCoroutine").setIsRunning(false);
         PlayerController.RevokePlayerControl(false, ControlTypeToRevoke.StairsMovement);
     }
 
-    private IEnumerator ClimbOntoObstacleCoroutine(Vector2 position)
+    private IEnumerator ClimbOntoObstacleCoroutine(Vector2 position, float changeRate)
     {
         var playerSizeX = (position.x > rigidbody2D.position.x) ? boxCollider2D.size.x / 2 : -boxCollider2D.size.x / 2;
         var playerSizeY = boxCollider2D.size.y / 2;
         var desiredPositionX = position.x + playerSizeX;
         var desiredPositionY = position.y + playerSizeY;
+        var f = 0.0f;
+        var initialPositionForY = rigidbody2D.position;
+        var initialPositionForX = new Vector2(rigidbody2D.position.x, desiredPositionY);
 
         /* Mathf.Abs(rigidbody2D.position.x - (position.x + playerSizeX)) >= 0.01 ||
            Mathf.Abs(rigidbody2D.position.y - (position.y + playerSizeY)) >= 0.01)*/
         while (!MathHelpers.Approximately(rigidbody2D.position.x, desiredPositionX, 0.01f) ||
                !MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, 0.01f))
         {
-            rigidbody2D.position = Vector2.Lerp(rigidbody2D.position,
+            /*rigidbody2D.MovePosition(Vector2.Lerp(rigidbody2D.position,
                 !MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, 0.01f)
                     ? new Vector2(rigidbody2D.position.x, desiredPositionY)
                     : new Vector2(desiredPositionX, rigidbody2D.position.y),
-                climbingObstacleSmoothness);
-            yield return new WaitForEndOfFrame();
+                climbingObstacleSmoothness));*/
+
+            if (!MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, 0f))
+            {
+                f += changeRate;
+                rigidbody2D.MovePosition(Vector2.Lerp(initialPositionForY,
+                    new Vector2(rigidbody2D.position.x, desiredPositionY), f));
+            }
+            else
+            {
+                if (rigidbody2D.position == initialPositionForX)
+                {
+                    f = 0;
+                }
+                f += changeRate;
+                rigidbody2D.MovePosition(Vector2.Lerp(initialPositionForX,
+                    new Vector2(desiredPositionX, rigidbody2D.position.y), f));
+            }
+
+
+            yield return new WaitForFixedUpdate();
         }
         CoroutineManager.findCoroutine("ClimbOntoObstacleCoroutine").setIsRunning(false);
         PlayerController.RevokePlayerControl(false, ControlTypeToRevoke.AllMovement);

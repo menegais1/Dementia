@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -32,15 +33,24 @@ public static class PhysicsHelpers
     }
 
     public static Vector2 HorizontalMovementByForce(float acceleration, float constant,
-        float maxSpeed, float direction, Rigidbody2D rigidBody)
+        float maxSpeed, float direction, Rigidbody2D rigidBody, float surfaceAngle, Vector2 surfaceNormal)
     {
         var velocity = (maxSpeed / 3.6f) * constant;
-
         var force = ForceCalcByAcceleration(acceleration, rigidBody.mass) +
-                    FrictionForceCalc(0.4f, Physics2D.gravity.y, rigidBody.mass);
+                    FrictionForceCalc(0.4f, Physics2D.gravity.y, rigidBody.mass) +
+                    SlopeForceCalc(surfaceAngle, surfaceNormal, direction, rigidBody.mass, Physics2D.gravity.y);
+
 
         var forceApplied = new Vector2(force * constant, 0) * direction;
 
+        if (!MathHelpers.Approximately(surfaceAngle, 0, float.Epsilon))
+        {
+            forceApplied = new Vector2(
+                               force * MathHelpers.AbsCos(surfaceAngle),
+                               force * (!SlopeInclinationRight(surfaceNormal)
+                                   ? -MathHelpers.AbsSin(surfaceAngle)
+                                   : MathHelpers.AbsSin(surfaceAngle))) * direction * constant;
+        }
         if (Mathf.Abs(rigidBody.velocity.x) > velocity)
         {
             rigidBody.AddRelativeForce(-forceApplied);
@@ -108,5 +118,20 @@ public static class PhysicsHelpers
     public static float ForceCalcByAcceleration(float acceleration, float mass)
     {
         return acceleration * mass;
+    }
+
+    public static float SlopeForceCalc(float angle, Vector2 surfaceNormal, float direction, float mass, float gravity)
+    {
+        if (direction > 0 && SlopeInclinationRight(surfaceNormal) ||
+            direction < 0 && !SlopeInclinationRight(surfaceNormal))
+        {
+            return Mathf.Abs(MathHelpers.Sin(angle) * mass * gravity);
+        }
+        return 0;
+    }
+
+    public static bool SlopeInclinationRight(Vector2 surfaceNormal)
+    {
+        return surfaceNormal.x < 0;
     }
 }

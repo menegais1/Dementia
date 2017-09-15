@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Security.Policy;
 using UnityEngine;
 
 public static class MathHelpers
@@ -8,27 +9,23 @@ public static class MathHelpers
         return ((a - b) < 0 ? ((a - b) * -1) : (a - b)) <= threshold;
     }
 
-   /* public static void Lerp(Vector3 initialPosition, Vector3 finalPosition, float timeToLerp,
-        float steps, Transform position)
+    public static float Sin(float angleInDegrees)
     {
-        CoroutineManager.insertNewCoroutine(LerpCoroutine(initialPosition, finalPosition, timeToLerp, steps, position),
-            "LerpCoroutine");
+        return Mathf.Sin(angleInDegrees * Mathf.Deg2Rad);
     }
 
-    public static IEnumerator LerpCoroutine(Vector3 initialPosition, Vector3 finalPosition, float timeToLerp,
-        float steps, Transform position)
+    public static float Cos(float angleInDegrees)
     {
-        float f = 0;
+        return Mathf.Cos(angleInDegrees * Mathf.Deg2Rad);
+    }
 
-        while (f <= 1)
-        {
-            position.position = Vector3.Lerp(initialPosition, finalPosition, f);
+    public static float AbsSin(float angleInDegrees)
+    {
+        return Mathf.Abs(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad));
+    }
 
-            f += 1f / steps;
-
-            yield return new WaitForSeconds(timeToLerp / steps);
-        }
-
-        CoroutineManager.deleteCoroutine("LerpCoroutine");
-    }*/
+    public static float AbsCos(float angleInDegrees)
+    {
+        return Mathf.Abs(Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
+    }
 }
