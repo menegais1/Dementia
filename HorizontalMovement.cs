@@ -111,12 +111,12 @@ public class HorizontalMovement
         }
     }
 
-    public void PressMovementHandler()
+    public void PressMovementHandler(ref Vector2 forceApplied)
     {
         switch (horizontalPressMovementState)
         {
             case HorizontalPressMovementState.Dodge:
-                Dodge();
+                forceApplied = Dodge();
                 break;
             case HorizontalPressMovementState.None:
                 break;
@@ -133,7 +133,10 @@ public class HorizontalMovement
         switch (horizontalMovementState)
         {
             case HorizontalMovementState.Idle:
-                PreventSlide(forceApplied);
+                if (verticalMovement.verticalMovementState != VerticalMovementState.OnAir)
+                {
+                    PreventSlide(forceApplied);
+                }
                 break;
             case HorizontalMovementState.Walking:
                 forceApplied = Walk(PlayerController.HorizontalMove, 1);
@@ -145,7 +148,10 @@ public class HorizontalMovement
                 forceApplied = Run(PlayerController.HorizontalMove, 2f);
                 break;
             case HorizontalMovementState.CrouchIdle:
-                PreventSlide(forceApplied);
+                if (verticalMovement.verticalMovementState != VerticalMovementState.OnAir)
+                {
+                    PreventSlide(forceApplied);
+                }
                 break;
             case HorizontalMovementState.CrouchWalking:
                 forceApplied = CrouchWalk(PlayerController.HorizontalMove, 1f);
@@ -154,7 +160,23 @@ public class HorizontalMovement
                 Debug.Log("ERRO");
                 break;
         }
+
+
+        if (CheckForPreventSlideOnSlopes())
+        {
+            PhysicsHelpers.PreventSlideOnSlopes(playerCollisions.SurfaceAngle, playerCollisions.SurfaceNormal,
+                rigidbody2D);
+        }
     }
+
+    public bool CheckForPreventSlideOnSlopes()
+    {
+        return !MathHelpers.Approximately(playerCollisions.SurfaceAngle, 0, float.Epsilon) &&
+               (horizontalMovementState == HorizontalMovementState.Idle ||
+                horizontalMovementState == HorizontalMovementState.CrouchIdle || rigidbody2D.velocity.y < 0) &&
+               verticalMovement.verticalMovementState != VerticalMovementState.OnAir;
+    }
+
 
     public Vector2 Walk(float horizontalMove, float constant)
     {
@@ -182,16 +204,17 @@ public class HorizontalMovement
 
     public Vector2 PreventSlide(Vector2 forceApplied)
     {
-        return PhysicsHelpers.PreventSlide(forceApplied, rigidbody2D);
+        return PhysicsHelpers.PreventSlide(forceApplied, playerCollisions.SurfaceAngle, rigidbody2D);
     }
 
     public Vector2 Dodge()
     {
         //Adicionar a colisão com inimigos depois
         ResetVelocityX();
-
+        ResetVelocityY();
         var forceApplied =
-            PhysicsHelpers.AddImpulseForce(dodgeForce, rigidbody2D, PlayerStatusVariables.facingDirection);
+            PhysicsHelpers.AddImpulseForce(dodgeForce, playerCollisions.SurfaceAngle, playerCollisions.SurfaceNormal,
+                rigidbody2D, PlayerStatusVariables.facingDirection);
         PlayerStatusVariables.isDodging = false;
         PlayerController.RevokePlayerControl(0.6f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
         return forceApplied;
@@ -223,6 +246,11 @@ public class HorizontalMovement
     public void ResetVelocityX()
     {
         rigidbody2D.velocity = new Vector2(0, rigidbody2D.velocity.y);
+    }
+
+    public void ResetVelocityY()
+    {
+        rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, 0);
     }
 
     public void CheckFacingDirection()

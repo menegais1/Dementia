@@ -148,6 +148,8 @@ public class VerticalMovement
                 Jump();
                 //Para motivos de segurança, caso o fixed update demorar para executar
                 PlayerController.RevokePlayerControl(true, ControlTypeToRevoke.AllMovement);
+                //Demora de alguns frames para modificar o tipo de VerticalMovementState
+                PlayerStatusVariables.isOnAir = true;
                 break;
             case VerticalPressMovementState.ClimbLadder:
                 ClimbOntoLadder(GetLadderPosition());
@@ -187,8 +189,13 @@ public class VerticalMovement
 
     public void ResolvePendencies()
     {
-        if (MathHelpers.Approximately(rigidbody2D.velocity.y, 0, 0.1f) && PlayerStatusVariables.isOnAir &&
-            PlayerStatusVariables.canJump)
+        /* if (MathHelpers.Approximately(rigidbody2D.velocity.y, 0, 0.1f) && PlayerStatusVariables.isOnAir &&
+             PlayerStatusVariables.canJump)
+         {
+             PlayerStatusVariables.isOnAir = false;
+             PlayerController.RevokePlayerControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+         }*/
+        if (PlayerStatusVariables.isOnAir && PlayerStatusVariables.canJump && rigidbody2D.velocity.y <= 0)
         {
             PlayerStatusVariables.isOnAir = false;
             PlayerController.RevokePlayerControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
@@ -246,6 +253,7 @@ public class VerticalMovement
 
     public void Jump()
     {
+        ResetVelocityY();
         PhysicsHelpers.Jump(jumpForce, rigidbody2D);
     }
 

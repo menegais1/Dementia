@@ -47,12 +47,11 @@ public class TemporaryMovement : MonoBehaviour
     {
         playerCollisions.StartCollisions(layerMaskForCollisions);
         horizontalMovement.StartHorizontalMovement();
-        horizontalMovement.PressMovementHandler();
+        horizontalMovement.PressMovementHandler(ref forceApplied);
         verticalMovement.StartVerticalMovement();
         verticalMovement.PressMovementHandler();
         miscellaneousMovement.StartMiscellaneousMovement();
         miscellaneousMovement.PressMovementHandler();
-        // print(horizontalMovement.horizontalMovementState);
     }
 
     void FixedUpdate()

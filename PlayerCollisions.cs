@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.VR.WSA.Persistence;
 
 public class PlayerCollisions
 {
@@ -17,8 +18,10 @@ public class PlayerCollisions
     }
 
     private float maxAngle;
+
     public float SurfaceAngle { get; private set; }
     public Vector2 SurfaceNormal { get; private set; }
+    public float DistanceForJump { get; private set; }
 
     private static PlayerCollisions instance;
     private RaycastHit2DPoints raycastHit2DPoints;
@@ -46,6 +49,7 @@ public class PlayerCollisions
         this.maxAngle = maxAngle;
         this.boxCollider2D = monoBehaviour.GetComponent<BoxCollider2D>();
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
+        this.DistanceForJump = 0.1f;
     }
 
     public void StartCollisions(LayerMask layerMask)
@@ -53,6 +57,7 @@ public class PlayerCollisions
         UpdateColliderBounds();
         CastRays(layerMask);
         CheckGroundForSlopes();
+        CheckGroundForFall();
     }
 
     private void UpdateColliderBounds()
@@ -63,7 +68,7 @@ public class PlayerCollisions
         boxColliderBounds.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
         boxColliderBounds.topLeft = new Vector2(bounds.min.x, bounds.max.y);
         boxColliderBounds.topRight = new Vector2(bounds.max.x, bounds.max.y)*/
-        ;
+        
         var center = boxCollider2D.offset;
 
         boxColliderBounds.bottomLeft =
@@ -114,6 +119,32 @@ public class PlayerCollisions
                raycastHit2DPoints.bottomMidRay.distance <= distance;
     }
 
+    public bool CheckGroundWithPerifericalRays(float distance, bool rightRay)
+    {
+        if (rightRay)
+        {
+            if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
+            {
+                distance = raycastHit2DPoints.bottomRightRay.distance <= distance ||
+                           raycastHit2DPoints.bottomRightRay.distance > 0.25f
+                    ? distance
+                    : raycastHit2DPoints.bottomRightRay.distance;
+            }
+            return raycastHit2DPoints.bottomRightRay.collider != null &&
+                   raycastHit2DPoints.bottomRightRay.distance <= distance;
+        }
+
+        if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
+        {
+            distance = raycastHit2DPoints.bottomLeftRay.distance <= distance ||
+                       raycastHit2DPoints.bottomLeftRay.distance > 0.25f
+                ? distance
+                : raycastHit2DPoints.bottomLeftRay.distance;
+        }
+        return raycastHit2DPoints.bottomLeftRay.collider != null &&
+               raycastHit2DPoints.bottomLeftRay.distance <= distance;
+    }
+
     private void CheckGroundForSlopes()
     {
         if (PlayerStatusVariables.facingDirection == FacingDirection.Right)
@@ -124,7 +155,6 @@ public class PlayerCollisions
             {
                 SurfaceAngle = rotationAngle;
                 SurfaceNormal = raycastHit2DPoints.bottomRightRay.normal;
-
             }
         }
         else
@@ -135,6 +165,23 @@ public class PlayerCollisions
             {
                 SurfaceAngle = rotationAngle;
                 SurfaceNormal = raycastHit2DPoints.bottomLeftRay.normal;
+            }
+        }
+    }
+
+    public void CheckGroundForFall()
+    {
+        if (!CheckGroundForJump(DistanceForJump))
+        {
+            if (CheckGroundWithPerifericalRays(DistanceForJump, true) &&
+                !CheckGroundWithPerifericalRays(DistanceForJump, false))
+            {
+                PhysicsHelpers.AddImpulseForce(3f, false, rigidbody2D);
+            }
+            else if (CheckGroundWithPerifericalRays(DistanceForJump, false) &&
+                     !CheckGroundWithPerifericalRays(DistanceForJump, true))
+            {
+                PhysicsHelpers.AddImpulseForce(3f, true, rigidbody2D);
             }
         }
     }
