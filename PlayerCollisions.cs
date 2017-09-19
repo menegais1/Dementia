@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.VR.WSA.Persistence;
 
@@ -18,6 +19,7 @@ public class PlayerCollisions
     }
 
     private float maxAngle;
+    private float offsetForPerifericalRays;
 
     public float SurfaceAngle { get; private set; }
     public Vector2 SurfaceNormal { get; private set; }
@@ -27,7 +29,7 @@ public class PlayerCollisions
     private RaycastHit2DPoints raycastHit2DPoints;
     private ColliderBounds boxColliderBounds;
 
-    private BoxCollider2D boxCollider2D;
+    private CapsuleCollider2D capsuleCollider2D;
     private Rigidbody2D rigidbody2D;
 
     public static PlayerCollisions GetInstance()
@@ -47,7 +49,7 @@ public class PlayerCollisions
     public void InitializeCollisions(MonoBehaviour monoBehaviour, float maxAngle)
     {
         this.maxAngle = maxAngle;
-        this.boxCollider2D = monoBehaviour.GetComponent<BoxCollider2D>();
+        this.capsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
         this.DistanceForJump = 0.1f;
     }
@@ -68,34 +70,34 @@ public class PlayerCollisions
         boxColliderBounds.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
         boxColliderBounds.topLeft = new Vector2(bounds.min.x, bounds.max.y);
         boxColliderBounds.topRight = new Vector2(bounds.max.x, bounds.max.y)*/
-        
-        var center = boxCollider2D.offset;
 
+        var center = capsuleCollider2D.offset;
+        offsetForPerifericalRays = capsuleCollider2D.size.y / 2;
         boxColliderBounds.bottomLeft =
-            boxCollider2D.transform.TransformPoint(new Vector2(center.x - boxCollider2D.size.x / 2,
-                center.y - boxCollider2D.size.y / 2));
+            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x - capsuleCollider2D.size.x / 2,
+                center.y));
         boxColliderBounds.bottomRight =
-            boxCollider2D.transform.TransformPoint(new Vector2(center.x + boxCollider2D.size.x / 2,
-                center.y - boxCollider2D.size.y / 2));
+            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x + capsuleCollider2D.size.x / 2,
+                center.y));
         boxColliderBounds.topLeft =
-            boxCollider2D.transform.TransformPoint(new Vector2(center.x - boxCollider2D.size.x / 2,
-                center.y + boxCollider2D.size.y / 2));
+            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x - capsuleCollider2D.size.x / 2,
+                center.y + capsuleCollider2D.size.y / 2));
         boxColliderBounds.topRight =
-            boxCollider2D.transform.TransformPoint(new Vector2(center.x + boxCollider2D.size.x / 2,
-                center.y + boxCollider2D.size.y / 2));
-        boxColliderBounds.bottomMid = boxCollider2D.transform.TransformPoint(new Vector2(
+            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x + capsuleCollider2D.size.x / 2,
+                center.y + capsuleCollider2D.size.y / 2));
+        boxColliderBounds.bottomMid = capsuleCollider2D.transform.TransformPoint(new Vector2(
             center.x,
-            center.y - boxCollider2D.size.y / 2));
+            center.y - capsuleCollider2D.size.y / 2));
     }
 
     private void CastRays(LayerMask layerMask)
     {
-        var direction = boxCollider2D.transform.up * -1;
+        var direction = capsuleCollider2D.transform.up * -1;
 
         raycastHit2DPoints.bottomLeftRay =
-            Physics2D.Raycast(boxColliderBounds.bottomLeft, direction, 1f, layerMask.value);
+            Physics2D.Raycast(boxColliderBounds.bottomLeft, direction, 1f + offsetForPerifericalRays, layerMask.value);
         raycastHit2DPoints.bottomRightRay =
-            Physics2D.Raycast(boxColliderBounds.bottomRight, direction, 1f, layerMask.value);
+            Physics2D.Raycast(boxColliderBounds.bottomRight, direction, 1f + offsetForPerifericalRays, layerMask.value);
         raycastHit2DPoints.bottomMidRay = Physics2D.Raycast(
             boxColliderBounds.bottomMid, direction, 1f,
             layerMask.value);
@@ -121,12 +123,13 @@ public class PlayerCollisions
 
     public bool CheckGroundWithPerifericalRays(float distance, bool rightRay)
     {
+        distance += offsetForPerifericalRays;
         if (rightRay)
         {
             if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
             {
                 distance = raycastHit2DPoints.bottomRightRay.distance <= distance ||
-                           raycastHit2DPoints.bottomRightRay.distance > 0.25f
+                           raycastHit2DPoints.bottomRightRay.distance > 0.25f + offsetForPerifericalRays
                     ? distance
                     : raycastHit2DPoints.bottomRightRay.distance;
             }
@@ -137,7 +140,7 @@ public class PlayerCollisions
         if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
         {
             distance = raycastHit2DPoints.bottomLeftRay.distance <= distance ||
-                       raycastHit2DPoints.bottomLeftRay.distance > 0.25f
+                       raycastHit2DPoints.bottomLeftRay.distance > 0.25f + offsetForPerifericalRays
                 ? distance
                 : raycastHit2DPoints.bottomLeftRay.distance;
         }
@@ -171,7 +174,7 @@ public class PlayerCollisions
 
     public void CheckGroundForFall()
     {
-        if (!CheckGroundForJump(DistanceForJump))
+        if (!CheckGroundForJump(DistanceForJump) && MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
         {
             if (CheckGroundWithPerifericalRays(DistanceForJump, true) &&
                 !CheckGroundWithPerifericalRays(DistanceForJump, false))

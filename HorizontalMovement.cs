@@ -16,7 +16,7 @@ public class HorizontalMovement
 
     private MonoBehaviour monoBehaviour;
     private Rigidbody2D rigidbody2D;
-    private BoxCollider2D boxCollider2D;
+    private CapsuleCollider2D capsuleCollider2D;
     private PlayerCollisions playerCollisions;
     private VerticalMovement verticalMovement;
 
@@ -50,8 +50,8 @@ public class HorizontalMovement
         this.dodgeForce = dodgeForce;
         this.crouchingSpeed = crouchingSpeed;
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
-        this.boxCollider2D = monoBehaviour.GetComponent<BoxCollider2D>();
-        this.characterHeight = boxCollider2D.bounds.size.y;
+        this.capsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
+        this.characterHeight = capsuleCollider2D.bounds.size.y;
         PlayerStatusVariables.facingDirection = FacingDirection.Right;
         this.spriteRenderer = monoBehaviour.GetComponent<SpriteRenderer>();
     }
@@ -161,7 +161,6 @@ public class HorizontalMovement
                 break;
         }
 
-
         if (CheckForPreventSlideOnSlopes())
         {
             PhysicsHelpers.PreventSlideOnSlopes(playerCollisions.SurfaceAngle, playerCollisions.SurfaceNormal,
@@ -222,20 +221,22 @@ public class HorizontalMovement
 
     public void Crouch()
     {
-        if (boxCollider2D.size.y > characterHeight / 2)
+        if (capsuleCollider2D.size.y > characterHeight / 2)
         {
-            boxCollider2D.size = new Vector2(boxCollider2D.size.x, boxCollider2D.size.y - crouchingSpeed);
-            boxCollider2D.offset = new Vector2(boxCollider2D.offset.x, boxCollider2D.offset.y - (crouchingSpeed / 2));
+            capsuleCollider2D.size = new Vector2(capsuleCollider2D.size.x, capsuleCollider2D.size.y - crouchingSpeed);
+            capsuleCollider2D.offset =
+                new Vector2(capsuleCollider2D.offset.x, capsuleCollider2D.offset.y - (crouchingSpeed / 2));
             PlayerStatusVariables.isCrouching = true;
         }
     }
 
     public void Raise()
     {
-        if (boxCollider2D.size.y < characterHeight)
+        if (capsuleCollider2D.size.y < characterHeight)
         {
-            boxCollider2D.size = new Vector2(boxCollider2D.size.x, boxCollider2D.size.y + crouchingSpeed);
-            boxCollider2D.offset = new Vector2(boxCollider2D.offset.x, boxCollider2D.offset.y + (crouchingSpeed / 2));
+            capsuleCollider2D.size = new Vector2(capsuleCollider2D.size.x, capsuleCollider2D.size.y + crouchingSpeed);
+            capsuleCollider2D.offset =
+                new Vector2(capsuleCollider2D.offset.x, capsuleCollider2D.offset.y + (crouchingSpeed / 2));
         }
         else
         {

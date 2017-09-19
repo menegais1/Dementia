@@ -16,7 +16,7 @@ public class VerticalMovement
 
     private MonoBehaviour monoBehaviour;
     private Rigidbody2D rigidbody2D;
-    private BoxCollider2D boxCollider2D;
+    private CapsuleCollider2D capsuleCollider2D;
     private PlayerCollisions playerCollisions;
 
     public static VerticalMovement GetInstance()
@@ -40,7 +40,7 @@ public class VerticalMovement
         playerCollisions = PlayerCollisions.GetInstance();
         this.monoBehaviour = monoBehaviour;
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
-        this.boxCollider2D = monoBehaviour.GetComponent<BoxCollider2D>();
+        this.capsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
         this.jumpForce = jumpForce;
         this.climbingLadderSmoothness = climbingLadderSmoothness;
         this.climbingObstacleSmoothness = climbingObstacleSmoothness;
@@ -226,7 +226,7 @@ public class VerticalMovement
         };
 
         var ladderColliders = new Collider2D[1];
-        boxCollider2D.GetContacts(contactFilter2D, ladderColliders);
+        capsuleCollider2D.GetContacts(contactFilter2D, ladderColliders);
         return ladderColliders[0].transform;
     }
 
@@ -240,7 +240,7 @@ public class VerticalMovement
         };
 
         var obstacleColliders = new Collider2D[1];
-        boxCollider2D.GetContacts(contactFilter2D, obstacleColliders);
+        capsuleCollider2D.GetContacts(contactFilter2D, obstacleColliders);
 
         var parentCollider = obstacleColliders[0].transform.parent.GetComponent<BoxCollider2D>();
         var position = obstacleColliders[0].transform.position.x > parentCollider.transform.position.x
@@ -313,8 +313,10 @@ public class VerticalMovement
 
     private IEnumerator ClimbOntoObstacleCoroutine(Vector2 position, float changeRate)
     {
-        var playerSizeX = (position.x > rigidbody2D.position.x) ? boxCollider2D.size.x / 2 : -boxCollider2D.size.x / 2;
-        var playerSizeY = boxCollider2D.size.y / 2;
+        var playerSizeX = (position.x > rigidbody2D.position.x)
+            ? capsuleCollider2D.size.x / 2
+            : -capsuleCollider2D.size.x / 2;
+        var playerSizeY = capsuleCollider2D.size.y / 2;
         var desiredPositionX = position.x + playerSizeX;
         var desiredPositionY = position.y + playerSizeY;
         var f = 0.0f;
@@ -358,7 +360,7 @@ public class VerticalMovement
 
     public void IgnoreCollision(Collider2D other, bool ignore)
     {
-        Physics2D.IgnoreCollision(boxCollider2D, other, ignore);
+        Physics2D.IgnoreCollision(capsuleCollider2D, other, ignore);
     }
 
     public void ClimbLadder(float climbLadderMovement)
