@@ -63,7 +63,8 @@ public static class PhysicsHelpers
         return forceApplied;
     }
 
-    public static void PreventSlideOnSlopes(float slopeAngle, Vector2 surfaceNormal, Rigidbody2D rigidbody2D)
+    public static void PreventSlideOnSlopes(float slopeAngle, Vector2 surfaceNormal, bool isIdle,
+        Rigidbody2D rigidbody2D)
     {
         var forceMagnitude = SlopeForceCalc(slopeAngle, rigidbody2D.mass, Physics2D.gravity.y);
         var force = new Vector2(
@@ -71,10 +72,13 @@ public static class PhysicsHelpers
                 ? forceMagnitude * MathHelpers.AbsCos(slopeAngle)
                 : -forceMagnitude * MathHelpers.AbsCos(slopeAngle),
             forceMagnitude * MathHelpers.AbsSin(slopeAngle));
-        if (MathHelpers.Approximately(rigidbody2D.velocity.magnitude, 0, 0.1f))
+
+        if (MathHelpers.Approximately(rigidbody2D.velocity.magnitude, 0, 0.1f) && isIdle)
         {
             rigidbody2D.velocity = Vector2.zero;
         }
+
+        if (rigidbody2D.velocity.y > 0) return;
         rigidbody2D.AddRelativeForce(force);
     }
 
@@ -83,7 +87,7 @@ public static class PhysicsHelpers
         FacingDirection facingDirection)
     {
         force += SlopeForceCalc(surfaceAngle, surfaceNormal, facingDirection == FacingDirection.Right ? 1 : -1,
-                     rigidBody.mass, Physics2D.gravity.y) * 0.3f;
+                     rigidBody.mass, Physics2D.gravity.y) * 0.385f;
 
         var forceApplied = new Vector2(force * MathHelpers.AbsCos(surfaceAngle),
             force * (!SlopeInclinationRight(surfaceNormal)

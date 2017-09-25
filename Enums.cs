@@ -8,6 +8,20 @@ public enum HorizontalMovementState
     CrouchWalking,
 }
 
+public enum StairsTriggerType
+{
+    TopTrigger,
+    BottomTrigger,
+    GeneralTrigger,
+}
+
+public enum LadderType
+{
+    Ladder,
+    BottomLadder,
+    TopLadder,
+}
+
 public enum HorizontalPressMovementState
 {
     None,
@@ -28,6 +42,7 @@ public enum VerticalPressMovementState
     Jump,
     ClimbLadder,
     ClimbObstacle,
+    ClimbStairs,
 }
 
 public enum MiscellaneousPressMovementState

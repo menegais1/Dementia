@@ -100,6 +100,7 @@ public class HorizontalMovement
         else if (PlayerStatusVariables.isDodging)
         {
             horizontalPressMovementState = HorizontalPressMovementState.Dodge;
+            horizontalMovementState = HorizontalMovementState.Idle;
         }
         else if (PlayerStatusVariables.isCrouching)
         {
@@ -164,6 +165,8 @@ public class HorizontalMovement
         if (CheckForPreventSlideOnSlopes())
         {
             PhysicsHelpers.PreventSlideOnSlopes(playerCollisions.SurfaceAngle, playerCollisions.SurfaceNormal,
+                (horizontalMovementState == HorizontalMovementState.Idle ||
+                 horizontalMovementState == HorizontalMovementState.CrouchIdle),
                 rigidbody2D);
         }
     }

@@ -55,7 +55,6 @@ public class VerticalMovement
         PlayerStatusVariables.canJump = CheckGroundForJump();
         PlayerStatusVariables.isOnAir = PlayerStatusVariables.CheckIsOnAir();
 
-        //Checar amanha
         if (PlayerStatusVariables.canClimbLadder && PlayerController.ClimbLadderPress)
         {
             PlayerStatusVariables.isClimbingLadder =
@@ -101,6 +100,42 @@ public class VerticalMovement
             }
         }
 
+        if (PlayerStatusVariables.canClimbStairs && !PlayerStatusVariables.isClimbingStairs)
+        {
+            var collider = GetStairsTrigger();
+
+            if (collider != null)
+            {
+                var stairsController = collider.GetComponent<StairsController>();
+
+                if (CheckIfObjectIsRight(stairsController.stairsCollider.transform.position))
+                {
+                    if (PlayerController.HorizontalMove > 0 &&
+                        (stairsController.stairsTriggerType == StairsTriggerType.TopTrigger
+                            ? PlayerController.VerticalMovement < 0
+                            : PlayerController.VerticalMovement > 0))
+                    {
+                        PlayerStatusVariables.isClimbingStairs = true;
+                        IgnoreCollision(stairsController.adjacentCollider, true);
+                        IgnoreLayerCollision(LayerMask.NameToLayer("Stairs Ground"), false);
+                    }
+                }
+                else
+                {
+                    if (PlayerController.HorizontalMove < 0 &&
+                        (stairsController.stairsTriggerType == StairsTriggerType.TopTrigger
+                            ? PlayerController.VerticalMovement < 0
+                            : PlayerController.VerticalMovement > 0))
+                    {
+                        PlayerStatusVariables.isClimbingStairs = true;
+                        IgnoreCollision(stairsController.adjacentCollider, true);
+                        IgnoreLayerCollision(LayerMask.NameToLayer("Stairs Ground"), false);
+                    }
+                }
+            }
+        }
+
+
         if (PlayerStatusVariables.isOnAir)
         {
             verticalMovementState = VerticalMovementState.OnAir;
@@ -121,7 +156,7 @@ public class VerticalMovement
             }
 
             if (PlayerStatusVariables.isClimbingLadder &&
-                !MathHelpers.Approximately(PlayerController.ClimbLadderMovement, 0, float.Epsilon))
+                !MathHelpers.Approximately(PlayerController.VerticalMovement, 0, float.Epsilon))
             {
                 verticalMovementState = VerticalMovementState.ClimbingLadder;
             }
@@ -159,6 +194,8 @@ public class VerticalMovement
                 break;
             case VerticalPressMovementState.None:
                 break;
+            case VerticalPressMovementState.ClimbStairs:
+                break;
             default:
                 Debug.Log("Error");
                 break;
@@ -175,7 +212,7 @@ public class VerticalMovement
                 PlayerController.RevokePlayerControl(true, ControlTypeToRevoke.AllMovement);
                 break;
             case VerticalMovementState.ClimbingLadder:
-                ClimbLadder(PlayerController.ClimbLadderMovement);
+                ClimbLadder(PlayerController.VerticalMovement);
                 break;
             case VerticalMovementState.Grounded:
                 break;
@@ -189,12 +226,6 @@ public class VerticalMovement
 
     public void ResolvePendencies()
     {
-        /* if (MathHelpers.Approximately(rigidbody2D.velocity.y, 0, 0.1f) && PlayerStatusVariables.isOnAir &&
-             PlayerStatusVariables.canJump)
-         {
-             PlayerStatusVariables.isOnAir = false;
-             PlayerController.RevokePlayerControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
-         }*/
         if (PlayerStatusVariables.isOnAir && PlayerStatusVariables.canJump && rigidbody2D.velocity.y <= 0)
         {
             PlayerStatusVariables.isOnAir = false;
@@ -202,18 +233,21 @@ public class VerticalMovement
         }
 
         if (!MathHelpers.Approximately(rigidbody2D.velocity.y, 0, float.Epsilon) &&
-            MathHelpers.Approximately(PlayerController.ClimbLadderMovement, 0, float.Epsilon) &&
+            MathHelpers.Approximately(PlayerController.VerticalMovement, 0, float.Epsilon) &&
             PlayerStatusVariables.isClimbingLadder)
         {
             ResetVelocityY();
+        }
+
+        if (!PlayerStatusVariables.isClimbingStairs)
+        {
+            IgnoreLayerCollision(LayerMask.NameToLayer("Stairs Ground"), true);
         }
     }
 
     private bool CheckGroundForJump()
     {
         return playerCollisions.CheckGroundForJump(0.1f);
-        /*&& !PlayerStatusVariables.isClimbingLadder &&
-        !PlayerStatusVariables.isClimbingObstacle*/
     }
 
     private Transform GetLadderPosition()
@@ -228,6 +262,25 @@ public class VerticalMovement
         var ladderColliders = new Collider2D[1];
         capsuleCollider2D.GetContacts(contactFilter2D, ladderColliders);
         return ladderColliders[0].transform;
+    }
+
+    private Collider2D GetStairsTrigger()
+    {
+        var contactFilter2D = new ContactFilter2D
+        {
+            useTriggers = true,
+            useLayerMask = true,
+            layerMask = LayerMask.GetMask("Top Stairs Trigger", "Bottom Stairs Trigger")
+        };
+
+        var stairsTriggers = new Collider2D[1];
+        capsuleCollider2D.GetContacts(contactFilter2D, stairsTriggers);
+        return stairsTriggers[0];
+    }
+
+    private bool CheckIfObjectIsRight(Vector3 position)
+    {
+        return position.x > rigidbody2D.transform.position.x;
     }
 
     private Vector2 GetObstaclePosition()
@@ -363,11 +416,20 @@ public class VerticalMovement
         Physics2D.IgnoreCollision(capsuleCollider2D, other, ignore);
     }
 
+    public void IgnoreLayerCollision(LayerMask layerMask, bool ignore)
+    {
+        Physics2D.IgnoreLayerCollision(rigidbody2D.gameObject.layer, layerMask.value, ignore);
+    }
+
     public void ClimbLadder(float climbLadderMovement)
     {
         PhysicsHelpers.ClimbLadder(climbLadderVelocity, climbLadderMovement, rigidbody2D);
     }
 
+    /* private void AddDownwardForce(float force, float surfaceAngle, Vector2 surfaceNormal)
+     {
+         PhysicsHelpers.AddDownwardForce(force, surfaceAngle, surfaceNormal, rigidbody2D);
+     }*/
 
     public void SwitchGravity(bool on)
     {

@@ -31,6 +31,7 @@ public class PlayerCollisions
 
     private CapsuleCollider2D capsuleCollider2D;
     private Rigidbody2D rigidbody2D;
+    private HorizontalMovement horizontalMovement;
 
     public static PlayerCollisions GetInstance()
     {
@@ -52,6 +53,7 @@ public class PlayerCollisions
         this.capsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
         this.DistanceForJump = 0.1f;
+        this.horizontalMovement = HorizontalMovement.GetInstance();
     }
 
     public void StartCollisions(LayerMask layerMask)
@@ -150,31 +152,61 @@ public class PlayerCollisions
 
     private void CheckGroundForSlopes()
     {
-        if (PlayerStatusVariables.facingDirection == FacingDirection.Right)
+        if (PlayerStatusVariables.facingDirection == FacingDirection.Right &&
+            raycastHit2DPoints.bottomRightRay.collider != null)
         {
-            if (raycastHit2DPoints.bottomRightRay.collider == null) return;
             var rotationAngle = Vector2.Angle(raycastHit2DPoints.bottomRightRay.normal, Vector2.up);
+            var surfaceNormal = raycastHit2DPoints.bottomRightRay.normal;
+
+            if (raycastHit2DPoints.bottomRightRay.normal.x > 0 && rotationAngle > SurfaceAngle)
+            {
+                rotationAngle = Vector2.Angle(raycastHit2DPoints.bottomLeftRay.normal, Vector2.up);
+                surfaceNormal = raycastHit2DPoints.bottomLeftRay.normal;
+            }
+            else if (MathHelpers.Approximately(raycastHit2DPoints.bottomRightRay.normal.x, 0, float.Epsilon) &&
+                     rotationAngle < SurfaceAngle)
+            {
+                rotationAngle = Vector2.Angle(raycastHit2DPoints.bottomMidRay.normal, Vector2.up);
+                surfaceNormal = raycastHit2DPoints.bottomMidRay.normal;
+            }
+
             if (rotationAngle <= maxAngle)
             {
                 SurfaceAngle = rotationAngle;
-                SurfaceNormal = raycastHit2DPoints.bottomRightRay.normal;
+                SurfaceNormal = surfaceNormal;
             }
         }
-        else
+        else if (PlayerStatusVariables.facingDirection == FacingDirection.Left &&
+                 raycastHit2DPoints.bottomLeftRay.collider != null)
         {
-            if (raycastHit2DPoints.bottomLeftRay.collider == null) return;
             var rotationAngle = Vector2.Angle(raycastHit2DPoints.bottomLeftRay.normal, Vector2.up);
+            var surfaceNormal = raycastHit2DPoints.bottomLeftRay.normal;
+            if (raycastHit2DPoints.bottomLeftRay.normal.x < 0 && rotationAngle > SurfaceAngle)
+            {
+                rotationAngle = Vector2.Angle(raycastHit2DPoints.bottomRightRay.normal, Vector2.up);
+                surfaceNormal = raycastHit2DPoints.bottomRightRay.normal;
+            }
+            else if (MathHelpers.Approximately(raycastHit2DPoints.bottomLeftRay.normal.x, 0, float.Epsilon) &&
+                     rotationAngle < SurfaceAngle)
+            {
+                rotationAngle = Vector2.Angle(raycastHit2DPoints.bottomMidRay.normal, Vector2.up);
+                surfaceNormal = raycastHit2DPoints.bottomMidRay.normal;
+            }
+
             if (rotationAngle <= maxAngle)
             {
                 SurfaceAngle = rotationAngle;
-                SurfaceNormal = raycastHit2DPoints.bottomLeftRay.normal;
+                SurfaceNormal = surfaceNormal;
             }
         }
+        
     }
 
     public void CheckGroundForFall()
     {
-        if (!CheckGroundForJump(DistanceForJump) && MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
+        if (!CheckGroundForJump(DistanceForJump) && MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon) &&
+            (horizontalMovement.horizontalMovementState == HorizontalMovementState.Idle ||
+             horizontalMovement.horizontalMovementState == HorizontalMovementState.CrouchIdle))
         {
             if (CheckGroundWithPerifericalRays(DistanceForJump, true) &&
                 !CheckGroundWithPerifericalRays(DistanceForJump, false))

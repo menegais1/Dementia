@@ -18,7 +18,7 @@ public static class PlayerController
     public static bool Run { get; private set; }
     public static bool Crouch { get; private set; }
     public static bool Dodge { get; private set; }
-    public static float ClimbLadderMovement { get; private set; }
+    public static float VerticalMovement { get; private set; }
     public static bool Jump { get; private set; }
     public static bool ClimbObstaclePress { get; private set; }
     public static bool ClimbLadderPress { get; private set; }
@@ -62,14 +62,14 @@ public static class PlayerController
             Jump = Input.GetButtonDown("Jump");
             ClimbObstaclePress = Input.GetButtonDown("Climb Obstacles");
             ClimbLadderPress = Input.GetButtonDown("Climb Ladder");
-            ClimbLadderMovement = GetClimbStairsMovement();
+            VerticalMovement = GetClimbStairsMovement();
         }
         else
         {
             Jump = false;
             ClimbObstaclePress = false;
             ClimbLadderPress = false;
-            ClimbLadderMovement = !revokeControlVariables.stairsMovementControl ? GetClimbStairsMovement() : 0;
+            VerticalMovement = !revokeControlVariables.stairsMovementControl ? GetClimbStairsMovement() : 0;
         }
     }
 
@@ -98,11 +98,11 @@ public static class PlayerController
         }
         if (Input.GetKey("w"))
         {
-            return !MathHelpers.Approximately(ClimbLadderMovement, -1, float.Epsilon) ? 1 : 0;
+            return !MathHelpers.Approximately(VerticalMovement, -1, float.Epsilon) ? 1 : 0;
         }
         if (Input.GetKey("s"))
         {
-            return !MathHelpers.Approximately(ClimbLadderMovement, 1, float.Epsilon) ? -1 : 0;
+            return !MathHelpers.Approximately(VerticalMovement, 1, float.Epsilon) ? -1 : 0;
         }
         return 0;
     }

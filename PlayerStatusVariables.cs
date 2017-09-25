@@ -25,6 +25,8 @@ public static class PlayerStatusVariables
 
     public static bool canClimbLadder;
 
+    public static bool canClimbStairs;
+
     public static bool canClimbObstacle;
 
     public static bool canTakeItem;
@@ -35,6 +37,8 @@ public static class PlayerStatusVariables
 
     public static bool isTakingItem;
 
+    public static bool isClimbingStairs;
+    
     public static FacingDirection facingDirection;
 
     public static bool CheckIsOnAir()
