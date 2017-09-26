@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class VerticalMovement
@@ -108,29 +109,36 @@ public class VerticalMovement
             {
                 var stairsController = collider.GetComponent<StairsController>();
 
-                if (CheckIfObjectIsRight(stairsController.stairsCollider.transform.position))
+
+                if ((CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
+                        ? PlayerController.HorizontalMove > 0
+                        : PlayerController.HorizontalMove < 0) &&
+                    (stairsController.stairsTriggerType == StairsTriggerType.TopTrigger
+                        ? PlayerController.VerticalMovement < 0
+                        : PlayerController.VerticalMovement > 0))
                 {
-                    if (PlayerController.HorizontalMove > 0 &&
-                        (stairsController.stairsTriggerType == StairsTriggerType.TopTrigger
-                            ? PlayerController.VerticalMovement < 0
-                            : PlayerController.VerticalMovement > 0))
-                    {
-                        PlayerStatusVariables.isClimbingStairs = true;
-                        IgnoreCollision(stairsController.adjacentCollider, true);
-                        IgnoreLayerCollision(LayerMask.NameToLayer("Stairs Ground"), false);
-                    }
+                    SetOnStairsColliders(stairsController);
                 }
-                else
+            }
+        }
+        else if (PlayerStatusVariables.isClimbingStairs &&
+                 (playerCollisions.CheckForLayerCollision(LayerMask.GetMask("Ground"), 0.1f) ||
+                  PlayerStatusVariables.isOnAir) &&
+                 PlayerStatusVariables.canClimbStairs)
+        {
+            var collider = GetStairsTrigger();
+
+            if (collider != null)
+            {
+                var stairsController = collider.GetComponent<StairsController>();
+                if (CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
+                    ? rigidbody2D.velocity.y > 0
+                    : rigidbody2D.velocity.y < 0)
                 {
-                    if (PlayerController.HorizontalMove < 0 &&
-                        (stairsController.stairsTriggerType == StairsTriggerType.TopTrigger
-                            ? PlayerController.VerticalMovement < 0
-                            : PlayerController.VerticalMovement > 0))
-                    {
-                        PlayerStatusVariables.isClimbingStairs = true;
-                        IgnoreCollision(stairsController.adjacentCollider, true);
-                        IgnoreLayerCollision(LayerMask.NameToLayer("Stairs Ground"), false);
-                    }
+                    PlayerStatusVariables.isClimbingStairs = false;
+
+                    IgnoreCollision(stairsController.adjacentCollider, false);
+                    stairsController.adjacentCollider.gameObject.layer = LayerMask.NameToLayer("Ground");
                 }
             }
         }
@@ -242,6 +250,7 @@ public class VerticalMovement
         if (!PlayerStatusVariables.isClimbingStairs)
         {
             IgnoreLayerCollision(LayerMask.NameToLayer("Stairs Ground"), true);
+            playerCollisions.SetLayerForCollisions(new[] {"Ground"});
         }
     }
 
@@ -308,6 +317,15 @@ public class VerticalMovement
     {
         ResetVelocityY();
         PhysicsHelpers.Jump(jumpForce, rigidbody2D);
+    }
+
+    private void SetOnStairsColliders(StairsController stairsController)
+    {
+        PlayerStatusVariables.isClimbingStairs = true;
+        IgnoreCollision(stairsController.adjacentCollider, true);
+        stairsController.adjacentCollider.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+        IgnoreLayerCollision(LayerMask.NameToLayer("Stairs Ground"), false);
+        playerCollisions.SetLayerForCollisions(new[] {"Ground", "Stairs Ground"});
     }
 
     public void ClimbOntoObstacle(Vector2 position)
@@ -387,7 +405,7 @@ public class VerticalMovement
                     : new Vector2(desiredPositionX, rigidbody2D.position.y),
                 climbingObstacleSmoothness));*/
 
-            if (!MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, 0f))
+            if (!MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, float.Epsilon))
             {
                 f += changeRate;
                 rigidbody2D.MovePosition(Vector2.Lerp(initialPositionForY,
@@ -395,7 +413,8 @@ public class VerticalMovement
             }
             else
             {
-                if (rigidbody2D.position == initialPositionForX)
+                if (MathHelpers.Approximately(rigidbody2D.position.x, initialPositionForX.x, 0.01f) &&
+                    MathHelpers.Approximately(rigidbody2D.position.y, initialPositionForX.y, 0.01f))
                 {
                     f = 0;
                 }

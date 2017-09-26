@@ -20,6 +20,7 @@ public class PlayerCollisions
 
     private float maxAngle;
     private float offsetForPerifericalRays;
+    private LayerMask layerMaskForCollisions;
 
     public float SurfaceAngle { get; private set; }
     public Vector2 SurfaceNormal { get; private set; }
@@ -47,19 +48,20 @@ public class PlayerCollisions
     {
     }
 
-    public void InitializeCollisions(MonoBehaviour monoBehaviour, float maxAngle)
+    public void InitializeCollisions(MonoBehaviour monoBehaviour, float maxAngle, LayerMask layerMaskForCollisions)
     {
         this.maxAngle = maxAngle;
         this.capsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
         this.DistanceForJump = 0.1f;
         this.horizontalMovement = HorizontalMovement.GetInstance();
+        this.layerMaskForCollisions = layerMaskForCollisions;
     }
 
-    public void StartCollisions(LayerMask layerMask)
+    public void StartCollisions()
     {
         UpdateColliderBounds();
-        CastRays(layerMask);
+        CastRays();
         CheckGroundForSlopes();
         CheckGroundForFall();
     }
@@ -92,17 +94,19 @@ public class PlayerCollisions
             center.y - capsuleCollider2D.size.y / 2));
     }
 
-    private void CastRays(LayerMask layerMask)
+    private void CastRays()
     {
         var direction = capsuleCollider2D.transform.up * -1;
 
         raycastHit2DPoints.bottomLeftRay =
-            Physics2D.Raycast(boxColliderBounds.bottomLeft, direction, 1f + offsetForPerifericalRays, layerMask.value);
+            Physics2D.Raycast(boxColliderBounds.bottomLeft, direction, 1f + offsetForPerifericalRays,
+                layerMaskForCollisions.value);
         raycastHit2DPoints.bottomRightRay =
-            Physics2D.Raycast(boxColliderBounds.bottomRight, direction, 1f + offsetForPerifericalRays, layerMask.value);
+            Physics2D.Raycast(boxColliderBounds.bottomRight, direction, 1f + offsetForPerifericalRays,
+                layerMaskForCollisions.value);
         raycastHit2DPoints.bottomMidRay = Physics2D.Raycast(
             boxColliderBounds.bottomMid, direction, 1f,
-            layerMask.value);
+            layerMaskForCollisions.value);
 
         Debug.DrawRay(boxColliderBounds.bottomLeft, direction, Color.red);
         Debug.DrawRay(boxColliderBounds.bottomMid, direction,
@@ -199,7 +203,12 @@ public class PlayerCollisions
                 SurfaceNormal = surfaceNormal;
             }
         }
-        
+    }
+
+    public bool CheckForLayerCollision(LayerMask layerMask, float distance)
+    {
+        var ray = Physics2D.Raycast(boxColliderBounds.bottomMid, Vector2.down, distance, layerMask.value);
+        return ray.collider != null;
     }
 
     public void CheckGroundForFall()
@@ -219,5 +228,10 @@ public class PlayerCollisions
                 PhysicsHelpers.AddImpulseForce(3f, true, rigidbody2D);
             }
         }
+    }
+
+    public void SetLayerForCollisions(string[] layersName)
+    {
+        layerMaskForCollisions = LayerMask.GetMask(layersName);
     }
 }

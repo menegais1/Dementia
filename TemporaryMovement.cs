@@ -40,12 +40,12 @@ public class TemporaryMovement : MonoBehaviour
         miscellaneousMovement.FillInstance(this, cameraZoomSize);
 
         playerCollisions = PlayerCollisions.GetInstance();
-        playerCollisions.InitializeCollisions(this, maxAngle);
+        playerCollisions.InitializeCollisions(this, maxAngle, layerMaskForCollisions);
     }
 
     void Update()
     {
-        playerCollisions.StartCollisions(layerMaskForCollisions);
+        playerCollisions.StartCollisions();
         horizontalMovement.StartHorizontalMovement();
         horizontalMovement.PressMovementHandler(ref forceApplied);
         verticalMovement.StartVerticalMovement();
