@@ -39,6 +39,7 @@ public class VerticalMovement
         float climbingObstacleSmoothness, float climbLadderVelocity)
     {
         playerCollisions = PlayerCollisions.GetInstance();
+
         this.monoBehaviour = monoBehaviour;
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
         this.capsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
@@ -131,9 +132,19 @@ public class VerticalMovement
             if (collider != null)
             {
                 var stairsController = collider.GetComponent<StairsController>();
+
+                var stairsCollider = stairsController.stairsCollider.GetComponent<BoxCollider2D>();
+                
+                //A normal é sempre perpendicular ao plano, porém é necessário manter a rotação entre 29 e -29
+                //var normal = stairsCollider.transform.TransformDirection(new Vector2(center.x, center.y + size.y / 2));
+                var normal = stairsCollider.transform.up;
                 if (CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
-                    ? rigidbody2D.velocity.y > 0
-                    : rigidbody2D.velocity.y < 0)
+                    ? PhysicsHelpers.SlopeInclinationRight(normal)
+                        ? rigidbody2D.velocity.y < 0
+                        : rigidbody2D.velocity.y > 0
+                    : PhysicsHelpers.SlopeInclinationRight(normal)
+                        ? rigidbody2D.velocity.y > 0
+                        : rigidbody2D.velocity.y < 0)
                 {
                     PlayerStatusVariables.isClimbingStairs = false;
 
@@ -201,8 +212,6 @@ public class VerticalMovement
                 ClimbOntoObstacle(GetObstaclePosition());
                 break;
             case VerticalPressMovementState.None:
-                break;
-            case VerticalPressMovementState.ClimbStairs:
                 break;
             default:
                 Debug.Log("Error");
@@ -379,7 +388,7 @@ public class VerticalMovement
         }
 
         CoroutineManager.findCoroutine("ClimbOntoLadderCoroutine").setIsRunning(false);
-        PlayerController.RevokePlayerControl(false, ControlTypeToRevoke.StairsMovement);
+        PlayerController.RevokePlayerControl(false, ControlTypeToRevoke.LadderMovement);
     }
 
     private IEnumerator ClimbOntoObstacleCoroutine(Vector2 position, float changeRate)

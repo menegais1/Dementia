@@ -8,7 +8,7 @@ public static class PlayerController
     {
         public bool horizontalMovementControl;
         public bool verticalMovementControl;
-        public bool stairsMovementControl;
+        public bool ladderMovementControl;
         public bool miscellaneousMovementControl;
         public bool allMovementControl;
     }
@@ -32,7 +32,7 @@ public static class PlayerController
 /*    public static bool takeOfCamera;
     public static bool interactWithScenery;
     public static bool takeItem;
-    public static bool onStairsControl;
+    public static bool onLadderControl;
     public static bool runningCoroutine;*/
 
     public static void CheckForHorizontalPlayerInput()
@@ -62,14 +62,14 @@ public static class PlayerController
             Jump = Input.GetButtonDown("Jump");
             ClimbObstaclePress = Input.GetButtonDown("Climb Obstacles");
             ClimbLadderPress = Input.GetButtonDown("Climb Ladder");
-            VerticalMovement = GetClimbStairsMovement();
+            VerticalMovement = GetClimbLadderMovement();
         }
         else
         {
             Jump = false;
             ClimbObstaclePress = false;
             ClimbLadderPress = false;
-            VerticalMovement = !revokeControlVariables.stairsMovementControl ? GetClimbStairsMovement() : 0;
+            VerticalMovement = !revokeControlVariables.ladderMovementControl ? GetClimbLadderMovement() : 0;
         }
     }
 
@@ -90,7 +90,7 @@ public static class PlayerController
     }
 
     //Para não poluir o código - Revisar isso mais tarde
-    private static float GetClimbStairsMovement()
+    private static float GetClimbLadderMovement()
     {
         if ((Input.GetKey("w") && Input.GetKey("s")) || (!Input.GetKey("w") && !Input.GetKey("s")))
         {
@@ -158,8 +158,8 @@ public static class PlayerController
             case ControlTypeToRevoke.VerticalMovement:
                 revokeControlVariables.verticalMovementControl = revoke;
                 break;
-            case ControlTypeToRevoke.StairsMovement:
-                revokeControlVariables.stairsMovementControl = revoke;
+            case ControlTypeToRevoke.LadderMovement:
+                revokeControlVariables.ladderMovementControl = revoke;
                 break;
             case ControlTypeToRevoke.MiscellaneousMovement:
                 revokeControlVariables.miscellaneousMovementControl = revoke;
@@ -167,7 +167,7 @@ public static class PlayerController
             case ControlTypeToRevoke.AllMovement:
                 revokeControlVariables.horizontalMovementControl = revoke;
                 revokeControlVariables.verticalMovementControl = revoke;
-                revokeControlVariables.stairsMovementControl = revoke;
+                revokeControlVariables.ladderMovementControl = revoke;
                 revokeControlVariables.miscellaneousMovementControl = revoke;
                 break;
             default:

@@ -42,7 +42,6 @@ public enum VerticalPressMovementState
     Jump,
     ClimbLadder,
     ClimbObstacle,
-    ClimbStairs,
 }
 
 public enum MiscellaneousPressMovementState
@@ -57,7 +56,7 @@ public enum ControlTypeToRevoke
 {
     HorizontalMovement,
     VerticalMovement,
-    StairsMovement,
+    LadderMovement,
     MiscellaneousMovement,
     AllMovement,
 }

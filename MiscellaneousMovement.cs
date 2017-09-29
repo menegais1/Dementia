@@ -118,13 +118,13 @@ public class MiscellaneousMovement
             "ZoomCameraCoroutine");
     }
 
-    public void SubscribeInteractiveScenery(SceneryInteractionDelegate @sceneryInteraction)
+    public void SubscribeInteractiveScenery(SceneryInteractionDelegate sceneryInteraction)
     {
         this.sceneryInteractionEvent = null;
         this.sceneryInteractionEvent += sceneryInteraction;
     }
 
-    public void SubscribeItemEffect(ItemEffectDelegate @itemEffect)
+    public void SubscribeItemEffect(ItemEffectDelegate itemEffect)
     {
         this.itemEffectEvent = null;
         this.itemEffectEvent += itemEffect;
