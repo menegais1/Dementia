@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        CoroutineManager.setMonoBehaviourInstance(this);
+        CoroutineManager.SetMonoBehaviourInstance(this);
     }
 
     // Update is called once per frame

@@ -18,7 +18,6 @@ public class HorizontalMovement
     private Rigidbody2D rigidbody2D;
     private CapsuleCollider2D capsuleCollider2D;
     private PlayerCollisions playerCollisions;
-    private VerticalMovement verticalMovement;
 
     private SpriteRenderer spriteRenderer;
     //private CoroutineManager coroutineManager;
@@ -43,7 +42,6 @@ public class HorizontalMovement
         float dodgeForce, float crouchingSpeed)
     {
         playerCollisions = PlayerCollisions.GetInstance();
-        verticalMovement = VerticalMovement.GetInstance();
         this.monoBehaviour = monoBehaviour;
         this.maxSpeed = maxSpeed;
         this.acceleration = acceleration;
@@ -134,7 +132,7 @@ public class HorizontalMovement
         switch (horizontalMovementState)
         {
             case HorizontalMovementState.Idle:
-                if (verticalMovement.verticalMovementState != VerticalMovementState.OnAir)
+                if (!PlayerStatusVariables.isOnAir)
                 {
                     PreventSlide(forceApplied);
                 }
@@ -149,7 +147,7 @@ public class HorizontalMovement
                 forceApplied = Run(PlayerController.HorizontalMove, 2f);
                 break;
             case HorizontalMovementState.CrouchIdle:
-                if (verticalMovement.verticalMovementState != VerticalMovementState.OnAir)
+                if (!PlayerStatusVariables.isOnAir)
                 {
                     PreventSlide(forceApplied);
                 }
@@ -176,7 +174,7 @@ public class HorizontalMovement
         return !MathHelpers.Approximately(playerCollisions.SurfaceAngle, 0, float.Epsilon) &&
                (horizontalMovementState == HorizontalMovementState.Idle ||
                 horizontalMovementState == HorizontalMovementState.CrouchIdle || rigidbody2D.velocity.y < 0) &&
-               verticalMovement.verticalMovementState != VerticalMovementState.OnAir;
+               !PlayerStatusVariables.isOnAir;
     }
 
 

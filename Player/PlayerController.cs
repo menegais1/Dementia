@@ -29,12 +29,6 @@ public static class PlayerController
     private static RevokeControlVariables revokeControlVariables;
 
 
-/*    public static bool takeOfCamera;
-    public static bool interactWithScenery;
-    public static bool takeItem;
-    public static bool onLadderControl;
-    public static bool runningCoroutine;*/
-
     public static void CheckForHorizontalPlayerInput()
     {
         if (!revokeControlVariables.horizontalMovementControl)
@@ -111,16 +105,16 @@ public static class PlayerController
     public static void RevokePlayerControl(float timeToRevoke, bool revoke,
         ControlTypeToRevoke controlTypeToRevoke, MonoBehaviour monoBehaviour)
     {
-        var coroutine = CoroutineManager.findCoroutine("RevokeControlCoroutine");
+        var coroutine = CoroutineManager.FindCoroutine("RevokeControlCoroutine");
         if (coroutine == null)
         {
-            CoroutineManager.insertNewCoroutine(RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, true),
+            CoroutineManager.AddCoroutine(RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, true),
                 "RevokeControlCoroutine");
         }
-        else if (!coroutine.getIsRunning())
+        else if (!coroutine.IsRunning)
         {
-            CoroutineManager.deleteCoroutine("RevokeControlCoroutine");
-            CoroutineManager.insertNewCoroutine(RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, true),
+            CoroutineManager.DeleteCoroutine("RevokeControlCoroutine");
+            CoroutineManager.AddCoroutine(RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, true),
                 "RevokeControlCoroutine");
         }
     }
@@ -139,7 +133,7 @@ public static class PlayerController
             yield return new WaitForSeconds(time);
         }
         RevokeControlSelection(revoke, controlTypeToRevoke, true);
-        CoroutineManager.findCoroutine("RevokeControlCoroutine").setIsRunning(false);
+        CoroutineManager.FindCoroutine("RevokeControlCoroutine").IsRunning = false;
     }
 
 

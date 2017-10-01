@@ -114,7 +114,7 @@ public class MiscellaneousMovement
 
     public void ZoomCamera(bool zoomOut)
     {
-        CoroutineManager.insertNewCoroutine(CameraController.ZoomCameraCoroutine(cameraZoomSize, 100, zoomOut),
+        CoroutineManager.AddCoroutine(CameraController.ZoomCameraCoroutine(cameraZoomSize, 100, zoomOut),
             "ZoomCameraCoroutine");
     }
 

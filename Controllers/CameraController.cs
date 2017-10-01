@@ -41,7 +41,7 @@ public class CameraController : MonoBehaviour
             yield return new WaitForSeconds(timeToZoomCamera / steps);
         }
 
-        CoroutineManager.deleteCoroutine("ZoomCameraCoroutine");
+        CoroutineManager.DeleteCoroutine("ZoomCameraCoroutine");
     }
 
    /* Vector3 SuperSmoothLerp(Vector3 x0, Vector3 y0, Vector3 yt, float t, float k)

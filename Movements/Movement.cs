@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TemporaryMovement : MonoBehaviour
+public class Movement : MonoBehaviour
 {
     [SerializeField] private float maxSpeed;
     [SerializeField] private float acceleration;
