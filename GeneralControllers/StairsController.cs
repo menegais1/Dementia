@@ -7,19 +7,24 @@ public class StairsController : MonoBehaviour
     public Collider2D adjacentCollider;
     public Collider2D stairsCollider;
     public StairsTriggerType stairsTriggerType;
+    private PlayerStatusVariables playerStatusVariables;
 
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.gameObject.tag.Equals("Player")) return;
+        playerStatusVariables = PlayerStatusVariables.GetInstance();
+    }
 
     public void OnTriggerStay2D(Collider2D other)
     {
         if (!other.gameObject.tag.Equals("Player")) return;
-        PlayerStatusVariables.canClimbStairs = true;
+        playerStatusVariables.canClimbStairs = true;
     }
 
 
     public void OnTriggerExit2D(Collider2D other)
     {
         if (!other.gameObject.tag.Equals("Player")) return;
-
-        PlayerStatusVariables.canClimbStairs = false;
+        playerStatusVariables.canClimbStairs = false;
     }
 }

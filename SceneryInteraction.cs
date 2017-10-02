@@ -2,24 +2,26 @@
 
 public class SceneryInteraction : MonoBehaviour
 {
-    private MiscellaneousMovement miscellaneousMovement;
+    private PlayerMiscellaneousMovement playerMiscellaneousMovement;
+    private PlayerStatusVariables playerStatusVariables;
 
     #region Métodos Unity
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        miscellaneousMovement = MiscellaneousMovement.GetInstance();
+        playerMiscellaneousMovement = PlayerMiscellaneousMovement.GetInstance();
+        playerStatusVariables = PlayerStatusVariables.GetInstance();
     }
 
     public void OnTriggerStay2D(Collider2D other)
     {
         if (!other.gameObject.CompareTag("Player")) return;
 
-        PlayerStatusVariables.canInteractWithScenery = true;
+        playerStatusVariables.canInteractWithScenery = true;
 
-        if (PlayerStatusVariables.isInteractingWithScenery)
+        if (playerStatusVariables.isInteractingWithScenery)
         {
-            miscellaneousMovement.SubscribeInteractiveScenery(Interaction);
+            playerMiscellaneousMovement.SubscribeInteractiveScenery(Interaction);
         }
     }
 
@@ -28,7 +30,7 @@ public class SceneryInteraction : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            PlayerStatusVariables.canInteractWithScenery = false;
+            playerStatusVariables.canInteractWithScenery = false;
         }
     }
 

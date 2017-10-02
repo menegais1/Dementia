@@ -1,64 +1,50 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using UnityEngine;
-using UnityEngine.VR.WSA.Persistence;
+﻿using UnityEngine;
 
-public class PlayerCollisions
+public class BasicCollisionHandler
 {
-    private struct ColliderBounds
+    protected struct ColliderBounds
     {
         public Vector2 bottomRight, bottomLeft, bottomMid;
-        public Vector2 topRight, topLeft;
     }
 
-    private struct RaycastHit2DPoints
+    protected struct RaycastHit2DPoints
     {
         public RaycastHit2D bottomLeftRay;
         public RaycastHit2D bottomRightRay;
         public RaycastHit2D bottomMidRay;
     }
 
-    private float maxAngle;
-    private float offsetForPerifericalRays;
-    private LayerMask layerMaskForCollisions;
+    protected float maxAngle;
+    protected float offsetForPerifericalRays;
+    protected LayerMask layerMaskForCollisions;
 
-    public float SurfaceAngle { get; private set; }
-    public Vector2 SurfaceNormal { get; private set; }
-    public float DistanceForJump { get; private set; }
+    public float SurfaceAngle { get; protected set; }
+    public Vector2 SurfaceNormal { get; protected set; }
+    public float DistanceForJump { get; protected set; }
 
-    private static PlayerCollisions instance;
-    private RaycastHit2DPoints raycastHit2DPoints;
-    private ColliderBounds boxColliderBounds;
+    protected static BasicCollisionHandler instance;
+    protected RaycastHit2DPoints raycastHit2DPoints;
+    protected ColliderBounds boxColliderBounds;
 
-    private CapsuleCollider2D capsuleCollider2D;
-    private Rigidbody2D rigidbody2D;
-    private HorizontalMovement horizontalMovement;
+    protected SpriteRenderer spriteRenderer;
+    protected CapsuleCollider2D capsuleCollider2D;
+    protected Rigidbody2D rigidbody2D;
+    protected PlayerHorizontalMovement horizontalMovement;
 
-    public static PlayerCollisions GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new PlayerCollisions();
-        }
 
-        return instance;
-    }
-
-    private PlayerCollisions()
-    {
-    }
-
-    public void InitializeCollisions(MonoBehaviour monoBehaviour, float maxAngle, LayerMask layerMaskForCollisions)
+    public virtual void InitializeCollisions(MonoBehaviour monoBehaviour, float maxAngle,
+        LayerMask layerMaskForCollisions)
     {
         this.maxAngle = maxAngle;
         this.capsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
         this.DistanceForJump = 0.1f;
-        this.horizontalMovement = HorizontalMovement.GetInstance();
+        this.horizontalMovement = PlayerHorizontalMovement.GetInstance();
+        this.spriteRenderer = monoBehaviour.GetComponent<SpriteRenderer>();
         this.layerMaskForCollisions = layerMaskForCollisions;
     }
 
-    public void StartCollisions()
+    public virtual void StartCollisions()
     {
         UpdateColliderBounds();
         CastRays();
@@ -66,15 +52,8 @@ public class PlayerCollisions
         CheckGroundForFall();
     }
 
-    private void UpdateColliderBounds()
+    protected virtual void UpdateColliderBounds()
     {
-        /*var bounds = boxCollider2D.bounds;
-
-        boxColliderBounds.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-        boxColliderBounds.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-        boxColliderBounds.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-        boxColliderBounds.topRight = new Vector2(bounds.max.x, bounds.max.y)*/
-
         var center = capsuleCollider2D.offset;
         offsetForPerifericalRays = capsuleCollider2D.size.y / 2;
         boxColliderBounds.bottomLeft =
@@ -83,18 +62,12 @@ public class PlayerCollisions
         boxColliderBounds.bottomRight =
             capsuleCollider2D.transform.TransformPoint(new Vector2(center.x + capsuleCollider2D.size.x / 2,
                 center.y));
-        boxColliderBounds.topLeft =
-            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x - capsuleCollider2D.size.x / 2,
-                center.y + capsuleCollider2D.size.y / 2));
-        boxColliderBounds.topRight =
-            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x + capsuleCollider2D.size.x / 2,
-                center.y + capsuleCollider2D.size.y / 2));
         boxColliderBounds.bottomMid = capsuleCollider2D.transform.TransformPoint(new Vector2(
             center.x,
             center.y - capsuleCollider2D.size.y / 2));
     }
 
-    private void CastRays()
+    protected virtual void CastRays()
     {
         var direction = capsuleCollider2D.transform.up * -1;
 
@@ -114,7 +87,7 @@ public class PlayerCollisions
         Debug.DrawRay(boxColliderBounds.bottomRight, direction, Color.blue);
     }
 
-    public bool CheckGroundForJump(float distance)
+    public virtual bool CheckGroundForJump(float distance)
     {
         if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
         {
@@ -127,7 +100,7 @@ public class PlayerCollisions
                raycastHit2DPoints.bottomMidRay.distance <= distance;
     }
 
-    public bool CheckGroundWithPerifericalRays(float distance, bool rightRay)
+    public virtual bool CheckGroundWithPerifericalRays(float distance, bool rightRay)
     {
         distance += offsetForPerifericalRays;
         if (rightRay)
@@ -154,9 +127,9 @@ public class PlayerCollisions
                raycastHit2DPoints.bottomLeftRay.distance <= distance;
     }
 
-    private void CheckGroundForSlopes()
+    protected virtual void CheckGroundForSlopes()
     {
-        if (PlayerStatusVariables.facingDirection == FacingDirection.Right &&
+        if (!spriteRenderer.flipX &&
             raycastHit2DPoints.bottomRightRay.collider != null)
         {
             var rotationAngle = Vector2.Angle(raycastHit2DPoints.bottomRightRay.normal, Vector2.up);
@@ -180,7 +153,7 @@ public class PlayerCollisions
                 SurfaceNormal = surfaceNormal;
             }
         }
-        else if (PlayerStatusVariables.facingDirection == FacingDirection.Left &&
+        else if (spriteRenderer.flipX &&
                  raycastHit2DPoints.bottomLeftRay.collider != null)
         {
             var rotationAngle = Vector2.Angle(raycastHit2DPoints.bottomLeftRay.normal, Vector2.up);
@@ -205,7 +178,7 @@ public class PlayerCollisions
         }
     }
 
-    public bool CheckForLayerCollision(LayerMask layerMask, float distance)
+    public virtual bool CheckForLayerCollision(LayerMask layerMask, float distance)
     {
         var ray = Physics2D.Raycast(boxColliderBounds.bottomMid, Vector2.down, distance, layerMask.value);
         return ray.collider != null;
@@ -230,7 +203,7 @@ public class PlayerCollisions
         }
     }
 
-    public void SetLayerForCollisions(string[] layersName)
+    public virtual void SetLayerForCollisions(string[] layersName)
     {
         layerMaskForCollisions = LayerMask.GetMask(layersName);
     }

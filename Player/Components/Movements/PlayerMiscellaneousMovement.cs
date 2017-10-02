@@ -1,11 +1,11 @@
 ﻿using System;
 using UnityEngine;
 
-public class MiscellaneousMovement
+public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 {
     public MiscellaneousPressMovementState miscellaneousPressMovementState;
 
-    private static MiscellaneousMovement instance;
+    private static PlayerMiscellaneousMovement instance;
 
     public delegate void SceneryInteractionDelegate();
 
@@ -15,70 +15,70 @@ public class MiscellaneousMovement
 
     private event ItemEffectDelegate itemEffectEvent;
 
-    /*private float characterHeight;
-    private bool existNote;
-    private bool canReadNote;
-    private bool readingNote;
-   */
+
     private float cameraZoomSize;
 
+    private BasicCollisionHandler basicCollisionHandler;
+    private PlayerController playerController;
+    private PlayerStatusVariables playerStatusVariables;
 
-    private MonoBehaviour monoBehaviour;
-    private Rigidbody2D rigidbody2D;
-    private BoxCollider2D boxCollider2D;
 
-    public static MiscellaneousMovement GetInstance()
+    public static PlayerMiscellaneousMovement GetInstance()
     {
         if (instance == null)
         {
-            instance = new MiscellaneousMovement();
+            instance = new PlayerMiscellaneousMovement();
         }
 
         return instance;
     }
 
-    private MiscellaneousMovement()
+    private PlayerMiscellaneousMovement()
     {
     }
 
-    public void FillInstance(MonoBehaviour monoBehaviour, float cameraZoomSize)
+    public void FillInstance(MonoBehaviour monoBehaviour, float cameraZoomSize,
+        BasicCollisionHandler basicCollisionHandler,
+        PlayerController playerController
+    )
     {
-        this.monoBehaviour = monoBehaviour;
+        FillInstance(monoBehaviour);
+        this.playerController = playerController;
+        this.basicCollisionHandler = basicCollisionHandler;
+        this.playerStatusVariables = PlayerStatusVariables.GetInstance();
         this.cameraZoomSize = cameraZoomSize;
-        this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
-        this.boxCollider2D = monoBehaviour.GetComponent<BoxCollider2D>();
     }
 
-    public void StartMiscellaneousMovement()
+    public override void StartMovement()
     {
-        PlayerController.CheckForMiscellaneousPlayerInput();
+        playerController.CheckForMiscellaneousInput();
 
-        if (PlayerStatusVariables.canTakeItem && PlayerController.TakeItemPress)
+        if (playerStatusVariables.canTakeItem && playerController.TakeItemPress)
         {
-            PlayerStatusVariables.isTakingItem = true;
+            playerStatusVariables.isTakingItem = true;
         }
 
-        if (PlayerStatusVariables.canInteractWithScenery && PlayerController.InteractWithSceneryPress)
+        if (playerStatusVariables.canInteractWithScenery && playerController.InteractWithSceneryPress)
         {
-            PlayerStatusVariables.isInteractingWithScenery = true;
+            playerStatusVariables.isInteractingWithScenery = true;
         }
 
-        if (PlayerController.ZoomCameraPress)
+        if (playerController.ZoomCameraPress)
         {
             miscellaneousPressMovementState = MiscellaneousPressMovementState.ZoomCamera;
-            PlayerStatusVariables.isCameraZoomed = !PlayerStatusVariables.isCameraZoomed;
+            playerStatusVariables.isCameraZoomed = !playerStatusVariables.isCameraZoomed;
         }
-        else if (PlayerStatusVariables.isTakingItem)
+        else if (playerStatusVariables.isTakingItem)
         {
             miscellaneousPressMovementState = MiscellaneousPressMovementState.TakeItem;
         }
-        else if (PlayerStatusVariables.isInteractingWithScenery)
+        else if (playerStatusVariables.isInteractingWithScenery)
         {
             miscellaneousPressMovementState = MiscellaneousPressMovementState.InteractWithScenery;
         }
     }
 
-    public void PressMovementHandler()
+    public override void PressMovementHandler()
     {
         switch (miscellaneousPressMovementState)
         {
@@ -91,13 +91,21 @@ public class MiscellaneousMovement
                 InteractWithScenery();
                 break;
             case MiscellaneousPressMovementState.ZoomCamera:
-                ZoomCamera(PlayerStatusVariables.isCameraZoomed);
+                ZoomCamera(playerStatusVariables.isCameraZoomed);
                 break;
             default:
                 Debug.Log("Error");
                 break;
         }
         miscellaneousPressMovementState = MiscellaneousPressMovementState.None;
+    }
+
+    public override void HoldMovementHandler()
+    {
+    }
+
+    public override void ResolvePendencies()
+    {
     }
 
     public void ReadNotes()
@@ -108,7 +116,7 @@ public class MiscellaneousMovement
     {
         if (sceneryInteractionEvent == null) return;
         sceneryInteractionEvent();
-        PlayerStatusVariables.isInteractingWithScenery = false;
+        playerStatusVariables.isInteractingWithScenery = false;
         // Debug.Log("teste");
     }
 
@@ -134,6 +142,6 @@ public class MiscellaneousMovement
     {
         if (itemEffectEvent == null) return;
         itemEffectEvent();
-        PlayerStatusVariables.isTakingItem = false;
+        playerStatusVariables.isTakingItem = false;
     }
 }

@@ -148,4 +148,15 @@ public static class PhysicsHelpers
     {
         return surfaceNormal.x < 0;
     }
+
+    public static void ResetVelocityX(Rigidbody2D rigidbody2D)
+    {
+        rigidbody2D.velocity = new Vector2(0, rigidbody2D.velocity.y);
+    }
+
+    public static void ResetVelocityY(Rigidbody2D rigidbody2D)
+    {
+        rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, 0);
+    }
+    
 }

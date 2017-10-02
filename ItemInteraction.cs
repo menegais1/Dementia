@@ -2,24 +2,26 @@
 
 public class ItemInteraction : MonoBehaviour
 {
-    private MiscellaneousMovement miscellaneousMovement;
+    private PlayerMiscellaneousMovement playerMiscellaneousMovement;
+    private PlayerStatusVariables playerStatusVariables;
 
     #region Métodos Unity
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        miscellaneousMovement = MiscellaneousMovement.GetInstance();
+        playerMiscellaneousMovement = PlayerMiscellaneousMovement.GetInstance();
+        playerStatusVariables = PlayerStatusVariables.GetInstance();
     }
 
     public void OnTriggerStay2D(Collider2D other)
     {
         if (!other.gameObject.CompareTag("Player")) return;
 
-        PlayerStatusVariables.canTakeItem = true;
+        playerStatusVariables.canTakeItem = true;
 
-        if (PlayerStatusVariables.isTakingItem)
+        if (playerStatusVariables.isTakingItem)
         {
-            miscellaneousMovement.SubscribeItemEffect(Interaction);
+            playerMiscellaneousMovement.SubscribeItemEffect(Interaction);
         }
     }
 
@@ -28,7 +30,7 @@ public class ItemInteraction : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            PlayerStatusVariables.canTakeItem = false;
+            playerStatusVariables.canTakeItem = false;
         }
     }
 
