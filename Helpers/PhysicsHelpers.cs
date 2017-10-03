@@ -158,5 +158,21 @@ public static class PhysicsHelpers
     {
         rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, 0);
     }
-    
+
+
+    public static void IgnoreCollision(Collider2D collider2D, Collider2D other, bool ignore)
+    {
+        Physics2D.IgnoreCollision(collider2D, other, ignore);
+    }
+
+    public static void IgnoreLayerCollision(LayerMask layerMask, LayerMask layerMaskToIgnore, bool ignore)
+    {
+        Physics2D.IgnoreLayerCollision(layerMask.value, layerMaskToIgnore.value, ignore);
+    }
+
+
+    public static void SwitchGravity(Rigidbody2D rigidbody2D, bool on, float gravityScaleToChange)
+    {
+        rigidbody2D.gravityScale = on ? gravityScaleToChange : 0;
+    }
 }

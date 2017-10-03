@@ -219,7 +219,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
                 basicCollisionHandler.SurfaceNormal,
                 rigidbody2D, playerStatusVariables.facingDirection);
         playerStatusVariables.isDodging = false;
-        playerController.RevokePlayerControl(0.6f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+        playerController.RevokeControl(0.6f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
         return forceApplied;
     }
 

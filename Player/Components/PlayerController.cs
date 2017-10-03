@@ -18,6 +18,7 @@ public sealed class PlayerController : BasicHumanoidController
     public bool ZoomCameraPress { get; private set; }
 
     private static PlayerController instance;
+    private RevokeControlVariables revokeControlVariables;
 
     public static PlayerController GetInstance()
     {
@@ -31,6 +32,7 @@ public sealed class PlayerController : BasicHumanoidController
 
     private PlayerController()
     {
+        revokeControlVariables = new RevokeControlVariables();
     }
 
     public override void CheckForHorizontalInput()
@@ -103,5 +105,16 @@ public sealed class PlayerController : BasicHumanoidController
             return !MathHelpers.Approximately(VerticalMovement, 1, float.Epsilon) ? -1 : 0;
         }
         return 0;
+    }
+
+    public void RevokeControl(bool revoke, ControlTypeToRevoke controlTypeToRevoke)
+    {
+        base.RevokeControl(revoke, controlTypeToRevoke, revokeControlVariables);
+    }
+
+    public void RevokeControl(float timeToRevoke, bool revoke, ControlTypeToRevoke controlTypeToRevoke,
+        MonoBehaviour monoBehaviour)
+    {
+        base.RevokeControl(timeToRevoke, revoke, controlTypeToRevoke, revokeControlVariables, monoBehaviour);
     }
 }
