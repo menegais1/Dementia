@@ -7,41 +7,50 @@ public class ApostleMovement : MonoBehaviour
     [SerializeField] private float maxAngle;
     [SerializeField] private LayerMask layerMaskForCollisions;
 
-    private ApostleHorizontalMovement horizontalMovement;
-    private ApostleVerticalMovement verticalMovement;
-    private ApostleController apostleController;
-    private BasicCollisionHandler apostleCollisions;
+    public ApostleHorizontalMovement HorizontalMovement { get; private set; }
+    public ApostleVerticalMovement VerticalMovement { get; private set; }
+    public ApostleController ApostleController { get; private set; }
+    public BasicCollisionHandler ApostleCollisionHandler { get; private set; }
+    public ApostleStatusVariables ApostleStatusVariables { get; private set; }
+    public ApostleInputHandler ApostleInputHandler { get; private set; }
 
     void Start()
     {
-        apostleCollisions = new BasicCollisionHandler();
-        apostleCollisions.InitializeCollisions(this, maxAngle, layerMaskForCollisions);
+        ApostleStatusVariables = new ApostleStatusVariables();
 
-        apostleController = ApostleController.GetInstance();
+        ApostleCollisionHandler = new BasicCollisionHandler();
+        ApostleCollisionHandler.InitializeCollisions(this, maxAngle, layerMaskForCollisions);
 
-        horizontalMovement = ApostleHorizontalMovement.GetInstance();
-        horizontalMovement.FillInstance(this, maxSpeed, acceleration, apostleCollisions, apostleController);
+        ApostleInputHandler = new ApostleInputHandler();
+        ApostleInputHandler.FillInstance(this, ApostleCollisionHandler, ApostleStatusVariables);
 
-        verticalMovement = ApostleVerticalMovement.GetInstance();
-        verticalMovement.FillInstance(this, apostleCollisions, apostleController);
+        ApostleController = new ApostleController();
+        ApostleController.FillInstance(this, ApostleInputHandler);
+        
+        HorizontalMovement = new ApostleHorizontalMovement();
+        HorizontalMovement.FillInstance(this, maxSpeed, acceleration, ApostleCollisionHandler, ApostleController,
+            ApostleStatusVariables);
+
+        VerticalMovement = new ApostleVerticalMovement();
+        VerticalMovement.FillInstance(this, ApostleCollisionHandler, ApostleController, ApostleStatusVariables);
     }
 
     void Update()
     {
-        apostleCollisions.StartCollisions();
-        horizontalMovement.StartMovement();
-        horizontalMovement.PressMovementHandler();
-        verticalMovement.StartMovement();
+        ApostleCollisionHandler.StartCollisions(HorizontalMovement.HorizontalMovementState);
+        HorizontalMovement.StartMovement();
+        HorizontalMovement.PressMovementHandler();
+        VerticalMovement.StartMovement();
     }
 
     void FixedUpdate()
     {
-        horizontalMovement.HoldMovementHandler();
-        verticalMovement.HoldMovementHandler();
+        HorizontalMovement.HoldMovementHandler();
+        VerticalMovement.HoldMovementHandler();
     }
 
     private void LateUpdate()
     {
-        verticalMovement.ResolvePendencies();
+        VerticalMovement.ResolvePendencies();
     }
 }

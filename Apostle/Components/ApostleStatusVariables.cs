@@ -2,8 +2,6 @@
 
 public class ApostleStatusVariables
 {
-    private static ApostleStatusVariables instance;
-
     public bool isJogging;
 
     public bool isOnAir;
@@ -12,17 +10,8 @@ public class ApostleStatusVariables
 
     public FacingDirection facingDirection;
 
-    public static ApostleStatusVariables GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new ApostleStatusVariables();
-        }
 
-        return instance;
-    }
-
-    private ApostleStatusVariables()
+    public ApostleStatusVariables()
     {
         facingDirection = FacingDirection.Right;
     }

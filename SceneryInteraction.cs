@@ -9,8 +9,8 @@ public class SceneryInteraction : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        playerMiscellaneousMovement = PlayerMiscellaneousMovement.GetInstance();
-        playerStatusVariables = PlayerStatusVariables.GetInstance();
+        playerMiscellaneousMovement = other.GetComponent<PlayerMovement>().MiscellaneousMovement;
+        playerStatusVariables = other.GetComponent<PlayerMovement>().PlayerStatusVariables;
     }
 
     public void OnTriggerStay2D(Collider2D other)

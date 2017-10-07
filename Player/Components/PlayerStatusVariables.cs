@@ -2,8 +2,6 @@
 
 public class PlayerStatusVariables
 {
-    private static PlayerStatusVariables instance;
-
     public bool isJogging;
 
     public bool isOnAir;
@@ -42,17 +40,8 @@ public class PlayerStatusVariables
 
     public FacingDirection facingDirection;
 
-    public static PlayerStatusVariables GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new PlayerStatusVariables();
-        }
 
-        return instance;
-    }
-
-    private PlayerStatusVariables()
+    public PlayerStatusVariables()
     {
         facingDirection = FacingDirection.Right;
     }

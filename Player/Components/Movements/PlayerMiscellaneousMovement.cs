@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 {
-    public MiscellaneousPressMovementState miscellaneousPressMovementState;
-
-    private static PlayerMiscellaneousMovement instance;
+    public MiscellaneousPressMovementState MiscellaneousPressMovementState { get; private set; }
 
     public delegate void SceneryInteractionDelegate();
 
@@ -18,34 +16,24 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 
     private float cameraZoomSize;
 
-    private BasicCollisionHandler basicCollisionHandler;
+    private BasicCollisionHandler playerCollisionHandler;
     private PlayerController playerController;
     private PlayerStatusVariables playerStatusVariables;
 
 
-    public static PlayerMiscellaneousMovement GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new PlayerMiscellaneousMovement();
-        }
-
-        return instance;
-    }
-
-    private PlayerMiscellaneousMovement()
+    public PlayerMiscellaneousMovement()
     {
     }
 
     public void FillInstance(MonoBehaviour monoBehaviour, float cameraZoomSize,
-        BasicCollisionHandler basicCollisionHandler,
-        PlayerController playerController
+        BasicCollisionHandler playerCollisionHandler,
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables
     )
     {
         FillInstance(monoBehaviour);
         this.playerController = playerController;
-        this.basicCollisionHandler = basicCollisionHandler;
-        this.playerStatusVariables = PlayerStatusVariables.GetInstance();
+        this.playerCollisionHandler = playerCollisionHandler;
+        this.playerStatusVariables = playerStatusVariables;
         this.cameraZoomSize = cameraZoomSize;
     }
 
@@ -65,22 +53,22 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 
         if (playerController.ZoomCameraPress)
         {
-            miscellaneousPressMovementState = MiscellaneousPressMovementState.ZoomCamera;
+            MiscellaneousPressMovementState = MiscellaneousPressMovementState.ZoomCamera;
             playerStatusVariables.isCameraZoomed = !playerStatusVariables.isCameraZoomed;
         }
         else if (playerStatusVariables.isTakingItem)
         {
-            miscellaneousPressMovementState = MiscellaneousPressMovementState.TakeItem;
+            MiscellaneousPressMovementState = MiscellaneousPressMovementState.TakeItem;
         }
         else if (playerStatusVariables.isInteractingWithScenery)
         {
-            miscellaneousPressMovementState = MiscellaneousPressMovementState.InteractWithScenery;
+            MiscellaneousPressMovementState = MiscellaneousPressMovementState.InteractWithScenery;
         }
     }
 
     public override void PressMovementHandler()
     {
-        switch (miscellaneousPressMovementState)
+        switch (MiscellaneousPressMovementState)
         {
             case MiscellaneousPressMovementState.None:
                 break;
@@ -97,7 +85,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 Debug.Log("Error");
                 break;
         }
-        miscellaneousPressMovementState = MiscellaneousPressMovementState.None;
+        MiscellaneousPressMovementState = MiscellaneousPressMovementState.None;
     }
 
     public override void HoldMovementHandler()

@@ -13,7 +13,7 @@ public class LadderController : MonoBehaviour
     {
         if (!other.gameObject.tag.Equals("Player")) return;
         if (ladder == LadderType.Ladder) return;
-        playerStatusVariables = PlayerStatusVariables.GetInstance();
+        playerStatusVariables = other.GetComponent<PlayerMovement>().PlayerStatusVariables;
         adjacentCollider = transform.parent.GetComponent<LadderController>().adjacentCollider;
     }
 

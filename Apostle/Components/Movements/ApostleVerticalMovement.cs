@@ -4,36 +4,24 @@ using UnityEngine;
 
 public class ApostleVerticalMovement : BasicPhysicsMovement
 {
-    public VerticalMovementState verticalMovementState;
+    public VerticalMovementState VerticalMovementState { get; private set; }
 
-    private static ApostleVerticalMovement instance;
-
-
-    private BasicCollisionHandler basicCollisionHandler;
+    private BasicCollisionHandler apostleCollisionHandler;
     private ApostleController apostleController;
     private ApostleStatusVariables apostleStatusVariables;
 
-    public static ApostleVerticalMovement GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new ApostleVerticalMovement();
-        }
 
-        return instance;
-    }
-
-    private ApostleVerticalMovement()
+    public ApostleVerticalMovement()
     {
     }
 
-    public void FillInstance(MonoBehaviour monoBehaviour, BasicCollisionHandler basicCollisionHandler,
-        ApostleController apostleController)
+    public void FillInstance(MonoBehaviour monoBehaviour, BasicCollisionHandler apostleCollisionHandler,
+        ApostleController apostleController, ApostleStatusVariables apostleStatusVariables)
     {
         FillInstance(monoBehaviour);
 
-        this.apostleStatusVariables = ApostleStatusVariables.GetInstance();
-        this.basicCollisionHandler = basicCollisionHandler;
+        this.apostleStatusVariables = apostleStatusVariables;
+        this.apostleCollisionHandler = apostleCollisionHandler;
         this.apostleController = apostleController;
     }
 
@@ -46,11 +34,11 @@ public class ApostleVerticalMovement : BasicPhysicsMovement
 
         if (apostleStatusVariables.isOnAir)
         {
-            verticalMovementState = VerticalMovementState.OnAir;
+            VerticalMovementState = VerticalMovementState.OnAir;
         }
         else
         {
-            verticalMovementState = VerticalMovementState.Grounded;
+            VerticalMovementState = VerticalMovementState.Grounded;
         }
     }
 
@@ -61,7 +49,7 @@ public class ApostleVerticalMovement : BasicPhysicsMovement
 
     public override void HoldMovementHandler()
     {
-        switch (verticalMovementState)
+        switch (VerticalMovementState)
         {
             case VerticalMovementState.OnAir:
                 apostleController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
@@ -87,6 +75,6 @@ public class ApostleVerticalMovement : BasicPhysicsMovement
 
     private bool CheckGroundForJump()
     {
-        return basicCollisionHandler.CheckGroundForJump(0.1f);
+        return apostleCollisionHandler.CheckGroundForJump(0.1f);
     }
 }

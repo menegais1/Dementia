@@ -3,10 +3,9 @@ using UnityEngine;
 
 public class PlayerHorizontalMovement : BasicPhysicsMovement
 {
-    public HorizontalMovementState horizontalMovementState;
-    public HorizontalPressMovementState horizontalPressMovementState;
+    public HorizontalMovementState HorizontalMovementState { get; private set; }
+    public HorizontalPressMovementState HorizontalPressMovementState { get; private set; }
 
-    private static PlayerHorizontalMovement instance;
 
     private float maxSpeed;
     private float acceleration;
@@ -17,31 +16,21 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
     private Vector2 forceApplied;
 
     private PlayerController playerController;
-    private BasicCollisionHandler basicCollisionHandler;
+    private BasicCollisionHandler playerCollisionHandler;
     private PlayerStatusVariables playerStatusVariables;
 
-    public static PlayerHorizontalMovement GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new PlayerHorizontalMovement();
-        }
-
-        return instance;
-    }
-
-    private PlayerHorizontalMovement()
+    public PlayerHorizontalMovement()
     {
     }
 
     public void FillInstance(MonoBehaviour monoBehaviour,
         float maxSpeed, float acceleration,
-        float dodgeForce, float crouchingSpeed, BasicCollisionHandler basicCollisionHandler,
-        PlayerController playerController)
+        float dodgeForce, float crouchingSpeed, BasicCollisionHandler playerCollisionHandler,
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables)
     {
         FillInstance(monoBehaviour);
 
-        this.playerStatusVariables = PlayerStatusVariables.GetInstance();
+        this.playerStatusVariables = playerStatusVariables;
         this.monoBehaviour = monoBehaviour;
         this.maxSpeed = maxSpeed;
         this.acceleration = acceleration;
@@ -49,7 +38,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
         this.crouchingSpeed = crouchingSpeed;
         this.characterHeight = capsuleCollider2D.bounds.size.y;
         this.playerController = playerController;
-        this.basicCollisionHandler = basicCollisionHandler;
+        this.playerCollisionHandler = playerCollisionHandler;
     }
 
     public override void StartMovement()
@@ -78,39 +67,39 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
         {
             if (playerStatusVariables.isCrouching)
             {
-                horizontalMovementState = HorizontalMovementState.CrouchWalking;
+                HorizontalMovementState = HorizontalMovementState.CrouchWalking;
             }
             else if (playerController.Run)
             {
-                horizontalMovementState = HorizontalMovementState.Running;
+                HorizontalMovementState = HorizontalMovementState.Running;
             }
             else if (playerStatusVariables.isJogging)
             {
-                horizontalMovementState = HorizontalMovementState.Jogging;
+                HorizontalMovementState = HorizontalMovementState.Jogging;
             }
             else
             {
-                horizontalMovementState = HorizontalMovementState.Walking;
+                HorizontalMovementState = HorizontalMovementState.Walking;
             }
         }
         else if (playerStatusVariables.isDodging)
         {
-            horizontalPressMovementState = HorizontalPressMovementState.Dodge;
-            horizontalMovementState = HorizontalMovementState.Idle;
+            HorizontalPressMovementState = HorizontalPressMovementState.Dodge;
+            HorizontalMovementState = HorizontalMovementState.Idle;
         }
         else if (playerStatusVariables.isCrouching)
         {
-            horizontalMovementState = HorizontalMovementState.CrouchIdle;
+            HorizontalMovementState = HorizontalMovementState.CrouchIdle;
         }
         else
         {
-            horizontalMovementState = HorizontalMovementState.Idle;
+            HorizontalMovementState = HorizontalMovementState.Idle;
         }
     }
 
     public override void PressMovementHandler()
     {
-        switch (horizontalPressMovementState)
+        switch (HorizontalPressMovementState)
         {
             case HorizontalPressMovementState.Dodge:
                 forceApplied = Dodge();
@@ -122,12 +111,12 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
                 break;
         }
 
-        horizontalPressMovementState = HorizontalPressMovementState.None;
+        HorizontalPressMovementState = HorizontalPressMovementState.None;
     }
 
     public override void HoldMovementHandler()
     {
-        switch (horizontalMovementState)
+        switch (HorizontalMovementState)
         {
             case HorizontalMovementState.Idle:
                 if (!playerStatusVariables.isOnAir)
@@ -160,9 +149,9 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
 
         if (CheckForPreventSlideOnSlopes())
         {
-            PhysicsHelpers.PreventSlideOnSlopes(basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal,
-                (horizontalMovementState == HorizontalMovementState.Idle ||
-                 horizontalMovementState == HorizontalMovementState.CrouchIdle),
+            PhysicsHelpers.PreventSlideOnSlopes(playerCollisionHandler.SurfaceAngle, playerCollisionHandler.SurfaceNormal,
+                (HorizontalMovementState == HorizontalMovementState.Idle ||
+                 HorizontalMovementState == HorizontalMovementState.CrouchIdle),
                 rigidbody2D);
         }
     }
@@ -173,9 +162,9 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
 
     public bool CheckForPreventSlideOnSlopes()
     {
-        return !MathHelpers.Approximately(basicCollisionHandler.SurfaceAngle, 0, float.Epsilon) &&
-               (horizontalMovementState == HorizontalMovementState.Idle ||
-                horizontalMovementState == HorizontalMovementState.CrouchIdle || rigidbody2D.velocity.y < 0) &&
+        return !MathHelpers.Approximately(playerCollisionHandler.SurfaceAngle, 0, float.Epsilon) &&
+               (HorizontalMovementState == HorizontalMovementState.Idle ||
+                HorizontalMovementState == HorizontalMovementState.CrouchIdle || rigidbody2D.velocity.y < 0) &&
                !playerStatusVariables.isOnAir;
     }
 
@@ -183,30 +172,30 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
     public Vector2 Walk(float horizontalMove, float constant)
     {
         return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
-            basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal);
+            playerCollisionHandler.SurfaceAngle, playerCollisionHandler.SurfaceNormal);
     }
 
     public Vector2 Jog(float horizontalMove, float constant)
     {
         return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
-            basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal);
+            playerCollisionHandler.SurfaceAngle, playerCollisionHandler.SurfaceNormal);
     }
 
     public Vector2 Run(float horizontalMove, float constant)
     {
         return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
-            basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal);
+            playerCollisionHandler.SurfaceAngle, playerCollisionHandler.SurfaceNormal);
     }
 
     public Vector2 CrouchWalk(float horizontalMove, float constant)
     {
         return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
-            basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal);
+            playerCollisionHandler.SurfaceAngle, playerCollisionHandler.SurfaceNormal);
     }
 
     public Vector2 PreventSlide(Vector2 forceApplied)
     {
-        return PhysicsHelpers.PreventSlide(forceApplied, basicCollisionHandler.SurfaceAngle, rigidbody2D);
+        return PhysicsHelpers.PreventSlide(forceApplied, playerCollisionHandler.SurfaceAngle, rigidbody2D);
     }
 
     public Vector2 Dodge()
@@ -215,8 +204,8 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
         PhysicsHelpers.ResetVelocityX(rigidbody2D);
         PhysicsHelpers.ResetVelocityY(rigidbody2D);
         var forceApplied =
-            PhysicsHelpers.AddImpulseForce(dodgeForce, basicCollisionHandler.SurfaceAngle,
-                basicCollisionHandler.SurfaceNormal,
+            PhysicsHelpers.AddImpulseForce(dodgeForce, playerCollisionHandler.SurfaceAngle,
+                playerCollisionHandler.SurfaceNormal,
                 rigidbody2D, playerStatusVariables.facingDirection);
         playerStatusVariables.isDodging = false;
         playerController.RevokeControl(0.6f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);

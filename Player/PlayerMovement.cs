@@ -17,50 +17,55 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float maxAngle;
     [SerializeField] private LayerMask layerMaskForCollisions;
 
-    private PlayerHorizontalMovement horizontalMovement;
-    private PlayerVerticalMovement verticalMovement;
-    private PlayerMiscellaneousMovement miscellaneousMovement;
-    private PlayerController playerController;
-    private BasicCollisionHandler playerCollisions;
+    public PlayerHorizontalMovement HorizontalMovement { get; private set; }
+    public PlayerVerticalMovement VerticalMovement { get; private set; }
+    public PlayerMiscellaneousMovement MiscellaneousMovement { get; private set; }
+    public PlayerController PlayerController { get; private set; }
+    public BasicCollisionHandler PlayerCollisionHandler { get; private set; }
+    public PlayerStatusVariables PlayerStatusVariables { get; private set; }
 
     void Start()
     {
-        playerCollisions = new BasicCollisionHandler();
-        playerCollisions.InitializeCollisions(this, maxAngle, layerMaskForCollisions);
+        PlayerStatusVariables = new PlayerStatusVariables();
+        
+        PlayerCollisionHandler = new BasicCollisionHandler();
+        PlayerCollisionHandler.InitializeCollisions(this, maxAngle, layerMaskForCollisions);
 
-        playerController = PlayerController.GetInstance();
+        PlayerController = new PlayerController();
 
-        horizontalMovement = PlayerHorizontalMovement.GetInstance();
-        horizontalMovement.FillInstance(this, maxSpeed, acceleration,
-            dodgeForce, crouchingSpeed, playerCollisions, playerController);
+        HorizontalMovement = new PlayerHorizontalMovement();
+        HorizontalMovement.FillInstance(this, maxSpeed, acceleration,
+            dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables);
 
-        verticalMovement = PlayerVerticalMovement.GetInstance();
-        verticalMovement.FillInstance(this, jumpForce, climbingLadderSmoothness,
-            climbingObstacleSmoothness, climbLadderVelocity, playerCollisions, playerController);
+        VerticalMovement = new PlayerVerticalMovement();
+        VerticalMovement.FillInstance(this, jumpForce, climbingLadderSmoothness,
+            climbingObstacleSmoothness, climbLadderVelocity, PlayerCollisionHandler, PlayerController,
+            PlayerStatusVariables);
 
-        miscellaneousMovement = PlayerMiscellaneousMovement.GetInstance();
-        miscellaneousMovement.FillInstance(this, cameraZoomSize, playerCollisions, playerController);
+        MiscellaneousMovement = new PlayerMiscellaneousMovement();
+        MiscellaneousMovement.FillInstance(this, cameraZoomSize, PlayerCollisionHandler, PlayerController,
+            PlayerStatusVariables);
     }
 
     void Update()
     {
-        playerCollisions.StartCollisions();
-        horizontalMovement.StartMovement();
-        horizontalMovement.PressMovementHandler();
-        verticalMovement.StartMovement();
-        verticalMovement.PressMovementHandler();
-        miscellaneousMovement.StartMovement();
-        miscellaneousMovement.PressMovementHandler();
+        PlayerCollisionHandler.StartCollisions(HorizontalMovement.HorizontalMovementState);
+        HorizontalMovement.StartMovement();
+        HorizontalMovement.PressMovementHandler();
+        VerticalMovement.StartMovement();
+        VerticalMovement.PressMovementHandler();
+        MiscellaneousMovement.StartMovement();
+        MiscellaneousMovement.PressMovementHandler();
     }
 
     void FixedUpdate()
     {
-        horizontalMovement.HoldMovementHandler();
-        verticalMovement.HoldMovementHandler();
+        HorizontalMovement.HoldMovementHandler();
+        VerticalMovement.HoldMovementHandler();
     }
 
     private void LateUpdate()
     {
-        verticalMovement.ResolvePendencies();
+        VerticalMovement.ResolvePendencies();
     }
 }

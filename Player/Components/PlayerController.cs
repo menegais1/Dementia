@@ -17,20 +17,10 @@ public sealed class PlayerController : BasicHumanoidController
     public bool InteractWithSceneryPress { get; private set; }
     public bool ZoomCameraPress { get; private set; }
 
-    private static PlayerController instance;
     private RevokeControlVariables revokeControlVariables;
 
-    public static PlayerController GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new PlayerController();
-        }
 
-        return instance;
-    }
-
-    private PlayerController()
+    public PlayerController()
     {
         revokeControlVariables = new RevokeControlVariables();
     }

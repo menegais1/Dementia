@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class ApostleHorizontalMovement : BasicPhysicsMovement
 {
-    public HorizontalMovementState horizontalMovementState;
-
-    private static ApostleHorizontalMovement instance;
+    public HorizontalMovementState HorizontalMovementState { get; private set; }
 
     private float maxSpeed;
     private float acceleration;
@@ -16,36 +14,27 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
     private Vector2 forceApplied;
 
     private ApostleController apostleController;
-    private BasicCollisionHandler basicCollisionHandler;
+    private BasicCollisionHandler apostleCollisionHandler;
     private ApostleStatusVariables apostleStatusVariables;
 
-    public static ApostleHorizontalMovement GetInstance()
-    {
-        if (instance == null)
-        {
-            instance = new ApostleHorizontalMovement();
-        }
 
-        return instance;
-    }
-
-    private ApostleHorizontalMovement()
+    public ApostleHorizontalMovement()
     {
     }
 
     public void FillInstance(MonoBehaviour monoBehaviour,
-        float maxSpeed, float acceleration, BasicCollisionHandler basicCollisionHandler,
-        ApostleController apostleController)
+        float maxSpeed, float acceleration, BasicCollisionHandler apostleCollisionHandler,
+        ApostleController apostleController, ApostleStatusVariables apostleStatusVariables)
     {
         FillInstance(monoBehaviour);
 
-        this.apostleStatusVariables = ApostleStatusVariables.GetInstance();
+        this.apostleStatusVariables = apostleStatusVariables;
         this.monoBehaviour = monoBehaviour;
         this.maxSpeed = maxSpeed;
         this.acceleration = acceleration;
         this.characterHeight = capsuleCollider2D.bounds.size.y;
         this.apostleController = apostleController;
-        this.basicCollisionHandler = basicCollisionHandler;
+        this.apostleCollisionHandler = apostleCollisionHandler;
     }
 
     public override void StartMovement()
@@ -58,25 +47,24 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
             apostleStatusVariables.isJogging = !apostleStatusVariables.isJogging;
         }
 
-
         if (!MathHelpers.Approximately(apostleController.HorizontalMove, 0, float.Epsilon))
         {
             if (apostleController.Run)
             {
-                horizontalMovementState = HorizontalMovementState.Running;
+                HorizontalMovementState = HorizontalMovementState.Running;
             }
             else if (apostleStatusVariables.isJogging)
             {
-                horizontalMovementState = HorizontalMovementState.Jogging;
+                HorizontalMovementState = HorizontalMovementState.Jogging;
             }
             else
             {
-                horizontalMovementState = HorizontalMovementState.Walking;
+                HorizontalMovementState = HorizontalMovementState.Walking;
             }
         }
         else
         {
-            horizontalMovementState = HorizontalMovementState.Idle;
+            HorizontalMovementState = HorizontalMovementState.Idle;
         }
     }
 
@@ -86,7 +74,7 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
 
     public override void HoldMovementHandler()
     {
-        switch (horizontalMovementState)
+        switch (HorizontalMovementState)
         {
             case HorizontalMovementState.Idle:
                 if (!apostleStatusVariables.isOnAir)
@@ -110,8 +98,9 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
 
         if (CheckForPreventSlideOnSlopes())
         {
-            PhysicsHelpers.PreventSlideOnSlopes(basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal,
-                horizontalMovementState == HorizontalMovementState.Idle,
+            PhysicsHelpers.PreventSlideOnSlopes(apostleCollisionHandler.SurfaceAngle,
+                apostleCollisionHandler.SurfaceNormal,
+                HorizontalMovementState == HorizontalMovementState.Idle,
                 rigidbody2D);
         }
     }
@@ -122,8 +111,8 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
 
     public bool CheckForPreventSlideOnSlopes()
     {
-        return !MathHelpers.Approximately(basicCollisionHandler.SurfaceAngle, 0, float.Epsilon) &&
-               (horizontalMovementState == HorizontalMovementState.Idle || rigidbody2D.velocity.y < 0) &&
+        return !MathHelpers.Approximately(apostleCollisionHandler.SurfaceAngle, 0, float.Epsilon) &&
+               (HorizontalMovementState == HorizontalMovementState.Idle || rigidbody2D.velocity.y < 0) &&
                !apostleStatusVariables.isOnAir;
     }
 
@@ -131,25 +120,25 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
     public Vector2 Walk(float horizontalMove, float constant)
     {
         return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
-            basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal);
+            apostleCollisionHandler.SurfaceAngle, apostleCollisionHandler.SurfaceNormal);
     }
 
     public Vector2 Jog(float horizontalMove, float constant)
     {
         return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
-            basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal);
+            apostleCollisionHandler.SurfaceAngle, apostleCollisionHandler.SurfaceNormal);
     }
 
     public Vector2 Run(float horizontalMove, float constant)
     {
         return PhysicsHelpers.HorizontalMovementByForce(acceleration, constant, maxSpeed, horizontalMove, rigidbody2D,
-            basicCollisionHandler.SurfaceAngle, basicCollisionHandler.SurfaceNormal);
+            apostleCollisionHandler.SurfaceAngle, apostleCollisionHandler.SurfaceNormal);
     }
 
 
     public Vector2 PreventSlide(Vector2 forceApplied)
     {
-        return PhysicsHelpers.PreventSlide(forceApplied, basicCollisionHandler.SurfaceAngle, rigidbody2D);
+        return PhysicsHelpers.PreventSlide(forceApplied, apostleCollisionHandler.SurfaceAngle, rigidbody2D);
     }
 
     public void CheckFacingDirection()
