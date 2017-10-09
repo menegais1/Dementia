@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 
-public class PlayerStatusVariables
+public class PlayerStatusVariables : MonoBehaviour
 {
     public bool isJogging;
+
+    public bool isRunning;
 
     public bool isOnAir;
 
@@ -15,8 +17,6 @@ public class PlayerStatusVariables
     public bool isCrouching;
 
     public bool isDodging;
-
-    public bool isOnStairs;
 
     public bool isCameraZoomed;
 
@@ -38,6 +38,18 @@ public class PlayerStatusVariables
 
     public bool isClimbingStairs;
 
+    public bool isAiming;
+
+    public bool canAim;
+
+    public bool canUseItem;
+
+    public bool canShoot;
+
+    public bool canReloadWeapon;
+
+    public bool canExecuteCQC;
+
     public FacingDirection facingDirection;
 
 
@@ -49,5 +61,10 @@ public class PlayerStatusVariables
     public bool CheckIsOnAir()
     {
         return !isClimbingObstacle && !isClimbingLadder && !canJump || isOnAir;
+    }
+
+    public bool CheckCanAim()
+    {
+        return !isClimbingObstacle && !isClimbingLadder && !isOnAir && !isDodging && !isJogging && !isRunning;
     }
 }

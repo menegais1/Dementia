@@ -61,6 +61,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
         }
 
         playerStatusVariables.isDodging = playerController.Dodge;
+        playerStatusVariables.isRunning = false;
 
         if (!MathHelpers.Approximately(playerController.HorizontalMove, 0, float.Epsilon) &&
             !playerStatusVariables.isDodging)
@@ -71,6 +72,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
             }
             else if (playerController.Run)
             {
+                playerStatusVariables.isRunning = true;
                 HorizontalMovementState = HorizontalMovementState.Running;
             }
             else if (playerStatusVariables.isJogging)
@@ -149,7 +151,8 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
 
         if (CheckForPreventSlideOnSlopes())
         {
-            PhysicsHelpers.PreventSlideOnSlopes(playerCollisionHandler.SurfaceAngle, playerCollisionHandler.SurfaceNormal,
+            PhysicsHelpers.PreventSlideOnSlopes(playerCollisionHandler.SurfaceAngle,
+                playerCollisionHandler.SurfaceNormal,
                 (HorizontalMovementState == HorizontalMovementState.Idle ||
                  HorizontalMovementState == HorizontalMovementState.CrouchIdle),
                 rigidbody2D);
@@ -240,11 +243,13 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
 
     public void CheckFacingDirection()
     {
-        if (MathHelpers.Approximately(playerController.HorizontalMove, 1, float.Epsilon))
+        if (MathHelpers.Approximately(playerController.HorizontalMove, 1, float.Epsilon) &&
+            !playerStatusVariables.isAiming)
         {
             playerStatusVariables.facingDirection = FacingDirection.Right;
         }
-        else if (MathHelpers.Approximately(playerController.HorizontalMove, -1, float.Epsilon))
+        else if (MathHelpers.Approximately(playerController.HorizontalMove, -1, float.Epsilon) &&
+                 !playerStatusVariables.isAiming)
         {
             playerStatusVariables.facingDirection = FacingDirection.Left;
         }

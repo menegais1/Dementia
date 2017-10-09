@@ -8,6 +8,12 @@ public enum HorizontalMovementState
     CrouchWalking,
 }
 
+public enum CombatMovementState
+{
+    Aiming,
+    None,
+}
+
 public enum StairsTriggerType
 {
     TopTrigger,
@@ -27,6 +33,13 @@ public enum HorizontalPressMovementState
     None,
     Dodge,
 }
+
+public enum CombatPressMovementState
+{
+    None,
+    Shoot,
+}
+
 
 public enum VerticalMovementState
 {
@@ -58,6 +71,7 @@ public enum ControlTypeToRevoke
     VerticalMovement,
     LadderMovement,
     MiscellaneousMovement,
+    CombatMovement,
     AllMovement,
 }
 
@@ -66,4 +80,16 @@ public enum FacingDirection
 {
     Right,
     Left,
+}
+
+public enum AimDirection
+{
+    Right,
+    Up,
+    Down,
+    Left,
+    UpRight,
+    UpLeft,
+    DownRight,
+    DownLeft,
 }

@@ -10,6 +10,7 @@ public abstract class BasicHumanoidController
         public bool verticalMovementControl;
         public bool ladderMovementControl;
         public bool miscellaneousMovementControl;
+        public bool combatMovementControl;
         public bool allMovementControl;
     }
 
@@ -79,11 +80,15 @@ public abstract class BasicHumanoidController
             case ControlTypeToRevoke.MiscellaneousMovement:
                 revokeControlVariables.miscellaneousMovementControl = revoke;
                 break;
+            case ControlTypeToRevoke.CombatMovement:
+                revokeControlVariables.combatMovementControl = revoke;
+                break;
             case ControlTypeToRevoke.AllMovement:
                 revokeControlVariables.horizontalMovementControl = revoke;
                 revokeControlVariables.verticalMovementControl = revoke;
                 revokeControlVariables.ladderMovementControl = revoke;
                 revokeControlVariables.miscellaneousMovementControl = revoke;
+                revokeControlVariables.combatMovementControl = revoke;
                 break;
             default:
                 Debug.Log("ERROR");

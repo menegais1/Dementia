@@ -9,13 +9,20 @@ public sealed class PlayerController : BasicHumanoidController
     public bool Run { get; private set; }
     public bool Crouch { get; private set; }
     public bool Dodge { get; private set; }
+
     public float VerticalMovement { get; private set; }
     public bool Jump { get; private set; }
     public bool ClimbObstaclePress { get; private set; }
     public bool ClimbLadderPress { get; private set; }
+
     public bool TakeItemPress { get; private set; }
     public bool InteractWithSceneryPress { get; private set; }
     public bool ZoomCameraPress { get; private set; }
+
+    public bool AimHold { get; private set; }
+    public bool ShootPress { get; private set; }
+    public float VerticalAim { get; private set; }
+    public float HorizontalAim { get; private set; }
 
     private RevokeControlVariables revokeControlVariables;
 
@@ -76,6 +83,24 @@ public sealed class PlayerController : BasicHumanoidController
             TakeItemPress = false;
             InteractWithSceneryPress = false;
             ZoomCameraPress = false;
+        }
+    }
+
+    public void CheckForCombatInput()
+    {
+        if (!revokeControlVariables.combatMovementControl)
+        {
+            AimHold = Input.GetButton("Aim");
+            ShootPress = Input.GetButtonDown("Shoot");
+            VerticalAim = Input.GetAxisRaw("Vertical Aim");
+            HorizontalAim = Input.GetAxisRaw("Horizontal Aim");
+        }
+        else
+        {
+            AimHold = false;
+            ShootPress = false;
+            VerticalAim = 0;
+            HorizontalAim = 0;
         }
     }
 

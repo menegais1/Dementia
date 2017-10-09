@@ -45,6 +45,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         playerController.CheckForVerticalInput();
 
         playerStatusVariables.canJump = CheckGroundForJump();
+
         playerStatusVariables.isOnAir = playerStatusVariables.CheckIsOnAir();
 
         if (playerStatusVariables.canClimbLadder && playerController.ClimbLadderPress)
@@ -192,7 +193,8 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
             case VerticalPressMovementState.Jump:
                 Jump();
                 //Para motivos de segurança, caso o fixed update demorar para executar
-                playerController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
+                //playerController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
+                playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 //Demora de alguns frames para modificar o tipo de VerticalMovementState
                 playerStatusVariables.isOnAir = true;
                 break;
@@ -217,7 +219,8 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         switch (VerticalMovementState)
         {
             case VerticalMovementState.OnAir:
-                playerController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
+                //playerController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
+                playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 break;
             case VerticalMovementState.ClimbingLadder:
                 ClimbLadder(playerController.VerticalMovement);
@@ -234,10 +237,11 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
 
     public override void ResolvePendencies()
     {
-        if (playerStatusVariables.isOnAir && playerStatusVariables.canJump && rigidbody2D.velocity.y <= 0)
+        if (playerStatusVariables.isOnAir && playerStatusVariables.canJump &&
+            (rigidbody2D.velocity.y < 0 || MathHelpers.Approximately(rigidbody2D.velocity.y, 0, float.Epsilon)))
         {
             playerStatusVariables.isOnAir = false;
-            playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+            playerController.RevokeControl(0.1f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
         }
 
         if (!MathHelpers.Approximately(rigidbody2D.velocity.y, 0, float.Epsilon) &&

@@ -16,17 +16,21 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float cameraZoomSize;
     [SerializeField] private float maxAngle;
     [SerializeField] private LayerMask layerMaskForCollisions;
+    [SerializeField] private GameObject bulletEffect;
 
     public PlayerHorizontalMovement HorizontalMovement { get; private set; }
     public PlayerVerticalMovement VerticalMovement { get; private set; }
     public PlayerMiscellaneousMovement MiscellaneousMovement { get; private set; }
+    public PlayerCombatMovement CombatMovement { get; private set; }
+
     public PlayerController PlayerController { get; private set; }
     public BasicCollisionHandler PlayerCollisionHandler { get; private set; }
     public PlayerStatusVariables PlayerStatusVariables { get; private set; }
 
     void Start()
     {
-        PlayerStatusVariables = new PlayerStatusVariables();
+        //PlayerStatusVariables = new PlayerStatusVariables();
+        PlayerStatusVariables = GetComponent<PlayerStatusVariables>();
         
         PlayerCollisionHandler = new BasicCollisionHandler();
         PlayerCollisionHandler.InitializeCollisions(this, maxAngle, layerMaskForCollisions);
@@ -45,6 +49,10 @@ public class PlayerMovement : MonoBehaviour
         MiscellaneousMovement = new PlayerMiscellaneousMovement();
         MiscellaneousMovement.FillInstance(this, cameraZoomSize, PlayerCollisionHandler, PlayerController,
             PlayerStatusVariables);
+
+        CombatMovement = new PlayerCombatMovement();
+        CombatMovement.FillInstance(this, bulletEffect, PlayerCollisionHandler, PlayerController,
+            PlayerStatusVariables);
     }
 
     void Update()
@@ -56,12 +64,15 @@ public class PlayerMovement : MonoBehaviour
         VerticalMovement.PressMovementHandler();
         MiscellaneousMovement.StartMovement();
         MiscellaneousMovement.PressMovementHandler();
+        CombatMovement.StartMovement();
+        CombatMovement.PressMovementHandler();
     }
 
     void FixedUpdate()
     {
         HorizontalMovement.HoldMovementHandler();
         VerticalMovement.HoldMovementHandler();
+        CombatMovement.HoldMovementHandler();
     }
 
     private void LateUpdate()

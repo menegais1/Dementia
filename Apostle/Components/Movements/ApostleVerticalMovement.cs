@@ -52,7 +52,9 @@ public class ApostleVerticalMovement : BasicPhysicsMovement
         switch (VerticalMovementState)
         {
             case VerticalMovementState.OnAir:
-                apostleController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
+                //apostleController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
+                apostleController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+
                 break;
             case VerticalMovementState.Grounded:
                 break;
