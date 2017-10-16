@@ -8,11 +8,7 @@ public class ApostleInputHandler
 
     private float horizontalMovement;
 
-    public ApostleInputHandler()
-    {
-    }
-
-    public void FillInstance(MonoBehaviour monoBehaviour, BasicCollisionHandler apostleCollisionHandler,
+    public ApostleInputHandler(MonoBehaviour monoBehaviour, BasicCollisionHandler apostleCollisionHandler,
         ApostleStatusVariables apostleStatusVariables)
     {
         this.monoBehaviour = monoBehaviour;

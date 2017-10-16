@@ -7,7 +7,7 @@ public abstract class BasicPhysicsMovement
     protected CapsuleCollider2D capsuleCollider2D;
     protected SpriteRenderer spriteRenderer;
 
-    public virtual void FillInstance(MonoBehaviour monoBehaviour)
+    protected BasicPhysicsMovement(MonoBehaviour monoBehaviour)
     {
         this.monoBehaviour = monoBehaviour;
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();

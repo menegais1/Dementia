@@ -11,15 +11,9 @@ public class ApostleVerticalMovement : BasicPhysicsMovement
     private ApostleStatusVariables apostleStatusVariables;
 
 
-    public ApostleVerticalMovement()
+    public ApostleVerticalMovement(MonoBehaviour monoBehaviour, BasicCollisionHandler apostleCollisionHandler,
+        ApostleController apostleController, ApostleStatusVariables apostleStatusVariables) : base(monoBehaviour)
     {
-    }
-
-    public void FillInstance(MonoBehaviour monoBehaviour, BasicCollisionHandler apostleCollisionHandler,
-        ApostleController apostleController, ApostleStatusVariables apostleStatusVariables)
-    {
-        FillInstance(monoBehaviour);
-
         this.apostleStatusVariables = apostleStatusVariables;
         this.apostleCollisionHandler = apostleCollisionHandler;
         this.apostleController = apostleController;

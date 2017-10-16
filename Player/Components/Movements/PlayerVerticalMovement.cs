@@ -18,17 +18,11 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
     private PlayerStatusVariables playerStatusVariables;
 
 
-    public PlayerVerticalMovement()
-    {
-    }
-
-    public void FillInstance(MonoBehaviour monoBehaviour,
+    public PlayerVerticalMovement(MonoBehaviour monoBehaviour,
         float jumpForce, float climbingLadderSmoothness,
         float climbingObstacleSmoothness, float climbLadderVelocity, BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables)
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables) : base(monoBehaviour)
     {
-        FillInstance(monoBehaviour);
-
         this.playerStatusVariables = playerStatusVariables;
         this.playerCollisionHandler = playerCollisionHandler;
         this.playerController = playerController;
@@ -38,7 +32,6 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         this.currentGravityScale = rigidbody2D.gravityScale;
         this.climbLadderVelocity = climbLadderVelocity;
     }
-
 
     public override void StartMovement()
     {

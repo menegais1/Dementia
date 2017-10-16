@@ -16,22 +16,17 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     private PlayerStatusVariables playerStatusVariables;
 
 
-    public PlayerCombatMovement()
-    {
-    }
-
-    public void FillInstance(MonoBehaviour monoBehaviour, GameObject bulletEffect,
+    public PlayerCombatMovement(MonoBehaviour monoBehaviour, GameObject bulletEffect,
         BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables)
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables) : base(monoBehaviour)
     {
-        FillInstance(monoBehaviour);
-
         this.playerStatusVariables = playerStatusVariables;
         this.monoBehaviour = monoBehaviour;
         this.playerController = playerController;
         this.bulletEffect = bulletEffect;
         this.playerCollisionHandler = playerCollisionHandler;
     }
+
 
     public override void StartMovement()
     {

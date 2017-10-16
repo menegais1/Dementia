@@ -12,16 +12,13 @@ public sealed class ApostleController : BasicHumanoidController
     private MonoBehaviour monoBehaviour;
     private ApostleInputHandler apostleInputHandler;
 
-    public ApostleController()
-    {
-        revokeControlVariables = new RevokeControlVariables();
-    }
-
-    public void FillInstance(MonoBehaviour monoBehaviour, ApostleInputHandler apostleInputHandler)
+    public ApostleController(MonoBehaviour monoBehaviour, ApostleInputHandler apostleInputHandler)
     {
         this.monoBehaviour = monoBehaviour;
         this.apostleInputHandler = apostleInputHandler;
+        revokeControlVariables = new RevokeControlVariables();
     }
+
 
     public override void CheckForHorizontalInput()
     {

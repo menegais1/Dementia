@@ -21,16 +21,10 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
     private PlayerStatusVariables playerStatusVariables;
 
 
-    public PlayerMiscellaneousMovement()
-    {
-    }
-
-    public void FillInstance(MonoBehaviour monoBehaviour, float cameraZoomSize,
+    public PlayerMiscellaneousMovement(MonoBehaviour monoBehaviour, float cameraZoomSize,
         BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables
-    )
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables) : base(monoBehaviour)
     {
-        FillInstance(monoBehaviour);
         this.playerController = playerController;
         this.playerCollisionHandler = playerCollisionHandler;
         this.playerStatusVariables = playerStatusVariables;

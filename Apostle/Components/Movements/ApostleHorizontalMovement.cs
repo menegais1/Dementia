@@ -1,4 +1,5 @@
 ﻿using System;
+using NUnit.Framework.Constraints;
 using UnityEngine;
 
 public class ApostleHorizontalMovement : BasicPhysicsMovement
@@ -8,8 +9,7 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
     private float maxSpeed;
     private float acceleration;
     private float dodgeForce;
-    private float crouchingSpeed;
-    private float characterHeight;
+
 
     private Vector2 forceApplied;
 
@@ -18,21 +18,14 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
     private ApostleStatusVariables apostleStatusVariables;
 
 
-    public ApostleHorizontalMovement()
-    {
-    }
-
-    public void FillInstance(MonoBehaviour monoBehaviour,
+    public ApostleHorizontalMovement(MonoBehaviour monoBehaviour,
         float maxSpeed, float acceleration, BasicCollisionHandler apostleCollisionHandler,
-        ApostleController apostleController, ApostleStatusVariables apostleStatusVariables)
+        ApostleController apostleController, ApostleStatusVariables apostleStatusVariables) : base(monoBehaviour)
     {
-        FillInstance(monoBehaviour);
-
         this.apostleStatusVariables = apostleStatusVariables;
         this.monoBehaviour = monoBehaviour;
         this.maxSpeed = maxSpeed;
         this.acceleration = acceleration;
-        this.characterHeight = capsuleCollider2D.bounds.size.y;
         this.apostleController = apostleController;
         this.apostleCollisionHandler = apostleCollisionHandler;
     }

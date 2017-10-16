@@ -31,27 +31,23 @@ public class PlayerMovement : MonoBehaviour
     {
         //PlayerStatusVariables = new PlayerStatusVariables();
         PlayerStatusVariables = GetComponent<PlayerStatusVariables>();
-        
-        PlayerCollisionHandler = new BasicCollisionHandler();
-        PlayerCollisionHandler.InitializeCollisions(this, maxAngle, layerMaskForCollisions);
+
+        PlayerCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
         PlayerController = new PlayerController();
 
-        HorizontalMovement = new PlayerHorizontalMovement();
-        HorizontalMovement.FillInstance(this, maxSpeed, acceleration,
+        HorizontalMovement = new PlayerHorizontalMovement(this, maxSpeed, acceleration,
             dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables);
 
-        VerticalMovement = new PlayerVerticalMovement();
-        VerticalMovement.FillInstance(this, jumpForce, climbingLadderSmoothness,
+        VerticalMovement = new PlayerVerticalMovement(this, jumpForce, climbingLadderSmoothness,
             climbingObstacleSmoothness, climbLadderVelocity, PlayerCollisionHandler, PlayerController,
             PlayerStatusVariables);
 
-        MiscellaneousMovement = new PlayerMiscellaneousMovement();
-        MiscellaneousMovement.FillInstance(this, cameraZoomSize, PlayerCollisionHandler, PlayerController,
+        MiscellaneousMovement = new PlayerMiscellaneousMovement(this, cameraZoomSize, PlayerCollisionHandler,
+            PlayerController,
             PlayerStatusVariables);
 
-        CombatMovement = new PlayerCombatMovement();
-        CombatMovement.FillInstance(this, bulletEffect, PlayerCollisionHandler, PlayerController,
+        CombatMovement = new PlayerCombatMovement(this, bulletEffect, PlayerCollisionHandler, PlayerController,
             PlayerStatusVariables);
     }
 

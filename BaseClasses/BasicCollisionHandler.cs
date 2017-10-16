@@ -32,8 +32,7 @@ public class BasicCollisionHandler
     protected CapsuleCollider2D capsuleCollider2D;
     protected Rigidbody2D rigidbody2D;
 
-
-    public virtual void InitializeCollisions(MonoBehaviour monoBehaviour, float maxAngle,
+    public BasicCollisionHandler(MonoBehaviour monoBehaviour, float maxAngle,
         LayerMask layerMaskForCollisions)
     {
         this.RaycastHit2DPoints = new RaycastHit2DPoints();
@@ -44,6 +43,7 @@ public class BasicCollisionHandler
         this.spriteRenderer = monoBehaviour.GetComponent<SpriteRenderer>();
         this.layerMaskForCollisions = layerMaskForCollisions;
     }
+
 
     public virtual void StartCollisions(HorizontalMovementState horizontalMovementState)
     {

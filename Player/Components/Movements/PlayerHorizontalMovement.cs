@@ -19,17 +19,11 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerStatusVariables playerStatusVariables;
 
-    public PlayerHorizontalMovement()
-    {
-    }
-
-    public void FillInstance(MonoBehaviour monoBehaviour,
+    public PlayerHorizontalMovement(MonoBehaviour monoBehaviour,
         float maxSpeed, float acceleration,
         float dodgeForce, float crouchingSpeed, BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables)
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables) : base(monoBehaviour)
     {
-        FillInstance(monoBehaviour);
-
         this.playerStatusVariables = playerStatusVariables;
         this.monoBehaviour = monoBehaviour;
         this.maxSpeed = maxSpeed;

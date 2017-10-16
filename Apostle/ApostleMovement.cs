@@ -18,21 +18,18 @@ public class ApostleMovement : MonoBehaviour
     {
         ApostleStatusVariables = new ApostleStatusVariables();
 
-        ApostleCollisionHandler = new BasicCollisionHandler();
-        ApostleCollisionHandler.InitializeCollisions(this, maxAngle, layerMaskForCollisions);
+        ApostleCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
-        ApostleInputHandler = new ApostleInputHandler();
-        ApostleInputHandler.FillInstance(this, ApostleCollisionHandler, ApostleStatusVariables);
+        ApostleInputHandler = new ApostleInputHandler(this, ApostleCollisionHandler, ApostleStatusVariables);
 
-        ApostleController = new ApostleController();
-        ApostleController.FillInstance(this, ApostleInputHandler);
-        
-        HorizontalMovement = new ApostleHorizontalMovement();
-        HorizontalMovement.FillInstance(this, maxSpeed, acceleration, ApostleCollisionHandler, ApostleController,
+        ApostleController = new ApostleController(this, ApostleInputHandler);
+
+        HorizontalMovement = new ApostleHorizontalMovement(this, maxSpeed, acceleration, ApostleCollisionHandler,
+            ApostleController,
             ApostleStatusVariables);
-
-        VerticalMovement = new ApostleVerticalMovement();
-        VerticalMovement.FillInstance(this, ApostleCollisionHandler, ApostleController, ApostleStatusVariables);
+        
+        VerticalMovement =
+            new ApostleVerticalMovement(this, ApostleCollisionHandler, ApostleController, ApostleStatusVariables);
     }
 
     void Update()
