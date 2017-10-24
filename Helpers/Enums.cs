@@ -38,6 +38,8 @@ public enum CombatPressMovementState
 {
     None,
     Shoot,
+    Reload,
+    Cqc,
 }
 
 

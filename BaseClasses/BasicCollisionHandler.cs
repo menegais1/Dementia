@@ -160,7 +160,7 @@ public class BasicCollisionHandler
                 rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomLeftRay.normal, Vector2.up);
                 surfaceNormal = RaycastHit2DPoints.bottomLeftRay.normal;
             }
-            else if (MathHelpers.Approximately(RaycastHit2DPoints.bottomRightRay.normal.x, 0, float.Epsilon) &&
+            else if (MathHelpers.Approximately(RaycastHit2DPoints.bottomRightRay.normal.x, 0, 0.05f) &&
                      rotationAngle < SurfaceAngle)
             {
                 rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomMidRay.normal, Vector2.up);
@@ -183,7 +183,7 @@ public class BasicCollisionHandler
                 rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomRightRay.normal, Vector2.up);
                 surfaceNormal = RaycastHit2DPoints.bottomRightRay.normal;
             }
-            else if (MathHelpers.Approximately(RaycastHit2DPoints.bottomLeftRay.normal.x, 0, float.Epsilon) &&
+            else if (MathHelpers.Approximately(RaycastHit2DPoints.bottomLeftRay.normal.x, 0, 0.05f) &&
                      rotationAngle < SurfaceAngle)
             {
                 rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomMidRay.normal, Vector2.up);
@@ -206,19 +206,20 @@ public class BasicCollisionHandler
 
     public void CheckGroundForFall(HorizontalMovementState horizontalMovementState)
     {
-        if (!CheckGroundForJump(DistanceForJump) && MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon) &&
+        if (!CheckGroundForJump(DistanceForJump) && MathHelpers.Approximately(SurfaceAngle, 0, 5f) &&
             (horizontalMovementState == HorizontalMovementState.Idle ||
-             horizontalMovementState == HorizontalMovementState.CrouchIdle))
+             horizontalMovementState == HorizontalMovementState.CrouchIdle) &&
+            MathHelpers.Approximately(rigidbody2D.velocity.magnitude, 0, 0.1f))
         {
             if (CheckGroundWithPerifericalRays(DistanceForJump, true) &&
                 !CheckGroundWithPerifericalRays(DistanceForJump, false))
             {
-                PhysicsHelpers.AddImpulseForce(3f, false, rigidbody2D);
+                PhysicsHelpers.AddImpulseForce(30f, false, rigidbody2D);
             }
             else if (CheckGroundWithPerifericalRays(DistanceForJump, false) &&
                      !CheckGroundWithPerifericalRays(DistanceForJump, true))
             {
-                PhysicsHelpers.AddImpulseForce(3f, true, rigidbody2D);
+                PhysicsHelpers.AddImpulseForce(30f, true, rigidbody2D);
             }
         }
     }

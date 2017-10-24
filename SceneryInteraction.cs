@@ -9,6 +9,8 @@ public class SceneryInteraction : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (!other.gameObject.CompareTag("Player")) return;
+
         playerMiscellaneousMovement = other.GetComponent<PlayerMovement>().MiscellaneousMovement;
         playerStatusVariables = other.GetComponent<PlayerMovement>().PlayerStatusVariables;
     }

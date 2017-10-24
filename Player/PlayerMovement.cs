@@ -15,8 +15,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float climbLadderVelocity;
     [SerializeField] private float cameraZoomSize;
     [SerializeField] private float maxAngle;
+    [SerializeField] private float cqcDistance;
     [SerializeField] private LayerMask layerMaskForCollisions;
-    [SerializeField] private GameObject bulletEffect;
+    [SerializeField] private Weapon weapon;
+
 
     public PlayerHorizontalMovement HorizontalMovement { get; private set; }
     public PlayerVerticalMovement VerticalMovement { get; private set; }
@@ -34,7 +36,7 @@ public class PlayerMovement : MonoBehaviour
 
         PlayerCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
-        PlayerController = new PlayerController();
+        PlayerController = new PlayerController(transform);
 
         HorizontalMovement = new PlayerHorizontalMovement(this, maxSpeed, acceleration,
             dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables);
@@ -47,8 +49,8 @@ public class PlayerMovement : MonoBehaviour
             PlayerController,
             PlayerStatusVariables);
 
-        CombatMovement = new PlayerCombatMovement(this, bulletEffect, PlayerCollisionHandler, PlayerController,
-            PlayerStatusVariables);
+        CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
+            PlayerStatusVariables, weapon, cqcDistance);
     }
 
     void Update()

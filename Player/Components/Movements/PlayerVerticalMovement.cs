@@ -121,7 +121,6 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
                 var stairsCollider = stairsController.stairsCollider.GetComponent<BoxCollider2D>();
 
                 //A normal é sempre perpendicular ao plano, porém é necessário manter a rotação entre 29 e -29
-                //var normal = stairsCollider.transform.TransformDirection(new Vector2(center.x, center.y + size.y / 2));
                 var normal = stairsCollider.transform.up;
                 if (CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
                     ? PhysicsHelpers.SlopeInclinationRight(normal)
@@ -186,7 +185,6 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
             case VerticalPressMovementState.Jump:
                 Jump();
                 //Para motivos de segurança, caso o fixed update demorar para executar
-                //playerController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
                 playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 //Demora de alguns frames para modificar o tipo de VerticalMovementState
                 playerStatusVariables.isOnAir = true;
@@ -212,7 +210,6 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         switch (VerticalMovementState)
         {
             case VerticalMovementState.OnAir:
-                //playerController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
                 playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 break;
             case VerticalMovementState.ClimbingLadder:
@@ -310,7 +307,6 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         return position;
     }
 
-
     public void Jump()
     {
         PhysicsHelpers.ResetVelocityY(rigidbody2D);
@@ -364,8 +360,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
 
     private IEnumerator ClimbOntoLadderCoroutine(Vector2 position, float changeRate)
     {
-        /*  Mathf.Abs(rigidbody2D.position.x - position.x) >= 0.01 ||
-              Mathf.Abs(rigidbody2D.position.y - position.y) >= 0.01)*/
+       
         var f = 0.0f;
         var initialPosition = rigidbody2D.position;
         while (!MathHelpers.Approximately(rigidbody2D.position.x, position.x, 0.01f) ||

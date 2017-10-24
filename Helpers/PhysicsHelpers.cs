@@ -114,6 +114,15 @@ public static class PhysicsHelpers
         return forceApplied;
     }
 
+    public static Vector2 AddImpulseForce(float force, Rigidbody2D rigidBody)
+    {
+        var forceApplied = new Vector2(force, 0);
+
+        rigidBody.AddRelativeForce(forceApplied, ForceMode2D.Impulse);
+
+        return forceApplied;
+    }
+
     public static void Jump(float force, Rigidbody2D rigidBody)
     {
         rigidBody.AddForce(new Vector2(0, force), ForceMode2D.Impulse);

@@ -1,49 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour {
+public class Bullet : MonoBehaviour
+{
+    [SerializeField] private float force;
 
-    #region Váriaveis Gerais
-
-    private float velocity;
-    private float acceleration;
-    private float mass;
-    private float force;
- 
-    #endregion
+    private Rigidbody2D rigidbody;
 
 
-
-    #region Métodos Unity
-
-
-    // Use this for initialization
-    void Start()
+    public void Awake()
     {
-
+        rigidbody = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Shoot()
     {
-
+        /*var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        var rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.rotation = rotation;*/
+        PhysicsHelpers.AddImpulseForce(force, this.rigidbody);
+        DestroyBullet(3f);
     }
 
-    #endregion
-
-    #region Métodos Gerais
-
-    public void shoot()
+    public static Bullet InstantiateBullet(Vector3 position, Vector3 direction, GameObject bullet)
     {
-
+        var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        var rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        var gameObject = Instantiate(bullet, position, rotation);
+        return gameObject.GetComponent<Bullet>();
     }
 
-    public void bulletAcceleration()
+    private void DestroyBullet(float time)
     {
-
+        Destroy(gameObject, time);
     }
-
-
-    #endregion
 }

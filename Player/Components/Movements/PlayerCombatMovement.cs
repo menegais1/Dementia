@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Policy;
 using UnityEngine;
 
 public class PlayerCombatMovement : BasicPhysicsMovement
@@ -6,31 +7,31 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     public CombatMovementState CombatMovementState { get; private set; }
     public CombatPressMovementState CombatPressMovementState { get; private set; }
 
-
-    public AimDirection AimDirection;
-
-    private GameObject bulletEffect;
-
     private PlayerController playerController;
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerStatusVariables playerStatusVariables;
 
+    private Weapon currentWeapon;
+    private float cqcDistance;
 
-    public PlayerCombatMovement(MonoBehaviour monoBehaviour, GameObject bulletEffect,
+    public PlayerCombatMovement(MonoBehaviour monoBehaviour,
         BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables) : base(monoBehaviour)
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Weapon currentWeapon,
+        float cqcDistance) : base(
+        monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
         this.monoBehaviour = monoBehaviour;
         this.playerController = playerController;
-        this.bulletEffect = bulletEffect;
         this.playerCollisionHandler = playerCollisionHandler;
+        this.currentWeapon = currentWeapon;
+        this.cqcDistance = cqcDistance;
     }
 
 
     public override void StartMovement()
     {
-        playerController.CheckForCombatInput();
+        playerController.CheckForCombatInput(currentWeapon.Automatic);
 
         playerStatusVariables.canAim = playerStatusVariables.CheckCanAim();
 
@@ -48,12 +49,23 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         {
             CheckFacingDirection();
             CombatMovementState = CombatMovementState.Aiming;
-            AimDirection = CheckAimDirection();
 
             if (playerController.ShootPress)
             {
                 CombatPressMovementState = CombatPressMovementState.Shoot;
             }
+            else if (playerController.ReloadPress)
+            {
+                CombatPressMovementState = CombatPressMovementState.Reload;
+            }
+            else if (playerController.CqcPress)
+            {
+                CombatPressMovementState = CombatPressMovementState.Cqc;
+            }
+        }
+        else if (playerController.CqcPress)
+        {
+            CombatPressMovementState = CombatPressMovementState.Cqc;
         }
         else
         {
@@ -70,6 +82,12 @@ public class PlayerCombatMovement : BasicPhysicsMovement
                 break;
             case CombatPressMovementState.None:
                 break;
+            case CombatPressMovementState.Reload:
+                ReloadWeapon();
+                break;
+            case CombatPressMovementState.Cqc:
+                Cqc();
+                break;
             default:
                 Debug.Log("Error");
                 break;
@@ -82,7 +100,6 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         switch (CombatMovementState)
         {
             case CombatMovementState.Aiming:
-                Aim();
                 break;
             case CombatMovementState.None:
                 break;
@@ -94,56 +111,6 @@ public class PlayerCombatMovement : BasicPhysicsMovement
 
     public override void ResolvePendencies()
     {
-    }
-
-    public void Aim()
-    {
-        switch (AimDirection)
-        {
-            case AimDirection.Right:
-                Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    monoBehaviour.transform.right);
-
-                break;
-            case AimDirection.Up:
-                Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    monoBehaviour.transform.up);
-
-                break;
-            case AimDirection.Down:
-                Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    monoBehaviour.transform.up * -1);
-
-                break;
-            case AimDirection.Left:
-                Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    monoBehaviour.transform.right * -1);
-
-                break;
-            case AimDirection.UpRight:
-                Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    (monoBehaviour.transform.up + monoBehaviour.transform.right).normalized);
-
-                break;
-            case AimDirection.UpLeft:
-                Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    (monoBehaviour.transform.up + (monoBehaviour.transform.right * -1)).normalized);
-
-                break;
-            case AimDirection.DownRight:
-                Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    ((monoBehaviour.transform.up * -1) + monoBehaviour.transform.right).normalized);
-
-                break;
-            case AimDirection.DownLeft:
-                Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    ((monoBehaviour.transform.up * -1) + (monoBehaviour.transform.right * -1)).normalized);
-
-                break;
-            default:
-                Debug.Log("Error");
-                break;
-        }
     }
 
     public void UseItem()
@@ -158,136 +125,35 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     {
     }
 
-    public AimDirection CheckAimDirection()
-    {
-        if (!MathHelpers.Approximately(playerController.HorizontalAim, 0, float.Epsilon))
-        {
-            if (!MathHelpers.Approximately(playerController.VerticalAim, 0, float.Epsilon))
-            {
-                if (MathHelpers.Approximately(playerController.HorizontalAim, 1, float.Epsilon)
-                    && MathHelpers.Approximately(playerController.VerticalAim, 1, float.Epsilon))
-                {
-                    return AimDirection.UpRight;
-                }
-                else if (MathHelpers.Approximately(playerController.HorizontalAim, 1, float.Epsilon)
-                         && MathHelpers.Approximately(playerController.VerticalAim, -1, float.Epsilon))
-                {
-                    return AimDirection.DownRight;
-                }
-                else if (MathHelpers.Approximately(playerController.HorizontalAim, -1, float.Epsilon)
-                         && MathHelpers.Approximately(playerController.VerticalAim, 1, float.Epsilon))
-                {
-                    return AimDirection.UpLeft;
-                }
-                else if (MathHelpers.Approximately(playerController.HorizontalAim, -1, float.Epsilon)
-                         && MathHelpers.Approximately(playerController.VerticalAim, -1, float.Epsilon))
-                {
-                    return AimDirection.DownLeft;
-                }
-            }
-            else
-            {
-                if (MathHelpers.Approximately(playerController.HorizontalAim, -1, float.Epsilon))
-                {
-                    return AimDirection.Left;
-                }
-                else
-                {
-                    return AimDirection.Right;
-                }
-            }
-        }
-        else if (MathHelpers.Approximately(playerController.VerticalAim, 1, float.Epsilon))
-        {
-            return AimDirection.Up;
-        }
-        else if (MathHelpers.Approximately(playerController.VerticalAim, -1, float.Epsilon))
-        {
-            return AimDirection.Down;
-        }
-
-        return playerStatusVariables.facingDirection == FacingDirection.Right
-            ? AimDirection.Right
-            : AimDirection.Left;
-    }
-
     public void Shoot()
     {
-        RaycastHit2D ray = new RaycastHit2D();
-        Debug.Log(AimDirection);
-
-        switch (AimDirection)
-        {
-            case AimDirection.Right:
-                ray = Physics2D.Raycast(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    monoBehaviour.transform.right);
-
-                break;
-            case AimDirection.Up:
-                ray = Physics2D.Raycast(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    monoBehaviour.transform.up);
-
-                break;
-            case AimDirection.Down:
-                ray = Physics2D.Raycast(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    monoBehaviour.transform.up * -1);
-
-                break;
-            case AimDirection.Left:
-                ray = Physics2D.Raycast(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    monoBehaviour.transform.right * -1);
-
-                break;
-            case AimDirection.UpRight:
-                ray = Physics2D.Raycast(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    (monoBehaviour.transform.up + monoBehaviour.transform.right).normalized);
-                break;
-            case AimDirection.UpLeft:
-                ray = Physics2D.Raycast(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    (monoBehaviour.transform.up + (monoBehaviour.transform.right * -1)).normalized);
-                break;
-            case AimDirection.DownRight:
-                ray = Physics2D.Raycast(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    ((monoBehaviour.transform.up * -1) + monoBehaviour.transform.right).normalized);
-
-                break;
-            case AimDirection.DownLeft:
-                ray = Physics2D.Raycast(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
-                    ((monoBehaviour.transform.up * -1) + (monoBehaviour.transform.right * -1)).normalized);
-
-                break;
-            default:
-                Debug.Log("Error");
-                break;
-        }
-
-        if (ray.collider != null)
-        {
-            var bulletEffectObject = GameObject.Instantiate(bulletEffect);
-            bulletEffectObject.transform.position = ray.point;
-            GameObject.Destroy(bulletEffectObject, 1f);
-        }
+        currentWeapon.Shoot(playerController.AimDirection);
     }
 
     public void ReloadWeapon()
     {
+        currentWeapon.Reload();
     }
 
     public void Cqc()
     {
+        RaycastHit2D ray = Physics2D.Raycast(
+            monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
+            playerStatusVariables.facingDirection == FacingDirection.Right ? Vector2.right : Vector2.right * -1,
+            cqcDistance);
+        
+        Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
+            playerStatusVariables.facingDirection == FacingDirection.Right ? Vector2.right : Vector2.right * -1,
+            Color.black);
     }
 
-    public void CheckBullets()
+    private void CheckFacingDirection()
     {
-    }
-
-    public void CheckFacingDirection()
-    {
-        if (MathHelpers.Approximately(playerController.HorizontalAim, 1, float.Epsilon))
+        if (playerController.AimDirection.x >= 0)
         {
             playerStatusVariables.facingDirection = FacingDirection.Right;
         }
-        else if (MathHelpers.Approximately(playerController.HorizontalAim, -1, float.Epsilon))
+        else if (playerController.AimDirection.x < 0)
         {
             playerStatusVariables.facingDirection = FacingDirection.Left;
         }

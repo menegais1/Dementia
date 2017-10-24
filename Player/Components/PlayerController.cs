@@ -21,15 +21,17 @@ public sealed class PlayerController : BasicHumanoidController
 
     public bool AimHold { get; private set; }
     public bool ShootPress { get; private set; }
-    public float VerticalAim { get; private set; }
-    public float HorizontalAim { get; private set; }
+    public bool ReloadPress { get; private set; }
+    public bool CqcPress { get; private set; }
+    public Vector3 AimDirection { get; private set; }
 
     private RevokeControlVariables revokeControlVariables;
+    private Transform playerTransform;
 
-
-    public PlayerController()
+    public PlayerController(Transform playerTransform)
     {
         revokeControlVariables = new RevokeControlVariables();
+        this.playerTransform = playerTransform;
     }
 
     public override void CheckForHorizontalInput()
@@ -86,21 +88,23 @@ public sealed class PlayerController : BasicHumanoidController
         }
     }
 
-    public void CheckForCombatInput()
+    public void CheckForCombatInput(bool automaticWeapon)
     {
         if (!revokeControlVariables.combatMovementControl)
         {
             AimHold = Input.GetButton("Aim");
-            ShootPress = Input.GetButtonDown("Shoot");
-            VerticalAim = Input.GetAxisRaw("Vertical Aim");
-            HorizontalAim = Input.GetAxisRaw("Horizontal Aim");
+            ReloadPress = Input.GetButtonDown("Reload");
+            CqcPress = Input.GetButtonDown("Cqc");
+            ShootPress = automaticWeapon ? Input.GetButton("Shoot") : Input.GetButtonDown("Shoot");
+            AimDirection = Camera.main.ScreenToWorldPoint(Input.mousePosition) - playerTransform.position;
         }
         else
         {
             AimHold = false;
+            ReloadPress = false;
+            ReloadPress = false;
             ShootPress = false;
-            VerticalAim = 0;
-            HorizontalAim = 0;
+            AimDirection = Vector3.zero;
         }
     }
 
