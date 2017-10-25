@@ -18,11 +18,13 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
     private PlayerController playerController;
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerStatusVariables playerStatusVariables;
+    private Player player;
 
     public PlayerHorizontalMovement(MonoBehaviour monoBehaviour,
         float maxSpeed, float acceleration,
         float dodgeForce, float crouchingSpeed, BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables) : base(monoBehaviour)
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Player player) : base(
+        monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
         this.monoBehaviour = monoBehaviour;
@@ -33,6 +35,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
         this.characterHeight = capsuleCollider2D.bounds.size.y;
         this.playerController = playerController;
         this.playerCollisionHandler = playerCollisionHandler;
+        this.player = player;
     }
 
     public override void StartMovement()
@@ -54,7 +57,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
             Raise();
         }
 
-        playerStatusVariables.isDodging = playerController.Dodge;
+        playerStatusVariables.isDodging = playerController.Dodge && player.CheckStamina(30, true);
         playerStatusVariables.isRunning = false;
 
         if (!MathHelpers.Approximately(playerController.HorizontalMove, 0, float.Epsilon) &&
@@ -64,12 +67,12 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
             {
                 HorizontalMovementState = HorizontalMovementState.CrouchWalking;
             }
-            else if (playerController.Run)
+            else if (playerController.Run && player.CheckStamina(10, false))
             {
                 playerStatusVariables.isRunning = true;
                 HorizontalMovementState = HorizontalMovementState.Running;
             }
-            else if (playerStatusVariables.isJogging)
+            else if (playerStatusVariables.isJogging && player.CheckStamina(5, false))
             {
                 HorizontalMovementState = HorizontalMovementState.Jogging;
             }
@@ -98,6 +101,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
         switch (HorizontalPressMovementState)
         {
             case HorizontalPressMovementState.Dodge:
+                player.SpendStamina(30, true);
                 forceApplied = Dodge();
                 break;
             case HorizontalPressMovementState.None:
@@ -124,9 +128,11 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
                 forceApplied = Walk(playerController.HorizontalMove, 1);
                 break;
             case HorizontalMovementState.Jogging:
+                player.SpendStamina(5f, false);
                 forceApplied = Jog(playerController.HorizontalMove, 1.5f);
                 break;
             case HorizontalMovementState.Running:
+                player.SpendStamina(10f, false);
                 forceApplied = Run(playerController.HorizontalMove, 2f);
                 break;
             case HorizontalMovementState.CrouchIdle:

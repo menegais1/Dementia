@@ -1,154 +1,132 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Remoting.Lifetime;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-
-    #region Váriaveis Gerais
-
     private bool canSave;
 
-    [SerializeField]
-    private float currentStamina;
-    [SerializeField]
-    public float maxStamina;
-    [SerializeField]
-    private float staminaRegenRate;
-    [SerializeField]
-    private float timeToStartStaminaRegen;
-    private float currentTimeToStartStaminaRegen;
-
-    private float life;
+    [SerializeField] private float currentStamina;
+    [SerializeField] public float maxStamina;
+    [SerializeField] private float staminaRegenRatePerSecond;
+    [SerializeField] private float timeToStartStaminaRegen;
+    [SerializeField] private float life;
     private bool activeMorphin;
     private bool activeAdrenaline;
     private int diaryState;
     private bool canUseDiary;
 
-    #endregion
+    private float currentTimeToStartStaminaRegen;
+    private float timeTrackerForSpendingStamina;
 
-
-
-    #region Métodos Unity
-
-
-    // Use this for initialization
     void Start()
     {
         currentStamina = maxStamina;
+        timeTrackerForSpendingStamina = Time.time;
     }
 
-    // Update is called once per frame
+
     void Update()
     {
-        //print(currentStamina);
-        regenStamina();
+        RegenStamina();
     }
 
-    #endregion
-
-    #region Métodos Gerais
 
     public void saveGame()
     {
-
     }
 
     public void archiveNotes()
     {
-
     }
 
     public void loadGame()
     {
-
     }
 
-    public void spendStamina(float staminaToSpent)
+    public void SpendStamina(float percentOfStaminaToSpent, bool imediate)
     {
-        if (currentStamina >= staminaToSpent)
+        if (CoroutineManager.CheckIfCoroutineExists("RegenStaminaCoroutine"))
         {
-            currentStamina -= staminaToSpent;
-            if (currentStamina < 0)
-            {
-                currentStamina = 0;
-            }
-            currentTimeToStartStaminaRegen = Time.time + timeToStartStaminaRegen;
+            CoroutineManager.DeleteCoroutine("RegenStaminaCoroutine");
+        }
+
+        if (imediate)
+        {
+            currentStamina -= maxStamina * percentOfStaminaToSpent / 100;
+        }
+        else if (Time.time >= timeTrackerForSpendingStamina)
+        {
+            timeTrackerForSpendingStamina = Time.time + Time.fixedDeltaTime;
+            currentStamina -= maxStamina * percentOfStaminaToSpent / 100 * Time.fixedDeltaTime;
+        }
+
+        currentStamina = currentStamina <= 0 ? 0 : currentStamina;
+
+        currentTimeToStartStaminaRegen = Time.time + timeToStartStaminaRegen;
+    }
+
+    private void RegenStamina()
+    {
+        if (Time.time >= currentTimeToStartStaminaRegen && currentStamina < maxStamina &&
+            !CoroutineManager.CheckIfCoroutineExists("RegenStaminaCoroutine"))
+        {
+            CoroutineManager.AddCoroutine(RegenStaminaCoroutine(), "RegenStaminaCoroutine");
         }
     }
 
-
-    public void regenStamina()
+    private IEnumerator RegenStaminaCoroutine()
     {
-        if (currentStamina < maxStamina)
-        {
+        var t = Time.fixedDeltaTime;
 
-            if (Time.time >= currentTimeToStartStaminaRegen)
+        while (currentStamina < maxStamina)
+        {
+            currentStamina += staminaRegenRatePerSecond * t;
+
+            if (currentStamina > maxStamina)
             {
-                currentStamina += staminaRegenRate * Time.deltaTime;
-                if (currentStamina > maxStamina)
-                {
-                    currentStamina = maxStamina;
-                }
+                currentStamina = maxStamina;
             }
+            yield return new WaitForFixedUpdate();
         }
+
+        CoroutineManager.DeleteCoroutine("RegenStaminaCoroutine");
     }
+
 
     public void takeDamage()
     {
-
     }
 
     public void regenLife()
     {
-
     }
 
     public void useDiary()
     {
-
     }
 
     public void checkSaveItem()
     {
-
     }
 
-    public bool checkStamina(float staminaToUseAction)
+    public bool CheckStamina(float percentOfStaminaToSpent, bool imediate)
     {
-        if (currentStamina < staminaToUseAction)
-        {
-            return false;
-        }
-
-        return true;
+        return currentStamina >= (maxStamina * percentOfStaminaToSpent / 100) * (imediate ? 1 : Time.fixedDeltaTime);
     }
 
     public void checkLife()
     {
-
     }
 
     public void checkBullets()
     {
-
     }
 
     public void selectItens()
     {
-
     }
 
     public void loseLife()
     {
-
     }
-
-    #endregion
-
-
-
-
-
 }

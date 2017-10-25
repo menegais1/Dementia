@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//Comparar duas coroutines nunca retorna falso, necessário refazer a classe
+
+
 public static class CoroutineManager
 {
     private static List<CoroutineContainer> runningCoroutines = new List<CoroutineContainer>();

@@ -24,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
     public PlayerVerticalMovement VerticalMovement { get; private set; }
     public PlayerMiscellaneousMovement MiscellaneousMovement { get; private set; }
     public PlayerCombatMovement CombatMovement { get; private set; }
+    public Player Player { get; private set; }
 
     public PlayerController PlayerController { get; private set; }
     public BasicCollisionHandler PlayerCollisionHandler { get; private set; }
@@ -33,17 +34,18 @@ public class PlayerMovement : MonoBehaviour
     {
         //PlayerStatusVariables = new PlayerStatusVariables();
         PlayerStatusVariables = GetComponent<PlayerStatusVariables>();
-
+        Player = GetComponent<Player>();
+        
         PlayerCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
         PlayerController = new PlayerController(transform);
 
         HorizontalMovement = new PlayerHorizontalMovement(this, maxSpeed, acceleration,
-            dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables);
+            dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables, Player);
 
         VerticalMovement = new PlayerVerticalMovement(this, jumpForce, climbingLadderSmoothness,
             climbingObstacleSmoothness, climbLadderVelocity, PlayerCollisionHandler, PlayerController,
-            PlayerStatusVariables);
+            PlayerStatusVariables, Player);
 
         MiscellaneousMovement = new PlayerMiscellaneousMovement(this, cameraZoomSize, PlayerCollisionHandler,
             PlayerController,

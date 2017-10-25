@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
@@ -17,9 +14,6 @@ public class Bullet : MonoBehaviour
 
     public void Shoot()
     {
-        /*var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        var rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-        transform.rotation = rotation;*/
         PhysicsHelpers.AddImpulseForce(force, this.rigidbody);
         DestroyBullet(3f);
     }
@@ -31,6 +25,7 @@ public class Bullet : MonoBehaviour
         var gameObject = Instantiate(bullet, position, rotation);
         return gameObject.GetComponent<Bullet>();
     }
+
 
     private void DestroyBullet(float time)
     {

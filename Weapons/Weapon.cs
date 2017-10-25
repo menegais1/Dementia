@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 
@@ -10,19 +11,40 @@ public class Weapon : MonoBehaviour
 
     [SerializeField] private int maxMagazine;
     [SerializeField] private float damage;
-    [SerializeField] private float precision;
     [SerializeField] private float reloadTime;
     [SerializeField] private float bulletsPerMinute;
     [SerializeField] private bool automatic;
-    [SerializeField] private float recoil;
+    [SerializeField] private float recoilBaseModifier;
+    [SerializeField] private float recoilBaseTime;
+    [SerializeField] private float recoilCooldownTime;
+    [SerializeField] private float recoilCooldownModifier;
     [SerializeField] private int currentAmmo;
     [SerializeField] private int currentMagazine;
     [SerializeField] private Transform muzzlePosition;
     [SerializeField] private GameObject bullet;
 
     private float nextShot;
-    //private int shotsFired;
-    
+    private float recoilCurrentTime;
+    private float timeFromLastShot;
+    private float timeAtLastShot;
+    private float timePerBullet;
+
+    private void Start()
+    {
+        timePerBullet = 60 / bulletsPerMinute;
+        timeFromLastShot = Time.time;
+    }
+
+    private void Update()
+    {
+        if (timeFromLastShot > recoilCooldownTime)
+        {
+            recoilCurrentTime = recoilCurrentTime > 0 ? recoilCurrentTime - recoilCooldownModifier : 0;
+        }
+
+        timeFromLastShot = Time.time - timeAtLastShot;
+    }
+
     public bool Automatic
     {
         get { return automatic; }
@@ -34,11 +56,13 @@ public class Weapon : MonoBehaviour
     {
         if (CheckIfCanShoot())
         {
+            var recoilCalc = RecoilCalc(direction);
             var instantiateBullet =
-                Bullet.InstantiateBullet(muzzlePosition.position, direction, bullet);
+                Bullet.InstantiateBullet(muzzlePosition.position, recoilCalc, bullet);
             instantiateBullet.Shoot();
             SpendBullets();
-            //shotsFired++;
+            recoilCurrentTime += timePerBullet;
+            timeAtLastShot = Time.time;
         }
         else if (currentMagazine == 0)
         {
@@ -65,26 +89,17 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    /* public float RecoilCalc()
-     {
-         if (automatic)
-         {
-             if (shotsFired < maxMagazine / 3)
-             {
-                 return recoil / precision;
-             }
- 
-             if (shotsFired >= maxMagazine / 3 && shotsFired < maxMagazine * 2 / 3)
-             {
-                 return recoil / precision * 2;
-             }
- 
-             if (shotsFired >= maxMagazine * 2 / 3)
-             {
-                 return recoil;
-             }
-         }
-     }*/
+    private Vector3 RecoilCalc(Vector3 direction)
+    {
+        if (recoilCurrentTime > recoilBaseTime)
+        {
+            var modifier = (recoilCurrentTime - recoilBaseTime) * recoilBaseModifier;
+            var angleAxis = Quaternion.AngleAxis(modifier, Vector3.forward);
+            return angleAxis * direction;
+        }
+
+        return direction;
+    }
 
     private bool CheckIfCanShoot()
     {

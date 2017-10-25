@@ -16,12 +16,14 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerController playerController;
     private PlayerStatusVariables playerStatusVariables;
+    private Player player;
 
 
     public PlayerVerticalMovement(MonoBehaviour monoBehaviour,
         float jumpForce, float climbingLadderSmoothness,
         float climbingObstacleSmoothness, float climbLadderVelocity, BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables) : base(monoBehaviour)
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Player player) : base(
+        monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
         this.playerCollisionHandler = playerCollisionHandler;
@@ -31,6 +33,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         this.climbingObstacleSmoothness = climbingObstacleSmoothness;
         this.currentGravityScale = rigidbody2D.gravityScale;
         this.climbLadderVelocity = climbLadderVelocity;
+        this.player = player;
     }
 
     public override void StartMovement()
@@ -56,7 +59,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         }
 
         playerStatusVariables.isJumping = playerStatusVariables.canJump && playerController.Jump &&
-                                          !playerStatusVariables.isClimbingObstacle;
+                                          !playerStatusVariables.isClimbingObstacle && player.CheckStamina(20, true);
 
 
         //Para velocidades ridiculamente altas, vai bugar
@@ -184,6 +187,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         {
             case VerticalPressMovementState.Jump:
                 Jump();
+                player.SpendStamina(20, true);
                 //Para motivos de segurança, caso o fixed update demorar para executar
                 playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 //Demora de alguns frames para modificar o tipo de VerticalMovementState
@@ -360,7 +364,6 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
 
     private IEnumerator ClimbOntoLadderCoroutine(Vector2 position, float changeRate)
     {
-       
         var f = 0.0f;
         var initialPosition = rigidbody2D.position;
         while (!MathHelpers.Approximately(rigidbody2D.position.x, position.x, 0.01f) ||
