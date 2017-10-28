@@ -5,7 +5,6 @@ public class ItemInteraction : MonoBehaviour
     private PlayerMiscellaneousMovement playerMiscellaneousMovement;
     private PlayerStatusVariables playerStatusVariables;
 
-    #region Métodos Unity
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -36,9 +35,6 @@ public class ItemInteraction : MonoBehaviour
         }
     }
 
-    #endregion
-
-    #region Métodos Gerais
 
     public void Interaction()
     {
@@ -46,5 +42,4 @@ public class ItemInteraction : MonoBehaviour
         Destroy(this.gameObject);
     }
 
-    #endregion
 }

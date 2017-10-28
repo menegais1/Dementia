@@ -13,6 +13,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float climbingLadderSmoothness;
     [SerializeField] private float climbingObstacleSmoothness;
     [SerializeField] private float climbLadderVelocity;
+    [SerializeField] private float minimumFallingDistanceForDamage;
+    [SerializeField] private float minimumDamageForFalling;
     [SerializeField] private float cameraZoomSize;
     [SerializeField] private float maxAngle;
     [SerializeField] private float cqcDistance;
@@ -35,7 +37,7 @@ public class PlayerMovement : MonoBehaviour
         //PlayerStatusVariables = new PlayerStatusVariables();
         PlayerStatusVariables = GetComponent<PlayerStatusVariables>();
         Player = GetComponent<Player>();
-        
+
         PlayerCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
         PlayerController = new PlayerController(transform);
@@ -44,7 +46,9 @@ public class PlayerMovement : MonoBehaviour
             dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables, Player);
 
         VerticalMovement = new PlayerVerticalMovement(this, jumpForce, climbingLadderSmoothness,
-            climbingObstacleSmoothness, climbLadderVelocity, PlayerCollisionHandler, PlayerController,
+            climbingObstacleSmoothness, climbLadderVelocity, minimumFallingDistanceForDamage, minimumDamageForFalling,
+            PlayerCollisionHandler,
+            PlayerController,
             PlayerStatusVariables, Player);
 
         MiscellaneousMovement = new PlayerMiscellaneousMovement(this, cameraZoomSize, PlayerCollisionHandler,

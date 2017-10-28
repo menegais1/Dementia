@@ -3,18 +3,18 @@
 public class Bullet : MonoBehaviour
 {
     [SerializeField] private float force;
-
-    private Rigidbody2D rigidbody;
+    [SerializeField] private WeaponType type;
+    private Rigidbody2D rigidbody2D;
 
 
     public void Awake()
     {
-        rigidbody = GetComponent<Rigidbody2D>();
+        rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
     public void Shoot()
     {
-        PhysicsHelpers.AddImpulseForce(force, this.rigidbody);
+        PhysicsHelpers.AddImpulseForce(force, this.rigidbody2D);
         DestroyBullet(3f);
     }
 

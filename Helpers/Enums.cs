@@ -42,7 +42,6 @@ public enum CombatPressMovementState
     Cqc,
 }
 
-
 public enum VerticalMovementState
 {
     Grounded,
@@ -82,6 +81,14 @@ public enum FacingDirection
 {
     Right,
     Left,
+}
+
+public enum WeaponType
+{
+    Revolver,
+    Shotgun,
+    MachineGun,
+    Rifle,
 }
 
 public enum AimDirection

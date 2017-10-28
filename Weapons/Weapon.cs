@@ -20,8 +20,10 @@ public class Weapon : MonoBehaviour
     [SerializeField] private float recoilCooldownModifier;
     [SerializeField] private int currentAmmo;
     [SerializeField] private int currentMagazine;
+    [SerializeField] private WeaponType type;
     [SerializeField] private Transform muzzlePosition;
     [SerializeField] private GameObject bullet;
+
 
     private float nextShot;
     private float recoilCurrentTime;

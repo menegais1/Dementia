@@ -1,6 +1,4 @@
-﻿using System;
-using System.Security.Policy;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerCombatMovement : BasicPhysicsMovement
 {
@@ -80,13 +78,13 @@ public class PlayerCombatMovement : BasicPhysicsMovement
             case CombatPressMovementState.Shoot:
                 Shoot();
                 break;
-            case CombatPressMovementState.None:
-                break;
             case CombatPressMovementState.Reload:
                 ReloadWeapon();
                 break;
             case CombatPressMovementState.Cqc:
                 Cqc();
+                break;
+            case CombatPressMovementState.None:
                 break;
             default:
                 Debug.Log("Error");
@@ -121,10 +119,6 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     {
     }
 
-    public void Die()
-    {
-    }
-
     public void Shoot()
     {
         currentWeapon.Shoot(playerController.AimDirection);
@@ -141,7 +135,7 @@ public class PlayerCombatMovement : BasicPhysicsMovement
             monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
             playerStatusVariables.facingDirection == FacingDirection.Right ? Vector2.right : Vector2.right * -1,
             cqcDistance);
-        
+
         Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
             playerStatusVariables.facingDirection == FacingDirection.Right ? Vector2.right : Vector2.right * -1,
             Color.black);

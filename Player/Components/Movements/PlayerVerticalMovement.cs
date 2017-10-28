@@ -12,6 +12,11 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
     private float climbingObstacleSmoothness;
     private float climbLadderVelocity;
     private float currentGravityScale;
+    private float minimumFallingDistanceForDamage;
+    private float minimumDamageForFalling;
+
+    private float distanceWhileFalling;
+    private float lastFramePositionWhileFalling;
 
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerController playerController;
@@ -21,7 +26,9 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
 
     public PlayerVerticalMovement(MonoBehaviour monoBehaviour,
         float jumpForce, float climbingLadderSmoothness,
-        float climbingObstacleSmoothness, float climbLadderVelocity, BasicCollisionHandler playerCollisionHandler,
+        float climbingObstacleSmoothness, float climbLadderVelocity, float minimumFallingDistanceForDamage
+        , float minimumDamageForFalling,
+        BasicCollisionHandler playerCollisionHandler,
         PlayerController playerController, PlayerStatusVariables playerStatusVariables, Player player) : base(
         monoBehaviour)
     {
@@ -31,6 +38,8 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         this.jumpForce = jumpForce;
         this.climbingLadderSmoothness = climbingLadderSmoothness;
         this.climbingObstacleSmoothness = climbingObstacleSmoothness;
+        this.minimumFallingDistanceForDamage = minimumFallingDistanceForDamage;
+        this.minimumDamageForFalling = minimumDamageForFalling;
         this.currentGravityScale = rigidbody2D.gravityScale;
         this.climbLadderVelocity = climbLadderVelocity;
         this.player = player;
@@ -231,11 +240,30 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
 
     public override void ResolvePendencies()
     {
-        if (playerStatusVariables.isOnAir && playerStatusVariables.canJump &&
-            (rigidbody2D.velocity.y < 0 || MathHelpers.Approximately(rigidbody2D.velocity.y, 0, float.Epsilon)))
+        if (playerStatusVariables.isOnAir)
         {
-            playerStatusVariables.isOnAir = false;
-            playerController.RevokeControl(0.1f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+            if (lastFramePositionWhileFalling >= rigidbody2D.position.y && rigidbody2D.velocity.y < 0)
+            {
+                distanceWhileFalling += lastFramePositionWhileFalling - rigidbody2D.position.y;
+            }
+
+            if (playerStatusVariables.canJump &&
+                (rigidbody2D.velocity.y < 0 || MathHelpers.Approximately(rigidbody2D.velocity.y, 0, float.Epsilon)))
+            {
+                if (distanceWhileFalling >= minimumFallingDistanceForDamage)
+                {
+                    player.TakeDamage(minimumDamageForFalling * distanceWhileFalling / minimumFallingDistanceForDamage);
+                }
+                distanceWhileFalling = 0;
+                playerStatusVariables.isOnAir = false;
+                playerController.RevokeControl(0.1f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+            }
+
+            lastFramePositionWhileFalling = rigidbody2D.position.y;
+        }
+        else
+        {
+            lastFramePositionWhileFalling = 0;
         }
 
         if (!MathHelpers.Approximately(rigidbody2D.velocity.y, 0, float.Epsilon) &&

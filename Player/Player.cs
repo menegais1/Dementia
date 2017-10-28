@@ -1,15 +1,17 @@
 ﻿using System.Collections;
+using System.Runtime.Remoting.Lifetime;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private bool canSave;
-
     [SerializeField] private float currentStamina;
     [SerializeField] public float maxStamina;
     [SerializeField] private float staminaRegenRatePerSecond;
     [SerializeField] private float timeToStartStaminaRegen;
-    [SerializeField] private float life;
+    [SerializeField] private float currentLife;
+    [SerializeField] private float maxLife;
+
+    private bool canSave;
     private bool activeMorphin;
     private bool activeAdrenaline;
     private int diaryState;
@@ -21,6 +23,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         currentStamina = maxStamina;
+        currentLife = maxLife;
         timeTrackerForSpendingStamina = Time.time;
     }
 
@@ -31,15 +34,15 @@ public class Player : MonoBehaviour
     }
 
 
-    public void saveGame()
+    public void SaveGame()
     {
     }
 
-    public void archiveNotes()
+    public void ArchiveNotes()
     {
     }
 
-    public void loadGame()
+    public void LoadGame()
     {
     }
 
@@ -93,19 +96,34 @@ public class Player : MonoBehaviour
     }
 
 
-    public void takeDamage()
+    public void TakeDamage(float lifeToDecrease)
+    {
+        currentLife -= lifeToDecrease;
+
+        if (currentLife < 0)
+        {
+            currentLife = 0;
+        }
+    }
+
+    public void RegenLife(float lifeToRegen)
+    {
+        currentLife += lifeToRegen;
+        if (currentLife > maxLife)
+        {
+            currentLife = maxLife;
+        }
+    }
+
+    public void Die()
     {
     }
 
-    public void regenLife()
+    public void UseDiary()
     {
     }
 
-    public void useDiary()
-    {
-    }
-
-    public void checkSaveItem()
+    public void CheckSaveItem()
     {
     }
 
@@ -114,19 +132,11 @@ public class Player : MonoBehaviour
         return currentStamina >= (maxStamina * percentOfStaminaToSpent / 100) * (imediate ? 1 : Time.fixedDeltaTime);
     }
 
-    public void checkLife()
+    public void SelectItens()
     {
     }
 
-    public void checkBullets()
-    {
-    }
-
-    public void selectItens()
-    {
-    }
-
-    public void loseLife()
+    public void LoseLife()
     {
     }
 }
