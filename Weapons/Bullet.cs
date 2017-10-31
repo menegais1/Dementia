@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public class Bullet : MonoBehaviour
-{
+{   
     [SerializeField] private float force;
     [SerializeField] private WeaponType type;
     private Rigidbody2D rigidbody2D;

@@ -409,6 +409,11 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
 
     private IEnumerator ClimbOntoObstacleCoroutine(Vector2 position, float changeRate)
     {
+        do
+        {
+            yield return new WaitForFixedUpdate();
+        } while (playerStatusVariables.isCrouching);
+
         var playerSizeX = (position.x > rigidbody2D.position.x)
             ? capsuleCollider2D.size.x / 2
             : -capsuleCollider2D.size.x / 2;

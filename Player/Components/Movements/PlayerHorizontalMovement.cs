@@ -222,6 +222,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
             capsuleCollider2D.size = new Vector2(capsuleCollider2D.size.x, capsuleCollider2D.size.y - crouchingSpeed);
             capsuleCollider2D.offset =
                 new Vector2(capsuleCollider2D.offset.x, capsuleCollider2D.offset.y - (crouchingSpeed / 2));
+            
             playerStatusVariables.isCrouching = true;
         }
     }

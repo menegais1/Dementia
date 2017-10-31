@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Runtime.Remoting.Lifetime;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -27,12 +26,10 @@ public class Player : MonoBehaviour
         timeTrackerForSpendingStamina = Time.time;
     }
 
-
     void Update()
     {
         RegenStamina();
     }
-
 
     public void SaveGame()
     {
