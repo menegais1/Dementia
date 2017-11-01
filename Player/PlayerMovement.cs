@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
     public PlayerMiscellaneousMovement MiscellaneousMovement { get; private set; }
     public PlayerCombatMovement CombatMovement { get; private set; }
     public Player Player { get; private set; }
+    public Inventory Inventory { get; private set; }
 
     public PlayerController PlayerController { get; private set; }
     public BasicCollisionHandler PlayerCollisionHandler { get; private set; }
@@ -37,6 +38,7 @@ public class PlayerMovement : MonoBehaviour
         //PlayerStatusVariables = new PlayerStatusVariables();
         PlayerStatusVariables = GetComponent<PlayerStatusVariables>();
         Player = GetComponent<Player>();
+        Inventory = GetComponent<Inventory>();
 
         PlayerCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
@@ -53,7 +55,7 @@ public class PlayerMovement : MonoBehaviour
 
         MiscellaneousMovement = new PlayerMiscellaneousMovement(this, cameraZoomSize, PlayerCollisionHandler,
             PlayerController,
-            PlayerStatusVariables);
+            PlayerStatusVariables, Inventory);
 
         CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
             PlayerStatusVariables, weapon, cqcDistance);

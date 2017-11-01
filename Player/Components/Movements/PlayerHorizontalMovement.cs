@@ -212,6 +212,9 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
                 rigidbody2D, playerStatusVariables.facingDirection);
         playerStatusVariables.isDodging = false;
         playerController.RevokeControl(0.6f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+        PhysicsHelpers.IgnoreLayerCollision(rigidbody2D.gameObject.layer, LayerMask.NameToLayer("Enemy"),
+            true, 0.6f);
+
         return forceApplied;
     }
 
@@ -222,7 +225,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
             capsuleCollider2D.size = new Vector2(capsuleCollider2D.size.x, capsuleCollider2D.size.y - crouchingSpeed);
             capsuleCollider2D.offset =
                 new Vector2(capsuleCollider2D.offset.x, capsuleCollider2D.offset.y - (crouchingSpeed / 2));
-            
+
             playerStatusVariables.isCrouching = true;
         }
     }

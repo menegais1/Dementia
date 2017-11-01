@@ -91,6 +91,14 @@ public enum WeaponType
     Rifle,
 }
 
+public enum ItemType
+{
+    RevolverBullet,
+    Bandages,
+    Molotov,
+    Analgesics,
+}
+
 public enum AimDirection
 {
     Right,

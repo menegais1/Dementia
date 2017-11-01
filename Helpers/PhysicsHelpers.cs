@@ -179,6 +179,26 @@ public static class PhysicsHelpers
         Physics2D.IgnoreLayerCollision(layerMask.value, layerMaskToIgnore.value, ignore);
     }
 
+    public static void IgnoreLayerCollision(LayerMask layerMask, LayerMask layerMaskToIgnore, bool ignore, float time)
+    {
+        CoroutineManager.AddCoroutine(IgnoreLayerCollisionCoroutine(layerMask, layerMaskToIgnore, ignore, time),
+            "IgnoreLayerCollisionCoroutine");
+        Physics2D.IgnoreLayerCollision(layerMask.value, layerMaskToIgnore.value, ignore);
+    }
+
+    private static IEnumerator IgnoreLayerCollisionCoroutine(LayerMask layerMask, LayerMask layerMaskToIgnore,
+        bool ignore,
+        float time)
+    {
+        for (var i = 0; i <= 1; i++)
+        {
+            Physics2D.IgnoreLayerCollision(layerMask.value, layerMaskToIgnore.value, ignore);
+            ignore = !ignore;
+            yield return new WaitForSeconds(time);
+        }
+        CoroutineManager.DeleteCoroutine("IgnoreLayerCollisionCoroutine");
+    }
+
 
     public static void SwitchGravity(Rigidbody2D rigidbody2D, bool on, float gravityScaleToChange)
     {

@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 {
@@ -11,23 +10,23 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 
     public delegate void ItemEffectDelegate();
 
-    private event ItemEffectDelegate itemEffectEvent;
-
-
     private float cameraZoomSize;
 
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerController playerController;
     private PlayerStatusVariables playerStatusVariables;
+    private Inventory inventory;
 
 
     public PlayerMiscellaneousMovement(MonoBehaviour monoBehaviour, float cameraZoomSize,
         BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables) : base(monoBehaviour)
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Inventory inventory) : base(
+        monoBehaviour)
     {
         this.playerController = playerController;
         this.playerCollisionHandler = playerCollisionHandler;
         this.playerStatusVariables = playerStatusVariables;
+        this.inventory = inventory;
         this.cameraZoomSize = cameraZoomSize;
     }
 
@@ -38,6 +37,10 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
         if (playerStatusVariables.canTakeItem && playerController.TakeItemPress)
         {
             playerStatusVariables.isTakingItem = true;
+        }
+        else if (!playerStatusVariables.canTakeItem && playerStatusVariables.isTakingItem)
+        {
+            playerStatusVariables.isTakingItem = false;
         }
 
         if (playerStatusVariables.canInteractWithScenery && playerController.InteractWithSceneryPress)
@@ -67,7 +70,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
             case MiscellaneousPressMovementState.None:
                 break;
             case MiscellaneousPressMovementState.TakeItem:
-                TakeItem();
+                inventory.TakeItem(TakeItem());
                 break;
             case MiscellaneousPressMovementState.InteractWithScenery:
                 InteractWithScenery();
@@ -114,16 +117,24 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
         this.sceneryInteractionEvent += sceneryInteraction;
     }
 
-    public void SubscribeItemEffect(ItemEffectDelegate itemEffect)
+    private CollectibleItem TakeItem()
     {
-        this.itemEffectEvent = null;
-        this.itemEffectEvent += itemEffect;
-    }
+        var contactFilter2D = new ContactFilter2D
+        {
+            useTriggers = true,
+            useLayerMask = true,
+            layerMask = LayerMask.GetMask("Collectible Item"),
+        };
 
-    private void TakeItem()
-    {
-        if (itemEffectEvent == null) return;
-        itemEffectEvent();
-        playerStatusVariables.isTakingItem = false;
+        var item = new Collider2D[1];
+        capsuleCollider2D.GetContacts(contactFilter2D, item);
+        var collectibleItem = item[0] != null ? item[0].GetComponent<CollectibleItem>() : null;
+
+        if (collectibleItem != null)
+        {
+            collectibleItem.DestroyItem();
+            return collectibleItem;
+        }
+        return null;
     }
 }
