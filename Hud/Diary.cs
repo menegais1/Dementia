@@ -4,61 +4,48 @@ using UnityEngine;
 
 public class Diary : MonoBehaviour
 {
-
-    #region Váriaveis Gerais
-
     private List<Note> takenNotes;
     private List<Note> archivedNotes;
-    private Inventory inventory;
     private OptionsMenu optionsMenu;
-    #endregion
 
-
-
-    #region Métodos Unity
-
+    private InventoryContainer inventoryContainer;
 
     // Use this for initialization
     void Start()
     {
-
+        inventoryContainer = GetComponentInChildren<InventoryContainer>();
     }
 
     // Update is called once per frame
     void Update()
     {
-
     }
 
-    #endregion
-
-    #region Métodos Gerais
+    public void AddItem(CollectibleItem item)
+    {
+        if (inventoryContainer != null)
+        {
+            inventoryContainer.AddItem(item);
+        }
+    }
 
     public void selectTab()
     {
-
     }
 
     public void selectNote()
     {
-
     }
 
     public void nextPage()
     {
-
     }
 
     public void previousPage()
     {
-
     }
 
     public void backMenu()
     {
-
     }
-
-    #endregion
-
 }

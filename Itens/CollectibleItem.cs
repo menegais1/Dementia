@@ -6,6 +6,7 @@ public class CollectibleItem : MonoBehaviour
 
     [SerializeField] private string itemName;
     [SerializeField] private int quantity;
+    [SerializeField] private ItemType itemType;
     [SerializeField] private GameObject itemInstance;
 
     public string ItemName
@@ -21,6 +22,11 @@ public class CollectibleItem : MonoBehaviour
     public GameObject ItemInstance
     {
         get { return itemInstance; }
+    }
+
+    public ItemType ItemType
+    {
+        get { return itemType; }
     }
 
 

@@ -53,6 +53,16 @@ public class Weapon : MonoBehaviour
         set { automatic = value; }
     }
 
+    public WeaponType Type
+    {
+        get { return type; }
+    }
+
+    public void AddAmmo(int quantity)
+    {
+        currentAmmo += quantity;
+    }
+
 
     public void Shoot(Vector3 direction)
     {

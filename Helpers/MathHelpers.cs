@@ -9,6 +9,12 @@ public static class MathHelpers
         return ((a - b) < 0 ? ((a - b) * -1) : (a - b)) <= threshold;
     }
 
+    public static bool Approximately(Vector2 a, Vector2 b, float threshold)
+    {
+        return ((a.x - b.x) < 0 ? ((a.x - b.x) * -1) : (a.x - b.x)) <= threshold &&
+               ((a.y - b.y) < 0 ? ((a.y - b.y) * -1) : (a.y - b.y)) <= threshold;
+    }
+
     public static float Sin(float angleInDegrees)
     {
         return Mathf.Sin(angleInDegrees * Mathf.Deg2Rad);

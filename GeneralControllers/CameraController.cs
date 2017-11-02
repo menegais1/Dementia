@@ -13,6 +13,8 @@ public class CameraController : MonoBehaviour
     private Vector3 cameraOldPosition;
     private Vector3 targetOldPosition;
 
+/*  var cameraHeight = Camera.main.orthographicSize * 2;
+        var cameraWidth = cameraHeight * Camera.main.aspect;*/
 
     // Use this for initialization
     void Start()
@@ -44,17 +46,17 @@ public class CameraController : MonoBehaviour
         CoroutineManager.DeleteCoroutine("ZoomCameraCoroutine");
     }
 
-   /* Vector3 SuperSmoothLerp(Vector3 x0, Vector3 y0, Vector3 yt, float t, float k)
-    {
-        Vector3 f = x0 - y0 + (yt - y0) / (k * t);
-        return yt - (yt - y0) / (k * t) + f * Mathf.Exp(-k * t);
-    }
-
-     Vector3 SmoothApproach(Vector3 pastPosition, Vector3 pastTargetPosition, Vector3 targetPosition, float speed)
+    /* Vector3 SuperSmoothLerp(Vector3 x0, Vector3 y0, Vector3 yt, float t, float k)
      {
-         float t = Time.deltaTime * speed;
-         Vector3 v = (targetPosition - pastTargetPosition) / t;
-         Vector3 f = pastPosition - pastTargetPosition + v;
-         return targetPosition - v + f * Mathf.Exp(-t);
-     }*/
+         Vector3 f = x0 - y0 + (yt - y0) / (k * t);
+         return yt - (yt - y0) / (k * t) + f * Mathf.Exp(-k * t);
+     }
+ 
+      Vector3 SmoothApproach(Vector3 pastPosition, Vector3 pastTargetPosition, Vector3 targetPosition, float speed)
+      {
+          float t = Time.deltaTime * speed;
+          Vector3 v = (targetPosition - pastTargetPosition) / t;
+          Vector3 f = pastPosition - pastTargetPosition + v;
+          return targetPosition - v + f * Mathf.Exp(-t);
+      }*/
 }

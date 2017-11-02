@@ -93,7 +93,9 @@ public enum WeaponType
 
 public enum ItemType
 {
+    Nothing,
     RevolverBullet,
+    Weapon,
     Bandages,
     Molotov,
     Analgesics,
