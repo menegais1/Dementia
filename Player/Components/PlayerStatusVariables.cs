@@ -50,12 +50,15 @@ public class PlayerStatusVariables : MonoBehaviour
 
     public bool canExecuteCQC;
 
+    public bool isInGameMenuOpen;
+
     public FacingDirection facingDirection;
 
 
     public PlayerStatusVariables()
     {
         facingDirection = FacingDirection.Right;
+        isInGameMenuOpen = false;
     }
 
     public bool CheckIsOnAir()

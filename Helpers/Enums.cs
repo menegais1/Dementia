@@ -85,6 +85,7 @@ public enum FacingDirection
 
 public enum WeaponType
 {
+    Nothing,
     Revolver,
     Shotgun,
     MachineGun,
@@ -99,6 +100,14 @@ public enum ItemType
     Bandages,
     Molotov,
     Analgesics,
+}
+
+public enum DiaryTab
+{
+    Inventory,
+    Diary,
+    Menu,
+    Nothing
 }
 
 public enum AimDirection

@@ -20,6 +20,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float cqcDistance;
     [SerializeField] private LayerMask layerMaskForCollisions;
     [SerializeField] private Weapon weapon;
+    [SerializeField] private Inventory inventory;
+    [SerializeField] private InGameMenuController inGameMenuController;
 
 
     public PlayerHorizontalMovement HorizontalMovement { get; private set; }
@@ -27,18 +29,25 @@ public class PlayerMovement : MonoBehaviour
     public PlayerMiscellaneousMovement MiscellaneousMovement { get; private set; }
     public PlayerCombatMovement CombatMovement { get; private set; }
     public Player Player { get; private set; }
-    public Inventory Inventory { get; private set; }
-
     public PlayerController PlayerController { get; private set; }
     public BasicCollisionHandler PlayerCollisionHandler { get; private set; }
     public PlayerStatusVariables PlayerStatusVariables { get; private set; }
+
+    public Inventory Inventory
+    {
+        get { return inventory; }
+    }
+
+    public InGameMenuController InGameMenuController
+    {
+        get { return inGameMenuController; }
+    }
 
     void Start()
     {
         //PlayerStatusVariables = new PlayerStatusVariables();
         PlayerStatusVariables = GetComponent<PlayerStatusVariables>();
         Player = GetComponent<Player>();
-        Inventory = GetComponent<Inventory>();
 
         PlayerCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
@@ -55,7 +64,7 @@ public class PlayerMovement : MonoBehaviour
 
         MiscellaneousMovement = new PlayerMiscellaneousMovement(this, cameraZoomSize, PlayerCollisionHandler,
             PlayerController,
-            PlayerStatusVariables, Inventory);
+            PlayerStatusVariables, Inventory, InGameMenuController);
 
         CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
             PlayerStatusVariables, weapon, cqcDistance);

@@ -16,23 +16,44 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
     private PlayerController playerController;
     private PlayerStatusVariables playerStatusVariables;
     private Inventory inventory;
+    private InGameMenuController inGameMenuController;
 
 
     public PlayerMiscellaneousMovement(MonoBehaviour monoBehaviour, float cameraZoomSize,
         BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Inventory inventory) : base(
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Inventory inventory,
+        InGameMenuController inGameMenuController) : base(
         monoBehaviour)
     {
         this.playerController = playerController;
         this.playerCollisionHandler = playerCollisionHandler;
         this.playerStatusVariables = playerStatusVariables;
         this.inventory = inventory;
+        this.inGameMenuController = inGameMenuController;
         this.cameraZoomSize = cameraZoomSize;
     }
 
     public override void StartMovement()
     {
         playerController.CheckForMiscellaneousInput();
+
+        if (playerStatusVariables.isInGameMenuOpen)
+        {
+            playerController.RevokeControl(0.1f, true, ControlTypeToRevoke.CombatMovement, monoBehaviour);
+        }
+        else
+        {
+            if (inGameMenuController.gameObject.activeSelf)
+            {
+                OpenCloseInGameMenu();
+            }
+        }
+
+        if (playerController.InGameMenuOpenClose)
+        {
+            playerStatusVariables.isInGameMenuOpen = !playerStatusVariables.isInGameMenuOpen;
+            OpenCloseInGameMenu();
+        }
 
         if (playerStatusVariables.canTakeItem && playerController.TakeItemPress)
         {
@@ -136,5 +157,10 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
             return collectibleItem;
         }
         return null;
+    }
+
+    private void OpenCloseInGameMenu()
+    {
+        inGameMenuController.OpenCloseInGameMenu();
     }
 }

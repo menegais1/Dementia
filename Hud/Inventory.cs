@@ -8,80 +8,126 @@ public class Inventory : MonoBehaviour
 {
     private Weapon currentWeapon;
     private Item currentItem;
-    private List<Weapon> weapons;
-    private List<Item> selectionItens;
-    [SerializeField] private Diary diary;
+    private List<Weapon> inventoryWeapons;
+    private List<Item> quickSelectionItens;
+    public List<CollectibleItem> InventoryItens { get; set; }
 
-    public List<CollectibleItem> Itens { get; set; }
+    private InGameMenuController inGameMenuController;
+
+    private ItemSlot[] itensSlots;
+    private WeaponSlot[] weaponsSlots;
 
 
-    // Use this for initialization
     void Start()
     {
-        Itens = new List<CollectibleItem>();
-        weapons = new List<Weapon>();
+        inGameMenuController = GetComponentInParent<InGameMenuController>();
+        InventoryItens = new List<CollectibleItem>();
+        inventoryWeapons = new List<Weapon>();
+
+        itensSlots = GetComponentsInChildren<ItemSlot>();
+        weaponsSlots = GetComponentsInChildren<WeaponSlot>();
     }
 
-    // Update is called once per frame
     void Update()
     {
     }
 
 
-    public void selectItem()
+    public void SelectItem()
     {
     }
 
-    public void selectWeapon()
+    public void SelectWeapon()
     {
     }
 
-    public void addItemSelection()
+    public void AddItemSelection()
     {
     }
 
     public void TakeItem(CollectibleItem item)
     {
         if (item == null) return;
+        Weapon weapon;
+        
         switch (item.ItemType)
         {
             case ItemType.RevolverBullet:
-                var weapon = weapons.Find(lambdaExpression => lambdaExpression.Type == WeaponType.Revolver);
+                weapon = inventoryWeapons.Find(lambdaExpression => lambdaExpression.Type == WeaponType.Revolver);
                 if (weapon != null)
                 {
                     weapon.AddAmmo(item.Quantity);
+                    RenderWeapon(weapon);
                 }
                 else
                 {
-                    Itens.Add(item);
+                    InventoryItens.Add(item);
                 }
                 break;
             case ItemType.Weapon:
-                weapons.Add(item.ItemInstance.GetComponent<Weapon>());
+                weapon = item.ItemInstance.GetComponent<Weapon>();
+                inventoryWeapons.Add(weapon);
                 currentWeapon = currentWeapon == null ? item.ItemInstance.GetComponent<Weapon>() : currentWeapon;
-                break;
+                RenderWeapon(weapon);
+                return;
             case ItemType.Bandages:
-                Itens.Add(item);
+                InventoryItens.Add(item);
                 break;
             case ItemType.Molotov:
-                Itens.Add(item);
+                InventoryItens.Add(item);
                 break;
             case ItemType.Analgesics:
-                Itens.Add(item);
+                InventoryItens.Add(item);
+                break;
+            case ItemType.Nothing:
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
-        Itens.Add(item);
 
-        if (diary != null)
+        if (inGameMenuController != null)
         {
-            diary.AddItem(item);
+            RenderItem(item);
         }
     }
 
-    public void removeItemSelection()
+    public void RemoveItemSelection()
     {
+    }
+
+    private void RenderItem(CollectibleItem item)
+    {
+        for (int i = 0; i < itensSlots.Length; i++)
+        {
+            if (itensSlots[i].Type == ItemType.Nothing)
+            {
+                itensSlots[i].Name.text = item.ItemName;
+                itensSlots[i].Quantity.text = item.Quantity.ToString();
+                itensSlots[i].Type = item.ItemType;
+                break;
+            }
+
+            if (itensSlots[i].Type == item.ItemType)
+            {
+                itensSlots[i].Quantity.text = (int.Parse(itensSlots[i].Quantity.text) + item.Quantity).ToString();
+                break;
+            }
+        }
+    }
+
+    private void RenderWeapon(Weapon weapon)
+    {
+        for (int i = 0; i < weaponsSlots.Length; i++)
+        {
+            if (weaponsSlots[i].Type == WeaponType.Nothing || weaponsSlots[i].Type == weapon.Type)
+            {
+                weaponsSlots[i].Name.text = weapon.Name;
+                weaponsSlots[i].Separator.text = "||";
+                weaponsSlots[i].Ammo.text = weapon.CurrentMagazine + "/" + weapon.CurrentAmmo;
+                weaponsSlots[i].Type = weapon.Type;
+                break;
+            }
+        }
     }
 }

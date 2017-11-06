@@ -9,6 +9,7 @@ public class Weapon : MonoBehaviour
     private string id;
     private bool worldStatus;
 
+    [SerializeField] private string name;
     [SerializeField] private int maxMagazine;
     [SerializeField] private float damage;
     [SerializeField] private float reloadTime;
@@ -58,9 +59,24 @@ public class Weapon : MonoBehaviour
         get { return type; }
     }
 
+    public int CurrentMagazine
+    {
+        get { return currentMagazine; }
+    }
+
+    public int CurrentAmmo
+    {
+        get { return currentAmmo; }
+    }
+
+    public string Name
+    {
+        get { return name; }
+    }
+
     public void AddAmmo(int quantity)
     {
-        currentAmmo += quantity;
+        currentAmmo = CurrentAmmo + quantity;
     }
 
 
@@ -76,7 +92,7 @@ public class Weapon : MonoBehaviour
             recoilCurrentTime += timePerBullet;
             timeAtLastShot = Time.time;
         }
-        else if (currentMagazine == 0)
+        else if (CurrentMagazine == 0)
         {
             Reload();
         }
@@ -84,17 +100,17 @@ public class Weapon : MonoBehaviour
 
     public void Reload()
     {
-        if (currentAmmo > 0 && currentMagazine < maxMagazine)
+        if (CurrentAmmo > 0 && CurrentMagazine < maxMagazine)
         {
-            var bulletsToMaxMagazine = maxMagazine - currentMagazine;
-            if (currentAmmo >= bulletsToMaxMagazine)
+            var bulletsToMaxMagazine = maxMagazine - CurrentMagazine;
+            if (CurrentAmmo >= bulletsToMaxMagazine)
             {
-                currentAmmo -= bulletsToMaxMagazine;
-                currentMagazine += bulletsToMaxMagazine;
+                currentAmmo = CurrentAmmo - bulletsToMaxMagazine;
+                currentMagazine = CurrentMagazine + bulletsToMaxMagazine;
             }
             else
             {
-                currentMagazine += currentAmmo;
+                currentMagazine = CurrentMagazine + CurrentAmmo;
                 currentAmmo = 0;
             }
             nextShot += reloadTime;
@@ -115,7 +131,7 @@ public class Weapon : MonoBehaviour
 
     private bool CheckIfCanShoot()
     {
-        if (currentMagazine > 0 && Time.time > nextShot)
+        if (CurrentMagazine > 0 && Time.time > nextShot)
         {
             nextShot = Time.time + (60 / bulletsPerMinute);
             return true;
@@ -126,6 +142,6 @@ public class Weapon : MonoBehaviour
 
     private void SpendBullets()
     {
-        currentMagazine--;
+        currentMagazine = CurrentMagazine - 1;
     }
 }

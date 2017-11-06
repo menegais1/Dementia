@@ -4,25 +4,13 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using UnityEngine;
 
-public class Diary : MonoBehaviour
+public class Menu : MonoBehaviour
 {
     void Start()
     {
     }
 
     void Update()
-    {
-    }
-
-    public void selectNote()
-    {
-    }
-
-    public void nextPage()
-    {
-    }
-
-    public void previousPage()
     {
     }
 }
