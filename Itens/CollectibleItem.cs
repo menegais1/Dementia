@@ -4,14 +4,15 @@ public class CollectibleItem : MonoBehaviour
 {
     private PlayerStatusVariables playerStatusVariables;
 
-    [SerializeField] private string itemName;
+    [SerializeField] private string name;
+    [SerializeField] private string description;
     [SerializeField] private int quantity;
     [SerializeField] private ItemType itemType;
     [SerializeField] private GameObject itemInstance;
 
-    public string ItemName
+    public string Name
     {
-        get { return itemName; }
+        get { return name; }
     }
 
     public int Quantity
@@ -27,6 +28,12 @@ public class CollectibleItem : MonoBehaviour
     public ItemType ItemType
     {
         get { return itemType; }
+    }
+
+    public string Description
+    {
+        get { return description; }
+        set { description = value; }
     }
 
 

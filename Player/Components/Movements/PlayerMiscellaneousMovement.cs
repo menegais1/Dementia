@@ -64,6 +64,15 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
             playerStatusVariables.isTakingItem = false;
         }
 
+        if (playerStatusVariables.canTakeWeapon && playerController.TakeItemPress)
+        {
+            playerStatusVariables.isTakingWeapon = true;
+        }
+        else if (!playerStatusVariables.canTakeWeapon && playerStatusVariables.isTakingItem)
+        {
+            playerStatusVariables.isTakingWeapon = false;
+        }
+
         if (playerStatusVariables.canInteractWithScenery && playerController.InteractWithSceneryPress)
         {
             playerStatusVariables.isInteractingWithScenery = true;
@@ -77,6 +86,10 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
         else if (playerStatusVariables.isTakingItem)
         {
             MiscellaneousPressMovementState = MiscellaneousPressMovementState.TakeItem;
+        }
+        else if (playerStatusVariables.isTakingWeapon)
+        {
+            MiscellaneousPressMovementState = MiscellaneousPressMovementState.TakeWeapon;
         }
         else if (playerStatusVariables.isInteractingWithScenery)
         {
@@ -92,6 +105,9 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 break;
             case MiscellaneousPressMovementState.TakeItem:
                 inventory.TakeItem(TakeItem());
+                break;
+            case MiscellaneousPressMovementState.TakeWeapon:
+                inventory.TakeWeapon(TakeWeapon());
                 break;
             case MiscellaneousPressMovementState.InteractWithScenery:
                 InteractWithScenery();
@@ -146,8 +162,8 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
             useLayerMask = true,
             layerMask = LayerMask.GetMask("Collectible Item"),
         };
-
         var item = new Collider2D[1];
+
         capsuleCollider2D.GetContacts(contactFilter2D, item);
         var collectibleItem = item[0] != null ? item[0].GetComponent<CollectibleItem>() : null;
 
@@ -155,6 +171,27 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
         {
             collectibleItem.DestroyItem();
             return collectibleItem;
+        }
+        return null;
+    }
+
+    private CollectibleWeapon TakeWeapon()
+    {
+        var contactFilter2D = new ContactFilter2D
+        {
+            useTriggers = true,
+            useLayerMask = true,
+            layerMask = LayerMask.GetMask("Collectible Weapon"),
+        };
+
+        var weapon = new Collider2D[1];
+        capsuleCollider2D.GetContacts(contactFilter2D, weapon);
+        var collectibleWeapon = weapon[0] != null ? weapon[0].GetComponent<CollectibleWeapon>() : null;
+
+        if (collectibleWeapon != null)
+        {
+            collectibleWeapon.DestroyWeapon();
+            return collectibleWeapon;
         }
         return null;
     }

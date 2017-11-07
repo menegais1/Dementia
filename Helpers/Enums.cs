@@ -62,6 +62,7 @@ public enum MiscellaneousPressMovementState
 {
     None,
     TakeItem,
+    TakeWeapon,
     InteractWithScenery,
     ZoomCamera,
 }
@@ -96,7 +97,6 @@ public enum ItemType
 {
     Nothing,
     RevolverBullet,
-    Weapon,
     Bandages,
     Molotov,
     Analgesics,

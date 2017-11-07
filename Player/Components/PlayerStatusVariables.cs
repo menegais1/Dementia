@@ -30,11 +30,15 @@ public class PlayerStatusVariables : MonoBehaviour
 
     public bool canTakeItem;
 
+    public bool canTakeWeapon;
+
     public bool canInteractWithScenery;
 
     public bool isInteractingWithScenery;
 
     public bool isTakingItem;
+
+    public bool isTakingWeapon;
 
     public bool isClimbingStairs;
 

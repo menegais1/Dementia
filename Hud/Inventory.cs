@@ -2,34 +2,44 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using NUnit.Framework;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
     private Weapon currentWeapon;
     private Item currentItem;
-    private List<Weapon> inventoryWeapons;
     private List<Item> quickSelectionItens;
-    public List<CollectibleItem> InventoryItens { get; set; }
 
     private InGameMenuController inGameMenuController;
 
-    private ItemSlot[] itensSlots;
-    private WeaponSlot[] weaponsSlots;
+    private List<ItemSlot> itensSlots;
+    private List<WeaponSlot> weaponsSlots;
+
+    private Description description;
 
 
     void Start()
     {
         inGameMenuController = GetComponentInParent<InGameMenuController>();
-        InventoryItens = new List<CollectibleItem>();
-        inventoryWeapons = new List<Weapon>();
-
-        itensSlots = GetComponentsInChildren<ItemSlot>();
-        weaponsSlots = GetComponentsInChildren<WeaponSlot>();
+        description = GetComponentInChildren<Description>();
+        itensSlots = new List<ItemSlot>();
+        weaponsSlots = new List<WeaponSlot>();
+        itensSlots.AddRange(GetComponentsInChildren<ItemSlot>());
+        weaponsSlots.AddRange(GetComponentsInChildren<WeaponSlot>());
     }
 
     void Update()
     {
+        var itemSelected = itensSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
+        if (itemSelected != null)
+        {
+            description.RenderDescription(itemSelected);
+        }
+        else
+        {
+            description.RenderDescription(null);
+        }
     }
 
 
@@ -48,84 +58,75 @@ public class Inventory : MonoBehaviour
     public void TakeItem(CollectibleItem item)
     {
         if (item == null) return;
-        Weapon weapon;
-        
-        switch (item.ItemType)
+
+        WeaponSlot weapon = weaponsSlots.Find(lambdaExpression =>
+            lambdaExpression.BulletType == item.ItemType);
+
+        if (weapon != null)
         {
-            case ItemType.RevolverBullet:
-                weapon = inventoryWeapons.Find(lambdaExpression => lambdaExpression.Type == WeaponType.Revolver);
-                if (weapon != null)
-                {
-                    weapon.AddAmmo(item.Quantity);
-                    RenderWeapon(weapon);
-                }
-                else
-                {
-                    InventoryItens.Add(item);
-                }
-                break;
-            case ItemType.Weapon:
-                weapon = item.ItemInstance.GetComponent<Weapon>();
-                inventoryWeapons.Add(weapon);
-                currentWeapon = currentWeapon == null ? item.ItemInstance.GetComponent<Weapon>() : currentWeapon;
-                RenderWeapon(weapon);
-                return;
-            case ItemType.Bandages:
-                InventoryItens.Add(item);
-                break;
-            case ItemType.Molotov:
-                InventoryItens.Add(item);
-                break;
-            case ItemType.Analgesics:
-                InventoryItens.Add(item);
-                break;
-            case ItemType.Nothing:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            AddAmmo(weapon, item.Quantity);
+            return;
         }
 
 
         if (inGameMenuController != null)
         {
-            RenderItem(item);
+            AddItem(item);
         }
+    }
+
+    public void TakeWeapon(CollectibleWeapon weapon)
+    {
+        if (weapon == null) return;
+        AddWeapon(weapon);
+        //currentWeapon = currentWeapon == null ? weapon.WeaponInstance.GetComponent<Weapon>() : currentWeapon;
     }
 
     public void RemoveItemSelection()
     {
     }
 
-    private void RenderItem(CollectibleItem item)
+    private void AddItem(CollectibleItem item)
     {
-        for (int i = 0; i < itensSlots.Length; i++)
+        for (int i = 0; i < itensSlots.Count; i++)
         {
             if (itensSlots[i].Type == ItemType.Nothing)
             {
-                itensSlots[i].Name.text = item.ItemName;
-                itensSlots[i].Quantity.text = item.Quantity.ToString();
-                itensSlots[i].Type = item.ItemType;
+                itensSlots[i].FillItem(item);
                 break;
             }
 
             if (itensSlots[i].Type == item.ItemType)
             {
-                itensSlots[i].Quantity.text = (int.Parse(itensSlots[i].Quantity.text) + item.Quantity).ToString();
+                itensSlots[i].Quantity += item.Quantity;
+                itensSlots[i].RenderItem();
                 break;
             }
         }
     }
 
-    private void RenderWeapon(Weapon weapon)
+    private void AddAmmo(WeaponSlot weapon, int quantity)
     {
-        for (int i = 0; i < weaponsSlots.Length; i++)
+        weapon.Ammo += quantity;
+        weapon.WeaponInstance.GetComponent<Weapon>().AddAmmo(quantity);
+        weapon.RenderWeapon();
+    }
+
+    private void AddWeapon(CollectibleWeapon weapon)
+    {
+        for (int i = 0; i < weaponsSlots.Count; i++)
         {
-            if (weaponsSlots[i].Type == WeaponType.Nothing || weaponsSlots[i].Type == weapon.Type)
+            if (weaponsSlots[i].Type == WeaponType.Nothing || weaponsSlots[i].Type == weapon.WeaponType)
             {
-                weaponsSlots[i].Name.text = weapon.Name;
-                weaponsSlots[i].Separator.text = "||";
-                weaponsSlots[i].Ammo.text = weapon.CurrentMagazine + "/" + weapon.CurrentAmmo;
-                weaponsSlots[i].Type = weapon.Type;
+                weaponsSlots[i].FillWeapon(weapon);
+                ItemSlot item = itensSlots.Find(lambdaExpression =>
+                    lambdaExpression.Type == weaponsSlots[i].BulletType);
+
+                if (item != null)
+                {
+                    AddAmmo(weaponsSlots[i], item.Quantity);
+                    item.Reset();
+                }
                 break;
             }
         }
