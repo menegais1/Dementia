@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using NUnit.Framework;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    private Weapon currentWeapon;
-    private Item currentItem;
+    private WeaponSlot currentWeapon;
+    private ItemSlot currentItem;
     private List<Item> quickSelectionItens;
 
     private InGameMenuController inGameMenuController;
@@ -27,32 +23,91 @@ public class Inventory : MonoBehaviour
         weaponsSlots = new List<WeaponSlot>();
         itensSlots.AddRange(GetComponentsInChildren<ItemSlot>());
         weaponsSlots.AddRange(GetComponentsInChildren<WeaponSlot>());
+
+        description.gameObject.SetActive(false);
+
+        DisableItemSlots();
+        DisableWeaponSlots();
+    }
+
+
+    private void DisableWeaponSlots()
+    {
+        for (var i = 0; i < weaponsSlots.Count; i++)
+        {
+            weaponsSlots[i].SetActive(false);
+        }
+    }
+
+    private void DisableItemSlots()
+    {
+        for (var i = 0; i < itensSlots.Count; i++)
+        {
+            itensSlots[i].SetActive(false);
+        }
     }
 
     void Update()
     {
+        CheckForSelection();
+
+
+        if (description.Equip.isOn)
+        {
+            CheckForEquipedWeapon();
+            CheckForEquipedItem();
+        }
+
+        currentWeapon = weaponsSlots.Find(lambdaExpression =>
+            lambdaExpression.IsEquiped);
+
+        currentItem = itensSlots.Find(lambdaExpression =>
+            lambdaExpression.IsEquiped);
+    }
+
+    private void CheckForSelection()
+    {
         var itemSelected = itensSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
+        var weaponSelected = weaponsSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
+
         if (itemSelected != null)
         {
             description.RenderDescription(itemSelected);
         }
+        else if (weaponSelected != null)
+        {
+            description.RenderDescription(weaponSelected);
+        }
         else
         {
-            description.RenderDescription(null);
+            description.RenderDescription();
         }
     }
 
-
-    public void SelectItem()
+    private void CheckForEquipedWeapon()
     {
+        if (description.WeaponSlot != null)
+        {
+            var equipedWeapon = weaponsSlots.Find(lambdaExpression =>
+                lambdaExpression.IsEquiped && lambdaExpression != description.WeaponSlot);
+            if (equipedWeapon != null)
+            {
+                equipedWeapon.Equip(new Color(0.2f, 0.2f, 0.2f), false);
+            }
+        }
     }
 
-    public void SelectWeapon()
+    private void CheckForEquipedItem()
     {
-    }
-
-    public void AddItemSelection()
-    {
+        if (description.ItemSlot != null)
+        {
+            var equipedItem = itensSlots.Find(lambdaExpression =>
+                lambdaExpression.IsEquiped && lambdaExpression != description.ItemSlot);
+            if (equipedItem != null)
+            {
+                equipedItem.Equip(new Color(0.2f, 0.2f, 0.2f), false);
+            }
+        }
     }
 
     public void TakeItem(CollectibleItem item)

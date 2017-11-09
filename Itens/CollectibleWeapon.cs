@@ -5,6 +5,7 @@ public class CollectibleWeapon : MonoBehaviour
     private PlayerStatusVariables playerStatusVariables;
 
     [SerializeField] private string name;
+    [SerializeField] private string description;
     [SerializeField] private int ammo;
     [SerializeField] private int magazine;
     [SerializeField] private ItemType bulletType;
@@ -38,6 +39,12 @@ public class CollectibleWeapon : MonoBehaviour
     {
         get { return name; }
         set { name = value; }
+    }
+
+    public string Description
+    {
+        get { return description; }
+        set { description = value; }
     }
 
     public WeaponType WeaponType

@@ -30,12 +30,6 @@ public class InGameMenuController : MonoBehaviour
         diary.gameObject.SetActive(false);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
 
     public void SelectTab(string tab)
     {
@@ -64,10 +58,5 @@ public class InGameMenuController : MonoBehaviour
     public void OpenCloseInGameMenu()
     {
         gameObject.SetActive(!gameObject.activeSelf);
-    }
-
-
-    public void BackMenu()
-    {
     }
 }

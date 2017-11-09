@@ -12,6 +12,8 @@ public class ItemSlot : MonoBehaviour
     private GameObject itemInstance;
     private ItemType type;
     private Toggle toggle;
+    private bool isEquiped;
+    private bool unequipable;
 
     public Text NameText
     {
@@ -61,6 +63,18 @@ public class ItemSlot : MonoBehaviour
         set { description = value; }
     }
 
+    public bool IsEquiped
+    {
+        get { return isEquiped; }
+        set { isEquiped = value; }
+    }
+
+    public bool Unequipable
+    {
+        get { return unequipable; }
+        set { unequipable = value; }
+    }
+
 
     private void Start()
     {
@@ -68,6 +82,7 @@ public class ItemSlot : MonoBehaviour
         nameText.text = "";
         quantityText.text = "";
         name = "";
+        description = "";
         quantity = 0;
         Toggle = GetComponentInChildren<Toggle>();
         Toggle.isOn = false;
@@ -79,15 +94,23 @@ public class ItemSlot : MonoBehaviour
         nameText.text = "";
         quantityText.text = "";
         name = "";
+        description = "";
         quantity = 0;
         itemInstance = null;
         Toggle.isOn = false;
+        gameObject.SetActive(false);
     }
 
     public void RenderItem()
     {
+        gameObject.SetActive(true);
         nameText.text = name;
         quantityText.text = quantity.ToString();
+    }
+
+    public void SetActive(bool setActive)
+    {
+        gameObject.SetActive(setActive);
     }
 
     public void FillItem(CollectibleItem item)
@@ -96,7 +119,17 @@ public class ItemSlot : MonoBehaviour
         Description = item.Description;
         quantity = item.Quantity;
         type = item.ItemType;
+        Unequipable = item.Unequipable;
         itemInstance = item.ItemInstance;
         RenderItem();
+    }
+
+    public void Equip(Color color, bool equip)
+    {
+        if (Unequipable) return;
+
+        nameText.color = color;
+        quantityText.color = color;
+        isEquiped = equip;
     }
 }

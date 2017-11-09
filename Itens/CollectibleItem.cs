@@ -7,6 +7,7 @@ public class CollectibleItem : MonoBehaviour
     [SerializeField] private string name;
     [SerializeField] private string description;
     [SerializeField] private int quantity;
+    [SerializeField] private bool unequipable;
     [SerializeField] private ItemType itemType;
     [SerializeField] private GameObject itemInstance;
 
@@ -34,6 +35,12 @@ public class CollectibleItem : MonoBehaviour
     {
         get { return description; }
         set { description = value; }
+    }
+
+    public bool Unequipable
+    {
+        get { return unequipable; }
+        set { unequipable = value; }
     }
 
 
