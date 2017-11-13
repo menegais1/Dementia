@@ -16,12 +16,14 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
     private PlayerController playerController;
     private PlayerStatusVariables playerStatusVariables;
     private Inventory inventory;
+    private Diary diary;
     private InGameMenuController inGameMenuController;
 
 
     public PlayerMiscellaneousMovement(MonoBehaviour monoBehaviour, float cameraZoomSize,
         BasicCollisionHandler playerCollisionHandler,
         PlayerController playerController, PlayerStatusVariables playerStatusVariables, Inventory inventory,
+        Diary diary,
         InGameMenuController inGameMenuController) : base(
         monoBehaviour)
     {
@@ -29,6 +31,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
         this.playerCollisionHandler = playerCollisionHandler;
         this.playerStatusVariables = playerStatusVariables;
         this.inventory = inventory;
+        this.diary = diary;
         this.inGameMenuController = inGameMenuController;
         this.cameraZoomSize = cameraZoomSize;
     }
@@ -73,6 +76,15 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
             playerStatusVariables.isTakingWeapon = false;
         }
 
+        if (playerStatusVariables.canTakeNote && playerController.TakeItemPress)
+        {
+            playerStatusVariables.isTakingNote = true;
+        }
+        else if (!playerStatusVariables.canTakeNote && playerStatusVariables.isTakingNote)
+        {
+            playerStatusVariables.isTakingNote = false;
+        }
+
         if (playerStatusVariables.canInteractWithScenery && playerController.InteractWithSceneryPress)
         {
             playerStatusVariables.isInteractingWithScenery = true;
@@ -91,6 +103,10 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
         {
             MiscellaneousPressMovementState = MiscellaneousPressMovementState.TakeWeapon;
         }
+        else if (playerStatusVariables.isTakingNote)
+        {
+            MiscellaneousPressMovementState = MiscellaneousPressMovementState.TakeNote;
+        }
         else if (playerStatusVariables.isInteractingWithScenery)
         {
             MiscellaneousPressMovementState = MiscellaneousPressMovementState.InteractWithScenery;
@@ -108,6 +124,9 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 break;
             case MiscellaneousPressMovementState.TakeWeapon:
                 inventory.TakeWeapon(TakeWeapon());
+                break;
+            case MiscellaneousPressMovementState.TakeNote:
+                diary.TakeNote(TakeNote());
                 break;
             case MiscellaneousPressMovementState.InteractWithScenery:
                 InteractWithScenery();
@@ -171,6 +190,27 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
         {
             collectibleItem.DestroyItem();
             return collectibleItem;
+        }
+        return null;
+    }
+
+    private CollectibleNote TakeNote()
+    {
+        var contactFilter2D = new ContactFilter2D
+        {
+            useTriggers = true,
+            useLayerMask = true,
+            layerMask = LayerMask.GetMask("Collectible Note"),
+        };
+        var note = new Collider2D[1];
+
+        capsuleCollider2D.GetContacts(contactFilter2D, note);
+        var collectibleNote = note[0] != null ? note[0].GetComponent<CollectibleNote>() : null;
+
+        if (collectibleNote != null)
+        {
+            collectibleNote.DestroyItem();
+            return collectibleNote;
         }
         return null;
     }

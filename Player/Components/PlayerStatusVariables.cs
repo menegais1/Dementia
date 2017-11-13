@@ -30,6 +30,8 @@ public class PlayerStatusVariables : MonoBehaviour
 
     public bool canTakeItem;
 
+    public bool canTakeNote;
+
     public bool canTakeWeapon;
 
     public bool canInteractWithScenery;
@@ -37,6 +39,8 @@ public class PlayerStatusVariables : MonoBehaviour
     public bool isInteractingWithScenery;
 
     public bool isTakingItem;
+
+    public bool isTakingNote;
 
     public bool isTakingWeapon;
 

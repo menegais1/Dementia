@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float timeToStartStaminaRegen;
     [SerializeField] private float currentLife;
     [SerializeField] private float maxLife;
+    [SerializeField] private Slider staminaBar;
 
     private bool canSave;
     private bool activeMorphin;
@@ -24,6 +26,9 @@ public class Player : MonoBehaviour
         currentStamina = maxStamina;
         currentLife = maxLife;
         timeTrackerForSpendingStamina = Time.time;
+        staminaBar.maxValue = maxStamina;
+        staminaBar.minValue = 0;
+        staminaBar.value = currentStamina;
     }
 
     void Update()
@@ -61,6 +66,7 @@ public class Player : MonoBehaviour
         }
 
         currentStamina = currentStamina <= 0 ? 0 : currentStamina;
+        staminaBar.value = currentStamina;
 
         currentTimeToStartStaminaRegen = Time.time + timeToStartStaminaRegen;
     }
@@ -86,6 +92,7 @@ public class Player : MonoBehaviour
             {
                 currentStamina = maxStamina;
             }
+            staminaBar.value = currentStamina;
             yield return new WaitForFixedUpdate();
         }
 

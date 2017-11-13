@@ -63,6 +63,7 @@ public enum MiscellaneousPressMovementState
     None,
     TakeItem,
     TakeWeapon,
+    TakeNote,
     InteractWithScenery,
     ZoomCamera,
 }

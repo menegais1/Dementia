@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private LayerMask layerMaskForCollisions;
     [SerializeField] private Weapon weapon;
     [SerializeField] private Inventory inventory;
+    [SerializeField] private Diary diary;
     [SerializeField] private InGameMenuController inGameMenuController;
 
 
@@ -64,7 +65,7 @@ public class PlayerMovement : MonoBehaviour
 
         MiscellaneousMovement = new PlayerMiscellaneousMovement(this, cameraZoomSize, PlayerCollisionHandler,
             PlayerController,
-            PlayerStatusVariables, Inventory, InGameMenuController);
+            PlayerStatusVariables, Inventory, diary, InGameMenuController);
 
         CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
             PlayerStatusVariables, weapon, cqcDistance);
