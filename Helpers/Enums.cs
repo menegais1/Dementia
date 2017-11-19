@@ -68,6 +68,12 @@ public enum MiscellaneousPressMovementState
     ZoomCamera,
 }
 
+public enum Ratio
+{
+    FourByThree,
+    SixteenByNine
+}
+
 public enum ControlTypeToRevoke
 {
     HorizontalMovement,

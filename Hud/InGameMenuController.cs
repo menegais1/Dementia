@@ -13,8 +13,6 @@ public class InGameMenuController : MonoBehaviour
     private Diary diary;
     private Menu menu;
 
-    // Use this for initialization
-
 
     private void Awake()
     {

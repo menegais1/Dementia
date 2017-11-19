@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Security.Policy;
 using UnityEngine;
 
 public static class MathHelpers
@@ -9,6 +8,10 @@ public static class MathHelpers
         return ((a - b) < 0 ? ((a - b) * -1) : (a - b)) <= threshold;
     }
 
+    public static bool Approximately(double a, double b, double threshold)
+    {
+        return ((a - b) < 0 ? ((a - b) * -1) : (a - b)) <= threshold;
+    }
     public static bool Approximately(Vector2 a, Vector2 b, float threshold)
     {
         return ((a.x - b.x) < 0 ? ((a.x - b.x) * -1) : (a.x - b.x)) <= threshold &&

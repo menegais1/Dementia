@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,9 +30,7 @@ public class NoteContent : MonoBehaviour
 
     private void BackButton()
     {
-        note.Selected = false;
-        note = null;
-        textContent.text = "";
+        Reset();
         gameObject.SetActive(false);
     }
 
@@ -63,7 +60,6 @@ public class NoteContent : MonoBehaviour
             }
             nextPageButton.gameObject.SetActive(true);
             textContent.text = pages[currentPage];
-
         }
     }
 
@@ -88,6 +84,8 @@ public class NoteContent : MonoBehaviour
 
     public void Reset()
     {
+        if (note != null)
+            note.Selected = false;
         this.note = null;
         pages = new string[0];
         noteText = "";

@@ -42,6 +42,7 @@ public class Diary : MonoBehaviour
         {
             noteContent.gameObject.SetActive(true);
             noteContent.FillContent(noteSlot);
+            
             notesGroup.gameObject.SetActive(false);
         }
         else if (noteSlot == null)

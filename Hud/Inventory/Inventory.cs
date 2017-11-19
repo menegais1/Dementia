@@ -23,7 +23,7 @@ public class Inventory : MonoBehaviour
         weaponsSlots = new List<WeaponSlot>();
         itensSlots.AddRange(GetComponentsInChildren<ItemSlot>());
         weaponsSlots.AddRange(GetComponentsInChildren<WeaponSlot>());
-
+        
         description.gameObject.SetActive(false);
 
         DisableItemSlots();
@@ -67,8 +67,8 @@ public class Inventory : MonoBehaviour
 
     private void CheckForSelection()
     {
-        var itemSelected = itensSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
-        var weaponSelected = weaponsSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
+        ItemSlot itemSelected = itensSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
+        WeaponSlot weaponSelected = weaponsSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
 
         if (itemSelected != null)
         {
