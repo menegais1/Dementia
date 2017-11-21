@@ -5,6 +5,7 @@ public class Weapon : MonoBehaviour
     private string id;
     private bool worldStatus;
 
+    [SerializeField] private int weaponTypeId;
     [SerializeField] private string name;
     [SerializeField] private int maxMagazine;
     [SerializeField] private float damage;
@@ -58,16 +59,23 @@ public class Weapon : MonoBehaviour
     public int CurrentMagazine
     {
         get { return currentMagazine; }
+        set { currentMagazine = value; }
     }
 
     public int CurrentAmmo
     {
         get { return currentAmmo; }
+        set { currentAmmo = value; }
     }
 
     public string Name
     {
         get { return name; }
+    }
+
+    public int WeaponTypeId
+    {
+        get { return weaponTypeId; }
     }
 
     public void AddAmmo(int quantity)
@@ -82,7 +90,7 @@ public class Weapon : MonoBehaviour
         {
             var recoilCalc = RecoilCalc(direction);
             var instantiateBullet =
-                Bullet.InstantiateBullet(muzzlePosition.position, recoilCalc, bullet);
+                Bullet.InstantiateBullet(muzzlePosition.position, recoilCalc, bullet, damage);
             instantiateBullet.Shoot();
             SpendBullets();
             recoilCurrentTime += timePerBullet;

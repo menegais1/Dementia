@@ -8,6 +8,7 @@ public class WeaponSlot : MonoBehaviour
     [SerializeField] private Text separatorText;
 
     private int ammo;
+    private int weaponTypeId;
     private string name;
     private int magazine;
     private ItemType bulletType;
@@ -89,6 +90,11 @@ public class WeaponSlot : MonoBehaviour
         set { name = value; }
     }
 
+    public int WeaponTypeId
+    {
+        get { return weaponTypeId; }
+    }
+
     private void Start()
     {
         Type = WeaponType.Nothing;
@@ -115,6 +121,8 @@ public class WeaponSlot : MonoBehaviour
         magazine = 0;
         bulletType = ItemType.Nothing;
         Toggle.isOn = false;
+        isEquiped = false;
+        weaponInstance = null;
         gameObject.SetActive(false);
     }
 
@@ -139,6 +147,7 @@ public class WeaponSlot : MonoBehaviour
         magazine = weapon.Magazine;
         type = weapon.WeaponType;
         bulletType = weapon.BulletType;
+        weaponTypeId = weapon.WeaponTypeId;
         weaponInstance = weapon.WeaponInstance;
         RenderWeapon();
     }

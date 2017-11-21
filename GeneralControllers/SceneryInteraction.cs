@@ -11,8 +11,8 @@ public class SceneryInteraction : MonoBehaviour
     {
         if (!other.gameObject.CompareTag("Player")) return;
 
-        playerMiscellaneousMovement = other.GetComponent<PlayerMovement>().MiscellaneousMovement;
-        playerStatusVariables = other.GetComponent<PlayerMovement>().PlayerStatusVariables;
+        playerMiscellaneousMovement = other.GetComponent<PlayerManager>().MiscellaneousMovement;
+        playerStatusVariables = other.GetComponent<PlayerManager>().PlayerStatusVariables;
     }
 
     public void OnTriggerStay2D(Collider2D other)

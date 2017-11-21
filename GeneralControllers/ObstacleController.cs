@@ -7,7 +7,7 @@ public class ObstacleController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.gameObject.tag.Equals("Player")) return;
-        playerStatusVariables = other.GetComponent<PlayerMovement>().PlayerStatusVariables;
+        playerStatusVariables = other.GetComponent<PlayerManager>().PlayerStatusVariables;
     }
 
     public void OnTriggerStay2D(Collider2D other)

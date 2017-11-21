@@ -20,7 +20,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerController playerController;
     private PlayerStatusVariables playerStatusVariables;
-    private Player player;
+    private PlayerGeneralController player;
 
 
     public PlayerVerticalMovement(MonoBehaviour monoBehaviour,
@@ -28,7 +28,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         float climbingObstacleSmoothness, float climbLadderVelocity, float minimumFallingDistanceForDamage
         , float minimumDamageForFalling,
         BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Player player) : base(
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables, PlayerGeneralController player) : base(
         monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;

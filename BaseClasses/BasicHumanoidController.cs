@@ -63,7 +63,7 @@ public abstract class BasicHumanoidController
         if (negate)
         {
             revoke = !revoke;
-        }
+        }      
 
         switch (controlTypeToRevoke)
         {

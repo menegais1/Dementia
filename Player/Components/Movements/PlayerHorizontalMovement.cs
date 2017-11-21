@@ -18,12 +18,13 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
     private PlayerController playerController;
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerStatusVariables playerStatusVariables;
-    private Player player;
+    private PlayerGeneralController player;
 
     public PlayerHorizontalMovement(MonoBehaviour monoBehaviour,
         float maxSpeed, float acceleration,
         float dodgeForce, float crouchingSpeed, BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Player player) : base(
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables,
+        PlayerGeneralController player) : base(
         monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
@@ -45,7 +46,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
 
         if (playerController.Jog)
         {
-            playerStatusVariables.isJogging = !playerStatusVariables.isJogging;
+            playerStatusVariables.isJoggingActive = !playerStatusVariables.isJoggingActive;
         }
 
         if (playerController.Crouch)
@@ -59,7 +60,8 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
 
         playerStatusVariables.isDodging = playerController.Dodge && player.CheckStamina(30, true);
         playerStatusVariables.isRunning = false;
-
+        playerStatusVariables.isJogging = false;
+        
         if (!MathHelpers.Approximately(playerController.HorizontalMove, 0, float.Epsilon) &&
             !playerStatusVariables.isDodging)
         {
@@ -72,9 +74,10 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
                 playerStatusVariables.isRunning = true;
                 HorizontalMovementState = HorizontalMovementState.Running;
             }
-            else if (playerStatusVariables.isJogging && player.CheckStamina(5, false))
+            else if (playerStatusVariables.isJoggingActive && player.CheckStamina(5, false))
             {
                 HorizontalMovementState = HorizontalMovementState.Jogging;
+                playerStatusVariables.isJogging = true;
             }
             else
             {

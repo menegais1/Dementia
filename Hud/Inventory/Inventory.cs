@@ -14,22 +14,55 @@ public class Inventory : MonoBehaviour
 
     private Description description;
 
+    public WeaponSlot CurrentWeapon
+    {
+        get { return currentWeapon; }
+        set { currentWeapon = value; }
+    }
+
+    public ItemSlot CurrentItem
+    {
+        get { return currentItem; }
+        set { currentItem = value; }
+    }
+
 
     void Start()
     {
         inGameMenuController = GetComponentInParent<InGameMenuController>();
         description = GetComponentInChildren<Description>();
-        itensSlots = new List<ItemSlot>();
-        weaponsSlots = new List<WeaponSlot>();
+
         itensSlots.AddRange(GetComponentsInChildren<ItemSlot>());
         weaponsSlots.AddRange(GetComponentsInChildren<WeaponSlot>());
-        
+
         description.gameObject.SetActive(false);
 
         DisableItemSlots();
         DisableWeaponSlots();
     }
 
+    private void OnEnable()
+    {
+        if (itensSlots == null)
+        {
+            itensSlots = new List<ItemSlot>();
+        }
+        if (weaponsSlots == null)
+        {
+            weaponsSlots = new List<WeaponSlot>();
+        }
+
+        for (var i = 0; i < itensSlots.Count; i++)
+        {
+            if (itensSlots[i].Type != ItemType.Nothing)
+                itensSlots[i].RenderItem();
+        }
+        for (var i = 0; i < weaponsSlots.Count; i++)
+        {
+            if (weaponsSlots[i].Type != WeaponType.Nothing)
+                weaponsSlots[i].RenderWeapon();
+        }
+    }
 
     private void DisableWeaponSlots()
     {
@@ -58,10 +91,10 @@ public class Inventory : MonoBehaviour
             CheckForEquipedItem();
         }
 
-        currentWeapon = weaponsSlots.Find(lambdaExpression =>
+        CurrentWeapon = weaponsSlots.Find(lambdaExpression =>
             lambdaExpression.IsEquiped);
 
-        currentItem = itensSlots.Find(lambdaExpression =>
+        CurrentItem = itensSlots.Find(lambdaExpression =>
             lambdaExpression.IsEquiped);
     }
 
@@ -133,6 +166,7 @@ public class Inventory : MonoBehaviour
     public void TakeWeapon(CollectibleWeapon weapon)
     {
         if (weapon == null) return;
+        if (weapon.WeaponInstance == null) return;
         AddWeapon(weapon);
         //currentWeapon = currentWeapon == null ? weapon.WeaponInstance.GetComponent<Weapon>() : currentWeapon;
     }

@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Runtime.CompilerServices;
+using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
     [SerializeField] private float force;
     [SerializeField] private float maxBulletDistance;
     [SerializeField] private WeaponType type;
+    private float damage;
     private Rigidbody2D rigidbody2D;
 
     private Vector3 initialPosition;
@@ -25,8 +27,18 @@ public class Bullet : MonoBehaviour
             if (raycastHit2D.collider.CompareTag("Scenery") ||
                 raycastHit2D.collider.CompareTag("Obstacle") || raycastHit2D.collider.CompareTag("Enemy"))
             {
-                if (Physics2D.Linecast(lastBulletPosition,
-                        rigidbody2D.position, LayerMask.GetMask("Enemy", "Ground")).collider != null)
+                var layerCollider = Physics2D.Linecast(lastBulletPosition,
+                    rigidbody2D.position, LayerMask.GetMask("Enemy", "Ground"));
+                if (layerCollider.collider != null &&
+                    LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Enemy")
+                {
+                    Destroy(this.gameObject);
+                    var apostleManager = layerCollider.transform.GetComponent<ApostleManager>();
+                    apostleManager.ApostleGeneralController.TakeDamage(damage);
+                    raycastHit2D = new RaycastHit2D();
+                }
+                else if (layerCollider.collider != null &&
+                         LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Ground")
                 {
                     Destroy(this.gameObject);
                     raycastHit2D = new RaycastHit2D();
@@ -50,7 +62,7 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    public static Bullet InstantiateBullet(Vector3 position, Vector3 direction, GameObject bullet)
+    public static Bullet InstantiateBullet(Vector3 position, Vector3 direction, GameObject bullet, float damage)
     {
         var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         var rotation = Quaternion.AngleAxis(angle, Vector3.forward);
@@ -58,7 +70,7 @@ public class Bullet : MonoBehaviour
         var instantiateBullet = gameObject.GetComponent<Bullet>();
         instantiateBullet.initialPosition = position;
         instantiateBullet.initialDirection = direction;
-
+        instantiateBullet.damage = damage;
         return instantiateBullet;
     }
 

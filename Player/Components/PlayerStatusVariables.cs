@@ -2,6 +2,8 @@
 
 public class PlayerStatusVariables : MonoBehaviour
 {
+    public bool isJoggingActive;
+
     public bool isJogging;
 
     public bool isRunning;

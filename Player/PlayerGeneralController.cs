@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class PlayerGeneralController : MonoBehaviour
 {
     [SerializeField] private float currentStamina;
     [SerializeField] public float maxStamina;

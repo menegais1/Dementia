@@ -42,7 +42,7 @@ public class Diary : MonoBehaviour
         {
             noteContent.gameObject.SetActive(true);
             noteContent.FillContent(noteSlot);
-            
+
             notesGroup.gameObject.SetActive(false);
         }
         else if (noteSlot == null)
@@ -57,12 +57,28 @@ public class Diary : MonoBehaviour
         {
             var noteSlotGameObject = Instantiate(noteSlotObject.gameObject, notesGroup.transform);
             var noteSlotRectTransform = noteSlotGameObject.GetComponent<RectTransform>();
-            noteSlotRectTransform.anchoredPosition = new Vector2(noteSlotRectTransform.anchoredPosition.x,
-                (noteSlotRectTransform.anchoredPosition.y < 0)
-                    ? noteSlotRectTransform.anchoredPosition.y +
-                      -(noteSlotRectTransform.sizeDelta.y * notesSlots.Count)
-                    : noteSlotRectTransform.anchoredPosition.y +
-                      (noteSlotRectTransform.sizeDelta.y * notesSlots.Count));
+
+            if (notesSlots.Count % 2 == 0)
+
+            {
+                noteSlotRectTransform.anchoredPosition = new Vector2(noteSlotRectTransform.anchoredPosition.x,
+                    (noteSlotRectTransform.anchoredPosition.y < 0)
+                        ? noteSlotRectTransform.anchoredPosition.y +
+                          -(noteSlotRectTransform.sizeDelta.y * notesSlots.Count / 2)
+                        : noteSlotRectTransform.anchoredPosition.y +
+                          (noteSlotRectTransform.sizeDelta.y * notesSlots.Count / 2));
+            }
+            else
+            {
+                noteSlotRectTransform.anchoredPosition = new Vector2(
+                    noteSlotRectTransform.anchoredPosition.x + noteSlotRectTransform.sizeDelta.x,
+                    (noteSlotRectTransform.anchoredPosition.y < 0)
+                        ? noteSlotRectTransform.anchoredPosition.y +
+                          -(noteSlotRectTransform.sizeDelta.y * (notesSlots.Count - 1) / 2)
+                        : noteSlotRectTransform.anchoredPosition.y +
+                          (noteSlotRectTransform.sizeDelta.y * (notesSlots.Count - 1) / 2)
+                );
+            }
 
 
             var noteSlot = noteSlotGameObject.GetComponent<NoteSlot>();
@@ -71,5 +87,4 @@ public class Diary : MonoBehaviour
             notesSlots.Add(noteSlot);
         }
     }
-
 }

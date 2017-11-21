@@ -28,7 +28,7 @@ public class CollectibleNote : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.gameObject.CompareTag("Player")) return;
-        playerStatusVariables = other.GetComponent<PlayerMovement>().PlayerStatusVariables;
+        playerStatusVariables = other.GetComponent<PlayerManager>().PlayerStatusVariables;
     }
 
     public void OnTriggerStay2D(Collider2D other)

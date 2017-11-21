@@ -98,6 +98,7 @@ public class ItemSlot : MonoBehaviour
         quantity = 0;
         itemInstance = null;
         Toggle.isOn = false;
+        isEquiped = false;
         gameObject.SetActive(false);
     }
 

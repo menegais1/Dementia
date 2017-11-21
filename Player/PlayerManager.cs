@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerManager : MonoBehaviour
 {
     [SerializeField] private float maxSpeed;
     [SerializeField] private float acceleration;
@@ -19,7 +19,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float maxAngle;
     [SerializeField] private float cqcDistance;
     [SerializeField] private LayerMask layerMaskForCollisions;
-    [SerializeField] private Weapon weapon;
     [SerializeField] private Inventory inventory;
     [SerializeField] private Diary diary;
     [SerializeField] private InGameMenuController inGameMenuController;
@@ -29,7 +28,7 @@ public class PlayerMovement : MonoBehaviour
     public PlayerVerticalMovement VerticalMovement { get; private set; }
     public PlayerMiscellaneousMovement MiscellaneousMovement { get; private set; }
     public PlayerCombatMovement CombatMovement { get; private set; }
-    public Player Player { get; private set; }
+    public PlayerGeneralController Player { get; private set; }
     public PlayerController PlayerController { get; private set; }
     public BasicCollisionHandler PlayerCollisionHandler { get; private set; }
     public PlayerStatusVariables PlayerStatusVariables { get; private set; }
@@ -48,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
     {
         //PlayerStatusVariables = new PlayerStatusVariables();
         PlayerStatusVariables = GetComponent<PlayerStatusVariables>();
-        Player = GetComponent<Player>();
+        Player = GetComponent<PlayerGeneralController>();
 
         PlayerCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
@@ -68,7 +67,7 @@ public class PlayerMovement : MonoBehaviour
             PlayerStatusVariables, Inventory, diary, InGameMenuController);
 
         CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
-            PlayerStatusVariables, weapon, cqcDistance);
+            PlayerStatusVariables, Inventory, cqcDistance);
     }
 
     void Update()

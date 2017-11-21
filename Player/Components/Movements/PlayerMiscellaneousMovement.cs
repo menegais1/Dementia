@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 {
@@ -42,6 +43,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 
         if (playerStatusVariables.isInGameMenuOpen)
         {
+            
             playerController.RevokeControl(0.1f, true, ControlTypeToRevoke.CombatMovement, monoBehaviour);
         }
         else
@@ -71,7 +73,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
         {
             playerStatusVariables.isTakingWeapon = true;
         }
-        else if (!playerStatusVariables.canTakeWeapon && playerStatusVariables.isTakingItem)
+        else if (!playerStatusVariables.canTakeWeapon && playerStatusVariables.isTakingWeapon)
         {
             playerStatusVariables.isTakingWeapon = false;
         }
@@ -121,12 +123,21 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 break;
             case MiscellaneousPressMovementState.TakeItem:
                 inventory.TakeItem(TakeItem());
+
+                playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+                playerController.RevokeControl(false, ControlTypeToRevoke.MiscellaneousMovement);
                 break;
             case MiscellaneousPressMovementState.TakeWeapon:
                 inventory.TakeWeapon(TakeWeapon());
+
+                playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+                playerController.RevokeControl(false, ControlTypeToRevoke.MiscellaneousMovement);
                 break;
             case MiscellaneousPressMovementState.TakeNote:
                 diary.TakeNote(TakeNote());
+
+                playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+                playerController.RevokeControl(false, ControlTypeToRevoke.MiscellaneousMovement);
                 break;
             case MiscellaneousPressMovementState.InteractWithScenery:
                 InteractWithScenery();

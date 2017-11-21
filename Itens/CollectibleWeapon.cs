@@ -4,6 +4,7 @@ public class CollectibleWeapon : MonoBehaviour
 {
     private PlayerStatusVariables playerStatusVariables;
 
+    private int weaponTypeId;
     [SerializeField] private string name;
     [SerializeField] private string description;
     [SerializeField] private int ammo;
@@ -53,11 +54,26 @@ public class CollectibleWeapon : MonoBehaviour
         set { weaponType = value; }
     }
 
+    public int WeaponTypeId
+    {
+        get { return weaponTypeId; }
+    }
+
+
+    private void Start()
+    {
+        if (weaponInstance != null)
+        {
+            var tempWeapon = Instantiate(weaponInstance);
+            weaponTypeId = tempWeapon.GetComponent<Weapon>().WeaponTypeId;
+            Destroy(tempWeapon);
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.gameObject.CompareTag("Player")) return;
-        playerStatusVariables = other.GetComponent<PlayerMovement>().PlayerStatusVariables;
+        playerStatusVariables = other.GetComponent<PlayerManager>().PlayerStatusVariables;
     }
 
     public void OnTriggerStay2D(Collider2D other)
