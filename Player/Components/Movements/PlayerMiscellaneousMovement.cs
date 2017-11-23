@@ -43,8 +43,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 
         if (playerStatusVariables.isInGameMenuOpen)
         {
-            
-            playerController.RevokeControl(0.1f, true, ControlTypeToRevoke.CombatMovement, monoBehaviour);
+            playerController.RevokeControl(true, ControlTypeToRevoke.CombatMovement);
         }
         else
         {
@@ -54,10 +53,15 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
             }
         }
 
-        if (playerController.InGameMenuOpenClose)
+        if (playerController.MenuPress)
         {
             playerStatusVariables.isInGameMenuOpen = !playerStatusVariables.isInGameMenuOpen;
+            if (inGameMenuController.gameObject.activeSelf)
+            {
+                playerController.RevokeControl(false, ControlTypeToRevoke.CombatMovement);
+            }
             OpenCloseInGameMenu();
+            
         }
 
         if (playerStatusVariables.canTakeItem && playerController.TakeItemPress)
@@ -123,7 +127,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 break;
             case MiscellaneousPressMovementState.TakeItem:
                 inventory.TakeItem(TakeItem());
-
+                
                 playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 playerController.RevokeControl(false, ControlTypeToRevoke.MiscellaneousMovement);
                 break;
@@ -135,7 +139,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 break;
             case MiscellaneousPressMovementState.TakeNote:
                 diary.TakeNote(TakeNote());
-
+                
                 playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 playerController.RevokeControl(false, ControlTypeToRevoke.MiscellaneousMovement);
                 break;

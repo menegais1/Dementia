@@ -1,13 +1,19 @@
 ﻿using UnityEngine;
 
-public abstract class Item : MonoBehaviour
+public class Item : MonoBehaviour
 {
-
     protected bool worldStatus;
     protected string id;
     protected int quantity;
-    
-    public abstract void effect();
+    [SerializeField] private ItemType type;
 
+    public ItemType Type
+    {
+        get { return type; }
+        set { type = value; }
+    }
 
+    public virtual void Effect()
+    {
+    }
 }

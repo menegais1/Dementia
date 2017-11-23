@@ -18,13 +18,13 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
     private PlayerController playerController;
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerStatusVariables playerStatusVariables;
-    private PlayerGeneralController player;
+    private PlayerStatusController player;
 
     public PlayerHorizontalMovement(MonoBehaviour monoBehaviour,
         float maxSpeed, float acceleration,
         float dodgeForce, float crouchingSpeed, BasicCollisionHandler playerCollisionHandler,
         PlayerController playerController, PlayerStatusVariables playerStatusVariables,
-        PlayerGeneralController player) : base(
+        PlayerStatusController player) : base(
         monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;

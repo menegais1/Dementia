@@ -28,7 +28,7 @@ public class PlayerManager : MonoBehaviour
     public PlayerVerticalMovement VerticalMovement { get; private set; }
     public PlayerMiscellaneousMovement MiscellaneousMovement { get; private set; }
     public PlayerCombatMovement CombatMovement { get; private set; }
-    public PlayerGeneralController Player { get; private set; }
+    public PlayerStatusController PlayerStatusController { get; private set; }
     public PlayerController PlayerController { get; private set; }
     public BasicCollisionHandler PlayerCollisionHandler { get; private set; }
     public PlayerStatusVariables PlayerStatusVariables { get; private set; }
@@ -47,27 +47,27 @@ public class PlayerManager : MonoBehaviour
     {
         //PlayerStatusVariables = new PlayerStatusVariables();
         PlayerStatusVariables = GetComponent<PlayerStatusVariables>();
-        Player = GetComponent<PlayerGeneralController>();
+        PlayerStatusController = GetComponent<PlayerStatusController>();
 
         PlayerCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
         PlayerController = new PlayerController(transform);
 
         HorizontalMovement = new PlayerHorizontalMovement(this, maxSpeed, acceleration,
-            dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables, Player);
+            dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables, PlayerStatusController);
 
         VerticalMovement = new PlayerVerticalMovement(this, jumpForce, climbingLadderSmoothness,
             climbingObstacleSmoothness, climbLadderVelocity, minimumFallingDistanceForDamage, minimumDamageForFalling,
             PlayerCollisionHandler,
             PlayerController,
-            PlayerStatusVariables, Player);
+            PlayerStatusVariables, PlayerStatusController);
 
         MiscellaneousMovement = new PlayerMiscellaneousMovement(this, cameraZoomSize, PlayerCollisionHandler,
             PlayerController,
             PlayerStatusVariables, Inventory, diary, InGameMenuController);
 
         CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
-            PlayerStatusVariables, Inventory, cqcDistance);
+            PlayerStatusVariables, PlayerStatusController, Inventory, cqcDistance);
     }
 
     void Update()

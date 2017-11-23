@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerCombatMovement : BasicPhysicsMovement
 {
@@ -8,20 +9,24 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     private PlayerController playerController;
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerStatusVariables playerStatusVariables;
-
+    private PlayerStatusController playerStatusController;
     private Inventory inventory;
 
     private Weapon currentWeapon;
+    private ItemSlot currentItem;
 
     private float cqcDistance;
 
     public PlayerCombatMovement(MonoBehaviour monoBehaviour,
         BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables, Inventory inventory,
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables,
+        PlayerStatusController playerStatusController,
+        Inventory inventory,
         float cqcDistance) : base(
         monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
+        this.playerStatusController = playerStatusController;
         this.monoBehaviour = monoBehaviour;
         this.playerController = playerController;
         this.playerCollisionHandler = playerCollisionHandler;
@@ -32,27 +37,8 @@ public class PlayerCombatMovement : BasicPhysicsMovement
 
     public override void StartMovement()
     {
-        if (inventory.CurrentWeapon != null && currentWeapon != null &&
-            currentWeapon.WeaponTypeId != inventory.CurrentWeapon.WeaponTypeId)
-        {
-            GameObject.Destroy(currentWeapon.gameObject);
-            currentWeapon = null;
-            Debug.Log("teste2");
-        }
-
-        if (inventory.CurrentWeapon != null && currentWeapon == null)
-        {
-            currentWeapon = GameObject.Instantiate(inventory.CurrentWeapon.WeaponInstance,
-                monoBehaviour.gameObject.transform).GetComponent<Weapon>();
-            currentWeapon.CurrentMagazine = inventory.CurrentWeapon.Magazine;
-            currentWeapon.CurrentAmmo = inventory.CurrentWeapon.Ammo;
-            Debug.Log("teste");
-        }
-        else if (inventory.CurrentWeapon == null && currentWeapon != null)
-        {
-            GameObject.Destroy(currentWeapon.gameObject);
-            currentWeapon = null;
-        }
+        CheckForEquipedWeapon();
+        CheckForEquipedItem();
 
         playerController.CheckForCombatInput(
             currentWeapon != null && currentWeapon.Automatic);
@@ -77,6 +63,10 @@ public class PlayerCombatMovement : BasicPhysicsMovement
             if (playerController.ShootPress)
             {
                 CombatPressMovementState = CombatPressMovementState.Shoot;
+            }
+            else if (playerController.UseItemPress)
+            {
+                CombatPressMovementState = CombatPressMovementState.UseItem;
             }
             else if (playerController.ReloadPress)
             {
@@ -110,6 +100,9 @@ public class PlayerCombatMovement : BasicPhysicsMovement
             case CombatPressMovementState.Cqc:
                 Cqc();
                 break;
+            case CombatPressMovementState.UseItem:
+                UseItem();
+                break;
             case CombatPressMovementState.None:
                 break;
             default:
@@ -137,8 +130,83 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     {
     }
 
-    public void UseItem()
+    private void CheckForEquipedWeapon()
     {
+        if (inventory.CurrentWeapon != null && currentWeapon != null &&
+            currentWeapon.WeaponTypeId != inventory.CurrentWeapon.WeaponTypeId)
+        {
+            GameObject.Destroy(currentWeapon.gameObject);
+            currentWeapon = null;
+        }
+
+        if (inventory.CurrentWeapon != null && currentWeapon == null)
+        {
+            currentWeapon = GameObject.Instantiate(inventory.CurrentWeapon.WeaponInstance,
+                monoBehaviour.gameObject.transform).GetComponent<Weapon>();
+            currentWeapon.CurrentMagazine = inventory.CurrentWeapon.Magazine;
+            currentWeapon.CurrentAmmo = inventory.CurrentWeapon.Ammo;
+        }
+        else if (inventory.CurrentWeapon == null && currentWeapon != null)
+        {
+            GameObject.Destroy(currentWeapon.gameObject);
+            currentWeapon = null;
+        }
+    }
+
+    private void CheckForEquipedItem()
+    {
+        if ((inventory.CurrentItem != null && currentItem != null &&
+             currentItem.Type != inventory.CurrentItem.Type) || (inventory.CurrentItem == null && currentItem != null))
+        {
+            currentItem = null;
+        }
+
+        if (inventory.CurrentItem != null && currentItem == null)
+        {
+            currentItem = inventory.CurrentItem;
+        }
+    }
+
+    private void UseItem()
+    {
+        if (currentItem == null) return;
+
+        Item item = null;
+
+        bool itemUsed = false;
+        switch (currentItem.Type)
+        {
+            case ItemType.Bandages:
+
+                item = InstantiateItem();
+
+                if (item == null) return;
+                
+                if (!playerStatusController.LifeIsFull())
+                {
+                    item.GetComponent<HealingItem>().Effect(playerStatusController);
+                    itemUsed = true;
+                }
+                break;
+            case ItemType.Molotov:
+                break;
+            case ItemType.Analgesics:
+                break;
+            default:
+                Debug.Log("Error");
+                break;
+        }
+
+        if (itemUsed)
+            currentItem.UseItem();
+        else if (item != null)
+            GameObject.Destroy(item.gameObject);
+    }
+
+    public Item InstantiateItem()
+    {
+        return GameObject.Instantiate(currentItem.ItemInstance, monoBehaviour.gameObject.transform)
+            .GetComponent<Item>();
     }
 
     public void TakeDamage()

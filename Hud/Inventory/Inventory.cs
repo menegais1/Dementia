@@ -62,6 +62,9 @@ public class Inventory : MonoBehaviour
             if (weaponsSlots[i].Type != WeaponType.Nothing)
                 weaponsSlots[i].RenderWeapon();
         }
+
+        if (description != null)
+            description.RenderDescription();
     }
 
     private void DisableWeaponSlots()
@@ -103,13 +106,28 @@ public class Inventory : MonoBehaviour
         ItemSlot itemSelected = itensSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
         WeaponSlot weaponSelected = weaponsSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
 
+
         if (itemSelected != null)
         {
-            description.RenderDescription(itemSelected);
+            if (description.ItemSlot != null && itemSelected.Type != description.ItemSlot.Type)
+            {
+                description.RenderDescription();
+            }
+            else
+            {
+                description.RenderDescription(itemSelected);
+            }
         }
         else if (weaponSelected != null)
         {
-            description.RenderDescription(weaponSelected);
+            if (description.WeaponSlot != null && weaponSelected.Type != description.WeaponSlot.Type)
+            {
+                description.RenderDescription();
+            }
+            else
+            {
+                description.RenderDescription(weaponSelected);
+            }
         }
         else
         {
@@ -156,24 +174,20 @@ public class Inventory : MonoBehaviour
             return;
         }
 
+        if (item.ItemType == ItemType.Nothing) return;
 
-        if (inGameMenuController != null)
-        {
-            AddItem(item);
-        }
+        if (item.ItemInstance == null && !item.Unequipable) return;
+
+        AddItem(item);
     }
 
     public void TakeWeapon(CollectibleWeapon weapon)
     {
         if (weapon == null) return;
-        if (weapon.WeaponInstance == null) return;
+        if (weapon.WeaponInstance == null || weapon.WeaponType == WeaponType.Nothing) return;
         AddWeapon(weapon);
-        //currentWeapon = currentWeapon == null ? weapon.WeaponInstance.GetComponent<Weapon>() : currentWeapon;
     }
 
-    public void RemoveItemSelection()
-    {
-    }
 
     private void AddItem(CollectibleItem item)
     {
@@ -197,7 +211,12 @@ public class Inventory : MonoBehaviour
     private void AddAmmo(WeaponSlot weapon, int quantity)
     {
         weapon.Ammo += quantity;
-        weapon.WeaponInstance.GetComponent<Weapon>().AddAmmo(quantity);
+        var weaponEquiped = GameObject.FindGameObjectWithTag("Weapon");
+
+        if (weaponEquiped != null)
+        {
+            weaponEquiped.GetComponent<Weapon>().AddAmmo(quantity);
+        }
         weapon.RenderWeapon();
     }
 

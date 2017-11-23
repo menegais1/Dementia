@@ -2,23 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HealingItem : Item {
+public class HealingItem : Item
+{
+    [SerializeField] private float lifeRegen;
 
-    #region Váriaveis Gerais
 
-    private float lifeRegen;
-    private bool anotherEffectCure;
-   
-
-    #endregion
-
-    #region Métodos Unity
-    public override void effect()
+    public void Effect(PlayerStatusController playerStatusController)
     {
+        if (playerStatusController == null) return;
+
+        playerStatusController.RegenLife(lifeRegen);
+        Destroy(this.gameObject);
     }
-
-
-    #endregion
-
-
 }

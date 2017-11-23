@@ -9,15 +9,20 @@ public class GameManager : MonoBehaviour
     private List<Weapon> initializeWeapons;
     private List<Note> initializeNotes;
     private List<Enemy> initializeEnemies;
-    
+
+    public static GameManager instance;
+
     void Start()
     {
         CoroutineManager.SetMonoBehaviourInstance(this);
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
 
     public void Save()
     {
-        
     }
 
     public void Load()

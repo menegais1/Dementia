@@ -18,7 +18,7 @@ public class ThrowableItem : Item
     #endregion
 
     #region Métodos Unity
-    public override void effect()
+    public override void Effect()
     {
     }
 

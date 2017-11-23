@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerGeneralController : MonoBehaviour
+public class PlayerStatusController : MonoBehaviour
 {
     [SerializeField] private float currentStamina;
     [SerializeField] public float maxStamina;
@@ -110,13 +110,25 @@ public class PlayerGeneralController : MonoBehaviour
         }
     }
 
-    public void RegenLife(float lifeToRegen)
+    public bool RegenLife(float lifeToRegen)
     {
+        if (LifeIsFull())
+        {
+            return false;
+        }
+
         currentLife += lifeToRegen;
         if (currentLife > maxLife)
         {
             currentLife = maxLife;
         }
+
+        return true;
+    }
+
+    public bool LifeIsFull()
+    {
+        return MathHelpers.Approximately(currentLife, maxLife, float.Epsilon);
     }
 
     public void Die()

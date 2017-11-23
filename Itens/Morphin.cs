@@ -36,9 +36,10 @@ public class Morphin : Item {
 
     #region Métodos Gerais
 
-    public override void effect()
+    public override void Effect()
     {
     }
+    
 
     #endregion
 

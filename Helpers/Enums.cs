@@ -40,6 +40,7 @@ public enum CombatPressMovementState
     Shoot,
     Reload,
     Cqc,
+    UseItem,
 }
 
 public enum VerticalMovementState

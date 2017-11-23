@@ -57,12 +57,12 @@ public class Description : MonoBehaviour
         descriptionText.text = "";
         equip.isOn = false;
         equipLabel = equip.gameObject.GetComponentInChildren<Text>();
-        
+
         equip.onValueChanged.AddListener(OnEquip);
         discard.onClick.AddListener(OpenPopUp);
         discardAcceptPopUp.onClick.AddListener(OnDiscard);
         discardDeclinePopUp.onClick.AddListener(ClosePopUp);
-        
+
         PopUp.gameObject.SetActive(false);
     }
 
@@ -143,12 +143,12 @@ public class Description : MonoBehaviour
     public void RenderDescription()
     {
         gameObject.SetActive(false);
+        popUp.gameObject.SetActive(false);
+        equip.gameObject.SetActive(true);
         descriptionText.text = "";
 
         weaponSlot = null;
         itemSlot = null;
-
-
         equip.isOn = false;
     }
 }

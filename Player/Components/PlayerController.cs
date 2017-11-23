@@ -18,10 +18,11 @@ public sealed class PlayerController : BasicHumanoidController
     public bool TakeItemPress { get; private set; }
     public bool InteractWithSceneryPress { get; private set; }
     public bool ZoomCameraPress { get; private set; }
-    public bool InGameMenuOpenClose { get; private set; }
+    public bool MenuPress { get; private set; }
 
     public bool AimHold { get; private set; }
     public bool ShootPress { get; private set; }
+    public bool UseItemPress { get; private set; }
     public bool ReloadPress { get; private set; }
     public bool CqcPress { get; private set; }
     public Vector3 AimDirection { get; private set; }
@@ -80,14 +81,14 @@ public sealed class PlayerController : BasicHumanoidController
             TakeItemPress = Input.GetButtonDown("Take Item");
             InteractWithSceneryPress = Input.GetButtonDown("Interact With Scenery");
             ZoomCameraPress = Input.GetButtonDown("Zoom Camera");
-            InGameMenuOpenClose = Input.GetButtonDown("InGameMenu Open Close");
+            MenuPress = Input.GetButtonDown("Menu");
         }
         else
         {
             TakeItemPress = false;
             InteractWithSceneryPress = false;
             ZoomCameraPress = false;
-            InGameMenuOpenClose = false;
+            MenuPress = false;
         }
     }
 
@@ -99,13 +100,15 @@ public sealed class PlayerController : BasicHumanoidController
             ReloadPress = Input.GetButtonDown("Reload");
             CqcPress = Input.GetButtonDown("Cqc");
             ShootPress = automaticWeapon ? Input.GetButton("Shoot") : Input.GetButtonDown("Shoot");
+            UseItemPress = Input.GetButtonDown("Use Item");
             AimDirection = Camera.main.ScreenToWorldPoint(Input.mousePosition) - playerTransform.position;
         }
         else
         {
             AimHold = false;
             ReloadPress = false;
-            ReloadPress = false;
+            CqcPress = false;
+            UseItemPress = false;
             ShootPress = false;
             AimDirection = Vector3.zero;
         }

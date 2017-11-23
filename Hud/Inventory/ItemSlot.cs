@@ -133,4 +133,13 @@ public class ItemSlot : MonoBehaviour
         quantityText.color = color;
         isEquiped = equip;
     }
+
+    public void UseItem()
+    {
+        quantity--;
+        if (quantity <= 0)
+        {
+            Reset();
+        }
+    }
 }
