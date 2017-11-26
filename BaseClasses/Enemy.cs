@@ -1,13 +1,54 @@
 ﻿using UnityEngine;
 
-public abstract class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour
 {
-    protected bool worldStatus;
-    protected string id;
-    protected float maxLife = 100f;
+    [SerializeField] private float reachArea;
+    [SerializeField] private float baseDamage;
+    [SerializeField] private float currentLife;
+    [SerializeField] private float maxLife;
+
+    private void Start()
+    {
+        currentLife = maxLife;
+    }
 
 
-    public abstract void TakeDamage(float damage);
-    public abstract void Die();
-    public abstract void CheckLife();
+    public void primaryAttack()
+    {
+    }
+
+    public void secondaryAttack()
+    {
+    }
+
+    public void terciaryAttack()
+    {
+    }
+
+    public void patrol()
+    {
+    }
+
+    public void findPlayer()
+    {
+    }
+
+    public  void TakeDamage(float damage)
+    {
+        currentLife -= damage;
+        CheckLife();
+    }
+
+    public  void Die()
+    {
+        Destroy(this.gameObject);
+    }
+
+    public void CheckLife()
+    {
+        if (currentLife <= 0)
+        {
+            Die();
+        }
+    }
 }

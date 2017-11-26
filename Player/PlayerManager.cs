@@ -18,6 +18,8 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private float cameraZoomSize;
     [SerializeField] private float maxAngle;
     [SerializeField] private float cqcDistance;
+    [SerializeField] private float offsetForThrowableItemPosition;
+    [SerializeField] private float rangeForShortThrowableItemPosition;
     [SerializeField] private LayerMask layerMaskForCollisions;
     [SerializeField] private Inventory inventory;
     [SerializeField] private Diary diary;
@@ -54,7 +56,8 @@ public class PlayerManager : MonoBehaviour
         PlayerController = new PlayerController(transform);
 
         HorizontalMovement = new PlayerHorizontalMovement(this, maxSpeed, acceleration,
-            dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables, PlayerStatusController);
+            dodgeForce, crouchingSpeed, PlayerCollisionHandler, PlayerController, PlayerStatusVariables,
+            PlayerStatusController);
 
         VerticalMovement = new PlayerVerticalMovement(this, jumpForce, climbingLadderSmoothness,
             climbingObstacleSmoothness, climbLadderVelocity, minimumFallingDistanceForDamage, minimumDamageForFalling,
@@ -67,7 +70,8 @@ public class PlayerManager : MonoBehaviour
             PlayerStatusVariables, Inventory, diary, InGameMenuController);
 
         CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
-            PlayerStatusVariables, PlayerStatusController, Inventory, cqcDistance);
+            PlayerStatusVariables, PlayerStatusController, Inventory, cqcDistance, offsetForThrowableItemPosition,
+            rangeForShortThrowableItemPosition);
     }
 
     void Update()

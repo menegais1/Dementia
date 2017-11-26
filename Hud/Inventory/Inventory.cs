@@ -90,14 +90,24 @@ public class Inventory : MonoBehaviour
 
         if (description.Equip.isOn)
         {
-            CheckForEquipedWeapon();
-            CheckForEquipedItem();
+            //Checa se não há outra arma/item equipada, se houver, desequipa-a
+            CheckForDifferentEquipedWeapon();
+            CheckForDifferentEquipedItem();
         }
 
-        CurrentWeapon = weaponsSlots.Find(lambdaExpression =>
-            lambdaExpression.IsEquiped);
+        CheckForCurrentItem();
+        CheckForCurrentWeapon();
+    }
 
+    public void CheckForCurrentItem()
+    {
         CurrentItem = itensSlots.Find(lambdaExpression =>
+            lambdaExpression.IsEquiped);
+    }
+
+    public void CheckForCurrentWeapon()
+    {
+        CurrentWeapon = weaponsSlots.Find(lambdaExpression =>
             lambdaExpression.IsEquiped);
     }
 
@@ -135,12 +145,14 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    private void CheckForEquipedWeapon()
+    private void CheckForDifferentEquipedWeapon()
     {
+        
         if (description.WeaponSlot != null)
         {
             var equipedWeapon = weaponsSlots.Find(lambdaExpression =>
                 lambdaExpression.IsEquiped && lambdaExpression != description.WeaponSlot);
+
             if (equipedWeapon != null)
             {
                 equipedWeapon.Equip(new Color(0.2f, 0.2f, 0.2f), false);
@@ -148,7 +160,7 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    private void CheckForEquipedItem()
+    private void CheckForDifferentEquipedItem()
     {
         if (description.ItemSlot != null)
         {

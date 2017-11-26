@@ -136,7 +136,7 @@ public class ItemSlot : MonoBehaviour
 
     public void UseItem()
     {
-        quantity--;
+        --quantity;
         if (quantity <= 0)
         {
             Reset();

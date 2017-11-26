@@ -120,6 +120,21 @@ public static class PhysicsHelpers
         return forceApplied;
     }
 
+    public static Vector2 AddImpulseForce(float force, Vector3 aimDirection, Rigidbody2D rigidBody)
+    {
+        var angle = Vector2.Angle(aimDirection.normalized, Vector2.right);
+
+
+        var forceApplied =
+            new Vector2(
+                aimDirection.normalized.x < 0 ? -force * MathHelpers.AbsCos(angle) : force * MathHelpers.AbsCos(angle),
+                aimDirection.normalized.y < 0 ? -force * MathHelpers.AbsSin(angle) : force * MathHelpers.AbsSin(angle));
+
+        rigidBody.AddForce(forceApplied, ForceMode2D.Impulse);
+
+        return forceApplied;
+    }
+
     public static void Jump(float force, Rigidbody2D rigidBody)
     {
         rigidBody.AddForce(new Vector2(0, force), ForceMode2D.Impulse);
@@ -173,7 +188,7 @@ public static class PhysicsHelpers
 
     public static void IgnoreLayerCollision(LayerMask layerMask, LayerMask layerMaskToIgnore, bool ignore)
     {
-        Physics2D.IgnoreLayerCollision(layerMask.value, layerMaskToIgnore.value, ignore);
+        Physics2D.IgnoreLayerCollision(layerMask, layerMaskToIgnore, ignore);
     }
 
     public static void IgnoreLayerCollision(LayerMask layerMask, LayerMask layerMaskToIgnore, bool ignore, float time)

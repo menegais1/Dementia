@@ -11,9 +11,13 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     private PlayerStatusVariables playerStatusVariables;
     private PlayerStatusController playerStatusController;
     private Inventory inventory;
+    private Collider2D collider2D;
+    private float offsetForThrowableItemPosition;
+    private float rangeForShortThrowableItemPosition;
 
     private Weapon currentWeapon;
     private ItemSlot currentItem;
+    private Vector3 throwableItemPosition;
 
     private float cqcDistance;
 
@@ -22,7 +26,7 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         PlayerController playerController, PlayerStatusVariables playerStatusVariables,
         PlayerStatusController playerStatusController,
         Inventory inventory,
-        float cqcDistance) : base(
+        float cqcDistance, float offsetForThrowableItemPosition, float rangeForShortThrowableItemPosition) : base(
         monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
@@ -31,7 +35,14 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         this.playerController = playerController;
         this.playerCollisionHandler = playerCollisionHandler;
         this.inventory = inventory;
+        this.collider2D = monoBehaviour.GetComponent<Collider2D>();
+        this.offsetForThrowableItemPosition = offsetForThrowableItemPosition;
+        this.rangeForShortThrowableItemPosition = rangeForShortThrowableItemPosition;
         this.cqcDistance = cqcDistance;
+
+        this.throwableItemPosition =
+            new Vector3(playerCollisionHandler.BoxColliderBounds.topRight.x + offsetForThrowableItemPosition,
+                playerCollisionHandler.BoxColliderBounds.topRight.y);
     }
 
 
@@ -181,14 +192,41 @@ public class PlayerCombatMovement : BasicPhysicsMovement
                 item = InstantiateItem();
 
                 if (item == null) return;
-                
+
                 if (!playerStatusController.LifeIsFull())
                 {
                     item.GetComponent<HealingItem>().Effect(playerStatusController);
                     itemUsed = true;
+                    playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 }
                 break;
             case ItemType.Molotov:
+                item = InstantiateItem();
+
+                if (item == null) return;
+
+                var raycastHit = Physics2D.Raycast(monoBehaviour.gameObject.transform.position,
+                    playerController.AimDirection);
+
+                if (raycastHit.collider != null &&
+                    Math.Abs(raycastHit.point.x - monoBehaviour.gameObject.transform.position.x) <
+                    rangeForShortThrowableItemPosition)
+                {
+                    item.transform.position = playerStatusVariables.facingDirection == FacingDirection.Right
+                        ? new
+                            Vector2(throwableItemPosition.x,
+                                playerCollisionHandler.BoxColliderBounds.bottomRight.y)
+                        : new Vector2(throwableItemPosition.x,
+                            playerCollisionHandler.BoxColliderBounds.bottomLeft.y);
+                }
+                else
+                {
+                    item.transform.position = throwableItemPosition;
+                }
+
+                item.GetComponent<ThrowableItem>().Effect(playerController.AimDirection);
+                itemUsed = true;
+                playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 break;
             case ItemType.Analgesics:
                 break;
@@ -198,14 +236,17 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         }
 
         if (itemUsed)
+        {
             currentItem.UseItem();
+            inventory.CheckForCurrentItem();
+        }
         else if (item != null)
             GameObject.Destroy(item.gameObject);
     }
 
     public Item InstantiateItem()
     {
-        return GameObject.Instantiate(currentItem.ItemInstance, monoBehaviour.gameObject.transform)
+        return GameObject.Instantiate(currentItem.ItemInstance)
             .GetComponent<Item>();
     }
 
@@ -252,10 +293,16 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         if (playerController.AimDirection.x >= 0)
         {
             playerStatusVariables.facingDirection = FacingDirection.Right;
+            this.throwableItemPosition =
+                new Vector3(playerCollisionHandler.BoxColliderBounds.topRight.x + offsetForThrowableItemPosition,
+                    playerCollisionHandler.BoxColliderBounds.topRight.y);
         }
         else if (playerController.AimDirection.x < 0)
         {
             playerStatusVariables.facingDirection = FacingDirection.Left;
+            this.throwableItemPosition =
+                new Vector3(playerCollisionHandler.BoxColliderBounds.topLeft.x - offsetForThrowableItemPosition,
+                    playerCollisionHandler.BoxColliderBounds.topLeft.y);
         }
         spriteRenderer.flipX = (playerStatusVariables.facingDirection != FacingDirection.Right);
     }

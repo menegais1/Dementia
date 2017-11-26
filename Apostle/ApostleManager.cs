@@ -13,14 +13,14 @@ public class ApostleManager : MonoBehaviour
     public BasicCollisionHandler ApostleCollisionHandler { get; private set; }
     public ApostleStatusVariables ApostleStatusVariables { get; private set; }
     public ApostleInputHandler ApostleInputHandler { get; private set; }
-    public ApostleGeneralController ApostleGeneralController { get; private set; }
+    public Enemy Enemy { get; private set; }
 
 
     void Start()
     {
         ApostleStatusVariables = new ApostleStatusVariables();
-        ApostleGeneralController = GetComponent<ApostleGeneralController>();
-        
+        Enemy = GetComponent<Enemy>();
+
         ApostleCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
         ApostleInputHandler = new ApostleInputHandler(this, ApostleCollisionHandler, ApostleStatusVariables);
