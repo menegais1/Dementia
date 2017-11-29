@@ -18,6 +18,9 @@ public sealed class PlayerController : BasicHumanoidController
     public bool TakeItemPress { get; private set; }
     public bool InteractWithSceneryPress { get; private set; }
     public bool ZoomCameraPress { get; private set; }
+    public bool SavePress { get; private set; }
+    public bool LoadPress { get; private set; }
+
     public bool MenuPress { get; private set; }
 
     public bool AimHold { get; private set; }
@@ -82,6 +85,8 @@ public sealed class PlayerController : BasicHumanoidController
             InteractWithSceneryPress = Input.GetButtonDown("Interact With Scenery");
             ZoomCameraPress = Input.GetButtonDown("Zoom Camera");
             MenuPress = Input.GetButtonDown("Menu");
+            SavePress = Input.GetButtonDown("Save");
+            LoadPress = Input.GetButtonDown("Load");
         }
         else
         {
@@ -89,6 +94,8 @@ public sealed class PlayerController : BasicHumanoidController
             InteractWithSceneryPress = false;
             ZoomCameraPress = false;
             MenuPress = false;
+            SavePress = false;
+            LoadPress = false;
         }
     }
 

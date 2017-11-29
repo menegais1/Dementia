@@ -17,7 +17,8 @@ public static class CoroutineManager
         monoBehaviourInstance = instance;
     }
 
-    public static CoroutineContainer AddCoroutine(IEnumerator coroutine, string name, Object instanceCoroutineWasCalled)
+    public static CoroutineContainer AddCoroutine(IEnumerator coroutine, string name,
+        System.Object instanceCoroutineWasCalled)
     {
         if (coroutine == null) return null;
 
@@ -28,7 +29,7 @@ public static class CoroutineManager
         return coroutineContainer;
     }
 
-    public static CoroutineContainer AddCoroutine(IEnumerator coroutine, Object instanceCoroutineWasCalled)
+    public static CoroutineContainer AddCoroutine(IEnumerator coroutine, System.Object instanceCoroutineWasCalled)
     {
         return AddCoroutine(coroutine, null, instanceCoroutineWasCalled);
     }
@@ -44,7 +45,7 @@ public static class CoroutineManager
     }
 
 
-    public static bool DeleteCoroutine(string name, Object instanceCoroutineWasCalled)
+    public static bool DeleteCoroutine(string name, System.Object instanceCoroutineWasCalled)
     {
         var resultCoroutine = FindCoroutine(name, instanceCoroutineWasCalled);
         if (resultCoroutine == null) return false;
@@ -54,7 +55,7 @@ public static class CoroutineManager
         return true;
     }
 
-    public static bool DeleteCoroutine(IEnumerator coroutine, Object instanceCoroutineWasCalled)
+    public static bool DeleteCoroutine(IEnumerator coroutine, System.Object instanceCoroutineWasCalled)
     {
         var resultCoroutine = FindCoroutine(coroutine, instanceCoroutineWasCalled);
         if (resultCoroutine == null) return false;
@@ -92,13 +93,13 @@ public static class CoroutineManager
         runningCoroutines = new List<CoroutineContainer>();
     }
 
-    public static CoroutineContainer FindCoroutine(string name, Object instanceCoroutineWasCalled)
+    public static CoroutineContainer FindCoroutine(string name, System.Object instanceCoroutineWasCalled)
     {
         return runningCoroutines.Find(lambdaCoroutine =>
             lambdaCoroutine.Name == name && lambdaCoroutine.InstanceCoroutineWasCalled == instanceCoroutineWasCalled);
     }
 
-    public static CoroutineContainer FindCoroutine(IEnumerator coroutine, Object instanceCoroutineWasCalled)
+    public static CoroutineContainer FindCoroutine(IEnumerator coroutine, System.Object instanceCoroutineWasCalled)
     {
         return runningCoroutines.Find(lambdaCoroutine =>
             lambdaCoroutine.Coroutine == coroutine &&
@@ -117,13 +118,13 @@ public static class CoroutineManager
             lambdaCoroutine.Name == name);
     }
 
-    public static bool CheckIfCoroutineExists(string name, Object instanceCoroutineWasCalled)
+    public static bool CheckIfCoroutineExists(string name, System.Object instanceCoroutineWasCalled)
     {
         return runningCoroutines.Exists(lambdaCoroutine =>
             lambdaCoroutine.Name == name && lambdaCoroutine.InstanceCoroutineWasCalled == instanceCoroutineWasCalled);
     }
 
-    public static bool CheckIfCoroutineExists(IEnumerator coroutine, Object instanceCoroutineWasCalled)
+    public static bool CheckIfCoroutineExists(IEnumerator coroutine, System.Object instanceCoroutineWasCalled)
     {
         return runningCoroutines.Exists(lambdaCoroutine =>
             lambdaCoroutine.Coroutine == coroutine &&
@@ -142,7 +143,7 @@ public static class CoroutineManager
             lambdaCoroutine.Name == name);
     }
 
-    public static bool CheckIfCoroutineIsRunning(string name, Object instanceCoroutineWasCalled)
+    public static bool CheckIfCoroutineIsRunning(string name, System.Object instanceCoroutineWasCalled)
     {
         if (CheckIfCoroutineExists(name, instanceCoroutineWasCalled))
         {
@@ -154,7 +155,7 @@ public static class CoroutineManager
         return false;
     }
 
-    public static bool CheckIfCoroutineIsRunning(IEnumerator coroutine, Object instanceCoroutineWasCalled)
+    public static bool CheckIfCoroutineIsRunning(IEnumerator coroutine, System.Object instanceCoroutineWasCalled)
     {
         if (CheckIfCoroutineExists(coroutine, instanceCoroutineWasCalled))
         {

@@ -7,6 +7,14 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float currentLife;
     [SerializeField] private float maxLife;
 
+    private int id;
+
+    public int Id
+    {
+        get { return id; }
+        set { id = value; }
+    }
+
     private void Start()
     {
         currentLife = maxLife;
@@ -33,13 +41,13 @@ public class Enemy : MonoBehaviour
     {
     }
 
-    public  void TakeDamage(float damage)
+    public void TakeDamage(float damage)
     {
         currentLife -= damage;
         CheckLife();
     }
 
-    public  void Die()
+    public void Die()
     {
         Destroy(this.gameObject);
     }

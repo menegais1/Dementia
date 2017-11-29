@@ -26,14 +26,26 @@ public class Inventory : MonoBehaviour
         set { currentItem = value; }
     }
 
+    public List<ItemSlot> ItensSlots
+    {
+        get { return itensSlots; }
+        set { itensSlots = value; }
+    }
+
+    public List<WeaponSlot> WeaponsSlots
+    {
+        get { return weaponsSlots; }
+        set { weaponsSlots = value; }
+    }
+
 
     void Start()
     {
         inGameMenuController = GetComponentInParent<InGameMenuController>();
         description = GetComponentInChildren<Description>();
 
-        itensSlots.AddRange(GetComponentsInChildren<ItemSlot>());
-        weaponsSlots.AddRange(GetComponentsInChildren<WeaponSlot>());
+        ItensSlots.AddRange(GetComponentsInChildren<ItemSlot>());
+        WeaponsSlots.AddRange(GetComponentsInChildren<WeaponSlot>());
 
         description.gameObject.SetActive(false);
 
@@ -43,24 +55,24 @@ public class Inventory : MonoBehaviour
 
     private void OnEnable()
     {
-        if (itensSlots == null)
+        if (ItensSlots == null)
         {
-            itensSlots = new List<ItemSlot>();
+            ItensSlots = new List<ItemSlot>();
         }
-        if (weaponsSlots == null)
+        if (WeaponsSlots == null)
         {
-            weaponsSlots = new List<WeaponSlot>();
+            WeaponsSlots = new List<WeaponSlot>();
         }
 
-        for (var i = 0; i < itensSlots.Count; i++)
+        for (var i = 0; i < ItensSlots.Count; i++)
         {
-            if (itensSlots[i].Type != ItemType.Nothing)
-                itensSlots[i].RenderItem();
+            if (ItensSlots[i].Type != ItemType.Nothing)
+                ItensSlots[i].RenderItem();
         }
-        for (var i = 0; i < weaponsSlots.Count; i++)
+        for (var i = 0; i < WeaponsSlots.Count; i++)
         {
-            if (weaponsSlots[i].Type != WeaponType.Nothing)
-                weaponsSlots[i].RenderWeapon();
+            if (WeaponsSlots[i].Type != WeaponType.Nothing)
+                WeaponsSlots[i].RenderWeapon();
         }
 
         if (description != null)
@@ -69,17 +81,17 @@ public class Inventory : MonoBehaviour
 
     private void DisableWeaponSlots()
     {
-        for (var i = 0; i < weaponsSlots.Count; i++)
+        for (var i = 0; i < WeaponsSlots.Count; i++)
         {
-            weaponsSlots[i].SetActive(false);
+            WeaponsSlots[i].SetActive(false);
         }
     }
 
     private void DisableItemSlots()
     {
-        for (var i = 0; i < itensSlots.Count; i++)
+        for (var i = 0; i < ItensSlots.Count; i++)
         {
-            itensSlots[i].SetActive(false);
+            ItensSlots[i].SetActive(false);
         }
     }
 
@@ -101,20 +113,20 @@ public class Inventory : MonoBehaviour
 
     public void CheckForCurrentItem()
     {
-        CurrentItem = itensSlots.Find(lambdaExpression =>
+        CurrentItem = ItensSlots.Find(lambdaExpression =>
             lambdaExpression.IsEquiped);
     }
 
     public void CheckForCurrentWeapon()
     {
-        CurrentWeapon = weaponsSlots.Find(lambdaExpression =>
+        CurrentWeapon = WeaponsSlots.Find(lambdaExpression =>
             lambdaExpression.IsEquiped);
     }
 
     private void CheckForSelection()
     {
-        ItemSlot itemSelected = itensSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
-        WeaponSlot weaponSelected = weaponsSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
+        ItemSlot itemSelected = ItensSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
+        WeaponSlot weaponSelected = WeaponsSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
 
 
         if (itemSelected != null)
@@ -150,7 +162,7 @@ public class Inventory : MonoBehaviour
         
         if (description.WeaponSlot != null)
         {
-            var equipedWeapon = weaponsSlots.Find(lambdaExpression =>
+            var equipedWeapon = WeaponsSlots.Find(lambdaExpression =>
                 lambdaExpression.IsEquiped && lambdaExpression != description.WeaponSlot);
 
             if (equipedWeapon != null)
@@ -164,7 +176,7 @@ public class Inventory : MonoBehaviour
     {
         if (description.ItemSlot != null)
         {
-            var equipedItem = itensSlots.Find(lambdaExpression =>
+            var equipedItem = ItensSlots.Find(lambdaExpression =>
                 lambdaExpression.IsEquiped && lambdaExpression != description.ItemSlot);
             if (equipedItem != null)
             {
@@ -177,7 +189,7 @@ public class Inventory : MonoBehaviour
     {
         if (item == null) return;
 
-        WeaponSlot weapon = weaponsSlots.Find(lambdaExpression =>
+        WeaponSlot weapon = WeaponsSlots.Find(lambdaExpression =>
             lambdaExpression.BulletType == item.ItemType);
 
         if (weapon != null)
@@ -203,18 +215,18 @@ public class Inventory : MonoBehaviour
 
     private void AddItem(CollectibleItem item)
     {
-        for (int i = 0; i < itensSlots.Count; i++)
+        for (int i = 0; i < ItensSlots.Count; i++)
         {
-            if (itensSlots[i].Type == ItemType.Nothing)
+            if (ItensSlots[i].Type == ItemType.Nothing)
             {
-                itensSlots[i].FillItem(item);
+                ItensSlots[i].FillItem(item);
                 break;
             }
 
-            if (itensSlots[i].Type == item.ItemType)
+            if (ItensSlots[i].Type == item.ItemType)
             {
-                itensSlots[i].Quantity += item.Quantity;
-                itensSlots[i].RenderItem();
+                ItensSlots[i].Quantity += item.Quantity;
+                ItensSlots[i].RenderItem();
                 break;
             }
         }
@@ -234,17 +246,17 @@ public class Inventory : MonoBehaviour
 
     private void AddWeapon(CollectibleWeapon weapon)
     {
-        for (int i = 0; i < weaponsSlots.Count; i++)
+        for (int i = 0; i < WeaponsSlots.Count; i++)
         {
-            if (weaponsSlots[i].Type == WeaponType.Nothing || weaponsSlots[i].Type == weapon.WeaponType)
+            if (WeaponsSlots[i].Type == WeaponType.Nothing || WeaponsSlots[i].Type == weapon.WeaponType)
             {
-                weaponsSlots[i].FillWeapon(weapon);
-                ItemSlot item = itensSlots.Find(lambdaExpression =>
-                    lambdaExpression.Type == weaponsSlots[i].BulletType);
+                WeaponsSlots[i].FillWeapon(weapon);
+                ItemSlot item = ItensSlots.Find(lambdaExpression =>
+                    lambdaExpression.Type == WeaponsSlots[i].BulletType);
 
                 if (item != null)
                 {
-                    AddAmmo(weaponsSlots[i], item.Quantity);
+                    AddAmmo(WeaponsSlots[i], item.Quantity);
                     item.Reset();
                 }
                 break;

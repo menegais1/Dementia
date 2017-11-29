@@ -41,6 +41,15 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
     {
         playerController.CheckForMiscellaneousInput();
 
+        if (playerController.SavePress)
+        {
+            GameManager.instance.SaveData();
+        }
+        else if (playerController.LoadPress)
+        {
+            GameManager.instance.LoadData(true);
+        }
+
         if (playerStatusVariables.isInGameMenuOpen)
         {
             playerController.RevokeControl(true, ControlTypeToRevoke.CombatMovement);
@@ -61,7 +70,6 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 playerController.RevokeControl(false, ControlTypeToRevoke.CombatMovement);
             }
             OpenCloseInGameMenu();
-            
         }
 
         if (playerStatusVariables.canTakeItem && playerController.TakeItemPress)
@@ -127,7 +135,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 break;
             case MiscellaneousPressMovementState.TakeItem:
                 inventory.TakeItem(TakeItem());
-                
+
                 playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 playerController.RevokeControl(false, ControlTypeToRevoke.MiscellaneousMovement);
                 break;
@@ -139,7 +147,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
                 break;
             case MiscellaneousPressMovementState.TakeNote:
                 diary.TakeNote(TakeNote());
-                
+
                 playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 playerController.RevokeControl(false, ControlTypeToRevoke.MiscellaneousMovement);
                 break;
@@ -171,9 +179,9 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
     private void InteractWithScenery()
     {
         if (sceneryInteractionEvent == null) return;
+
         sceneryInteractionEvent();
         playerStatusVariables.isInteractingWithScenery = false;
-        // Debug.Log("teste");
     }
 
     public void ZoomCamera(bool zoomOut)
@@ -224,7 +232,7 @@ public class PlayerMiscellaneousMovement : BasicPhysicsMovement
 
         if (collectibleNote != null)
         {
-            collectibleNote.DestroyItem();
+            collectibleNote.DestroyNote();
             return collectibleNote;
         }
         return null;

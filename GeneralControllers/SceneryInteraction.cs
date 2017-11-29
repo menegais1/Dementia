@@ -5,8 +5,6 @@ public class SceneryInteraction : MonoBehaviour
     private PlayerMiscellaneousMovement playerMiscellaneousMovement;
     private PlayerStatusVariables playerStatusVariables;
 
-    #region Métodos Unity
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.gameObject.CompareTag("Player")) return;
@@ -23,6 +21,7 @@ public class SceneryInteraction : MonoBehaviour
 
         if (playerStatusVariables.isInteractingWithScenery)
         {
+            Debug.Log("subscribed");
             playerMiscellaneousMovement.SubscribeInteractiveScenery(Interaction);
         }
     }
@@ -36,14 +35,9 @@ public class SceneryInteraction : MonoBehaviour
         }
     }
 
-    #endregion
-
-    #region Métodos Gerais
 
     public void Interaction()
     {
-        print("Teste");
+        print("interação");
     }
-
-    #endregion
 }

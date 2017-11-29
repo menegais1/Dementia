@@ -11,6 +11,8 @@ public class CollectibleItem : MonoBehaviour
     [SerializeField] private ItemType itemType;
     [SerializeField] private GameObject itemInstance;
 
+    private int id;
+
     public string Name
     {
         get { return name; }
@@ -19,6 +21,7 @@ public class CollectibleItem : MonoBehaviour
     public int Quantity
     {
         get { return quantity; }
+        set { quantity = value; }
     }
 
     public GameObject ItemInstance
@@ -43,9 +46,12 @@ public class CollectibleItem : MonoBehaviour
         set { unequipable = value; }
     }
 
+    public int Id
+    {
+        get { return id; }
+        set { id = value; }
+    }
 
-    //    private bool worldStatus;
-    //    protected string id;
 
     private void OnTriggerEnter2D(Collider2D other)
     {

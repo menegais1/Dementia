@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Object = System.Object;
 
 public class CoroutineContainer
 {

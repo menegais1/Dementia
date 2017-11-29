@@ -70,7 +70,8 @@ public class PlayerManager : MonoBehaviour
             PlayerStatusVariables, Inventory, diary, InGameMenuController);
 
         CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
-            PlayerStatusVariables, PlayerStatusController, Inventory, cqcDistance, offsetForThrowableItemPosition,
+            PlayerStatusVariables, PlayerStatusController, HorizontalMovement, Inventory, cqcDistance,
+            offsetForThrowableItemPosition,
             rangeForShortThrowableItemPosition);
     }
 

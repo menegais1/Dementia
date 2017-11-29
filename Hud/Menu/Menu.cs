@@ -29,5 +29,6 @@ public class Menu : MonoBehaviour
 
     private void OnMainMenuButtonClick()
     {
+       GameManager.instance.QuitGame();
     }
 }

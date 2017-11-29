@@ -17,6 +17,13 @@ public class WeaponSlot : MonoBehaviour
     private string description;
     private Toggle toggle;
     private bool isEquiped;
+    private int id;
+
+    public int Id
+    {
+        get { return id; }
+        set { id = value; }
+    }
 
     public bool IsEquiped
     {
@@ -102,6 +109,7 @@ public class WeaponSlot : MonoBehaviour
         ammoText.text = "";
         separatorText.text = "";
         name = "";
+        id = -1;
         description = "";
         ammo = 0;
         Toggle = GetComponentInChildren<Toggle>();
@@ -117,6 +125,7 @@ public class WeaponSlot : MonoBehaviour
         separatorText.text = "";
         name = "";
         description = "";
+        id = -1;
         ammo = 0;
         magazine = 0;
         bulletType = ItemType.Nothing;
@@ -149,6 +158,7 @@ public class WeaponSlot : MonoBehaviour
         bulletType = weapon.BulletType;
         weaponTypeId = weapon.WeaponTypeId;
         weaponInstance = weapon.WeaponInstance;
+        id = weapon.Id;
         RenderWeapon();
     }
 

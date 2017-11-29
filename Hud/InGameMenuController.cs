@@ -5,27 +5,25 @@ using UnityEngine;
 
 public class InGameMenuController : MonoBehaviour
 {
-    private List<Note> takenNotes;
-    private List<Note> archivedNotes;
     private OptionsMenu optionsMenu;
 
-    private Inventory inventory;
-    private Diary diary;
-    private Menu menu;
+    public Inventory MenuControllerInventory { get; private set; }
+    public Diary MenuControllerDiary { get; private set; }
+    public Menu MenuControllerMenu { get; private set; }
 
 
     private void Awake()
     {
-        inventory = GetComponentInChildren<Inventory>();
-        diary = GetComponentInChildren<Diary>();
-        menu = GetComponentInChildren<Menu>();
+        MenuControllerInventory = GetComponentInChildren<Inventory>();
+        MenuControllerDiary = GetComponentInChildren<Diary>();
+        MenuControllerMenu = GetComponentInChildren<Menu>();
     }
 
     private void OnEnable()
     {
-        inventory.gameObject.SetActive(true);
-        menu.gameObject.SetActive(false);
-        diary.gameObject.SetActive(false);
+        MenuControllerInventory.gameObject.SetActive(true);
+        MenuControllerMenu.gameObject.SetActive(false);
+        MenuControllerDiary.gameObject.SetActive(false);
     }
 
 
@@ -34,20 +32,20 @@ public class InGameMenuController : MonoBehaviour
         switch (tab)
         {
             case "Inventory":
-                inventory.gameObject.SetActive(true);
-                menu.gameObject.SetActive(false);
-                diary.gameObject.SetActive(false);
+                MenuControllerInventory.gameObject.SetActive(true);
+                MenuControllerMenu.gameObject.SetActive(false);
+                MenuControllerDiary.gameObject.SetActive(false);
                 break;
             case "Diary":
-                inventory.gameObject.SetActive(false);
-                Debug.Log(menu);
-                menu.gameObject.SetActive(false);
-                diary.gameObject.SetActive(true);
+                MenuControllerInventory.gameObject.SetActive(false);
+                Debug.Log(MenuControllerMenu);
+                MenuControllerMenu.gameObject.SetActive(false);
+                MenuControllerDiary.gameObject.SetActive(true);
                 break;
             case "Menu":
-                inventory.gameObject.SetActive(false);
-                menu.gameObject.SetActive(true);
-                diary.gameObject.SetActive(false);
+                MenuControllerInventory.gameObject.SetActive(false);
+                MenuControllerMenu.gameObject.SetActive(true);
+                MenuControllerDiary.gameObject.SetActive(false);
                 break;
         }
     }

@@ -7,6 +7,14 @@ public class CollectibleNote : MonoBehaviour
     [SerializeField] private string noteName;
     [SerializeField] private TextAsset noteContent;
 
+    private int id;
+
+    public int Id
+    {
+        get { return id; }
+        set { id = value; }
+    }
+
     public PlayerStatusVariables PlayerStatusVariables
     {
         get { return playerStatusVariables; }
@@ -44,7 +52,7 @@ public class CollectibleNote : MonoBehaviour
         playerStatusVariables.canTakeNote = false;
     }
 
-    public void DestroyItem()
+    public void DestroyNote()
     {
         Destroy(this.gameObject);
     }

@@ -14,6 +14,13 @@ public class ItemSlot : MonoBehaviour
     private Toggle toggle;
     private bool isEquiped;
     private bool unequipable;
+    private int id;
+
+    public int Id
+    {
+        get { return id; }
+        set { id = value; }
+    }
 
     public Text NameText
     {
@@ -82,6 +89,7 @@ public class ItemSlot : MonoBehaviour
         nameText.text = "";
         quantityText.text = "";
         name = "";
+        id = -1;
         description = "";
         quantity = 0;
         Toggle = GetComponentInChildren<Toggle>();
@@ -96,6 +104,7 @@ public class ItemSlot : MonoBehaviour
         name = "";
         description = "";
         quantity = 0;
+        id = -1;
         itemInstance = null;
         Toggle.isOn = false;
         isEquiped = false;
@@ -119,6 +128,7 @@ public class ItemSlot : MonoBehaviour
         name = item.Name;
         Description = item.Description;
         quantity = item.Quantity;
+        id = item.Id;
         type = item.ItemType;
         Unequipable = item.Unequipable;
         itemInstance = item.ItemInstance;

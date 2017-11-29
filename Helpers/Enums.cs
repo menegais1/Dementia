@@ -107,7 +107,8 @@ public enum ItemType
     RevolverBullet,
     Bandages,
     Molotov,
-    Analgesics,
+    Morphin,
+    Adrenaline,
 }
 
 public enum DiaryTab

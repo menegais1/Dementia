@@ -13,13 +13,29 @@ public class PlayerStatusController : MonoBehaviour
     [SerializeField] private Slider staminaBar;
 
     private bool canSave;
-    private bool activeMorphin;
-    private bool activeAdrenaline;
     private int diaryState;
     private bool canUseDiary;
 
+    private float staminaRegenMultiplier;
+    private float originalHealth;
+    private float regenLifeTemporaryTime;
+
     private float currentTimeToStartStaminaRegen;
     private float timeTrackerForSpendingStamina;
+
+    private PlayerStatusVariables playerStatusVariables;
+
+    public float StaminaRegenMultiplier
+    {
+        get { return staminaRegenMultiplier; }
+        set { staminaRegenMultiplier = value; }
+    }
+
+    public float CurrentLife
+    {
+        get { return currentLife; }
+        set { currentLife = value; }
+    }
 
     void Start()
     {
@@ -29,6 +45,8 @@ public class PlayerStatusController : MonoBehaviour
         staminaBar.maxValue = maxStamina;
         staminaBar.minValue = 0;
         staminaBar.value = currentStamina;
+        playerStatusVariables = GetComponent<PlayerStatusVariables>();
+        StaminaRegenMultiplier = 1;
     }
 
     void Update()
@@ -86,7 +104,7 @@ public class PlayerStatusController : MonoBehaviour
 
         while (currentStamina < maxStamina)
         {
-            currentStamina += staminaRegenRatePerSecond * t;
+            currentStamina += staminaRegenRatePerSecond * StaminaRegenMultiplier * t;
 
             if (currentStamina > maxStamina)
             {
@@ -99,40 +117,63 @@ public class PlayerStatusController : MonoBehaviour
         CoroutineManager.DeleteCoroutine("RegenStaminaCoroutine");
     }
 
-
     public void TakeDamage(float lifeToDecrease)
     {
-        currentLife -= lifeToDecrease;
+        currentLife = CurrentLife - lifeToDecrease;
 
-        if (currentLife < 0)
+        if (CurrentLife < 0)
         {
             currentLife = 0;
         }
     }
 
-    public bool RegenLife(float lifeToRegen)
+    public void RegenLife(float lifeToRegen)
     {
-        if (LifeIsFull())
-        {
-            return false;
-        }
-
-        currentLife += lifeToRegen;
-        if (currentLife > maxLife)
+        currentLife = CurrentLife + lifeToRegen;
+        if (CurrentLife > maxLife)
         {
             currentLife = maxLife;
         }
+    }
 
-        return true;
+    public void RegenLifeTemporary(float duration, float lifeToRegen, bool deactivateMorphin)
+    {
+        regenLifeTemporaryTime = Time.time + duration;
+        CoroutineManager.AddCoroutine(RegenLifeTemporaryCoroutine(lifeToRegen, deactivateMorphin),
+            "RegenLifeTemporaryCoroutine");
+    }
+
+    public IEnumerator RegenLifeTemporaryCoroutine(float lifeToRegen, bool deactivateMorphin)
+    {
+        originalHealth = CurrentLife;
+        currentLife = CurrentLife + lifeToRegen;
+
+        while (regenLifeTemporaryTime > Time.time)
+        {
+            if (CurrentLife > originalHealth)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+            else
+            {
+                regenLifeTemporaryTime = Time.time;
+            }
+        }
+        if (deactivateMorphin)
+            playerStatusVariables.isMorphinActive = false;
+        
+        currentLife = originalHealth;
+        CoroutineManager.DeleteCoroutine("RegenLifeTemporaryCoroutine");
     }
 
     public bool LifeIsFull()
     {
-        return MathHelpers.Approximately(currentLife, maxLife, float.Epsilon);
+        return MathHelpers.Approximately(CurrentLife, maxLife, float.Epsilon);
     }
 
     public void Die()
     {
+        Debug.Log("morreu");
     }
 
     public void UseDiary()

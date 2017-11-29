@@ -52,18 +52,15 @@ public class PlayerStatusVariables : MonoBehaviour
 
     public bool canAim;
 
-    public bool canUseItem;
-
-    public bool canShoot;
-
-    public bool canReloadWeapon;
-
-    public bool canExecuteCQC;
-
     public bool isInGameMenuOpen;
 
-    public FacingDirection facingDirection;
+    public bool isMorphinActive;
 
+    public bool isAdrenalineActive;
+
+    public bool isAdrenalineAfterEffectActive;
+
+    public FacingDirection facingDirection;
 
     public PlayerStatusVariables()
     {

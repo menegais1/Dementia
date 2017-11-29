@@ -9,6 +9,12 @@ public class Diary : MonoBehaviour
 
     private List<NoteSlot> notesSlots;
 
+    public List<NoteSlot> NotesSlots
+    {
+        get { return notesSlots; }
+        set { notesSlots = value; }
+    }
+
     void Start()
     {
         noteContent.gameObject.SetActive(false);
@@ -16,20 +22,20 @@ public class Diary : MonoBehaviour
 
     private void OnEnable()
     {
-        if (notesSlots == null)
+        if (NotesSlots == null)
         {
-            notesSlots = new List<NoteSlot>();
+            NotesSlots = new List<NoteSlot>();
         }
 
-        for (var i = 0; i < notesSlots.Count; i++)
+        for (var i = 0; i < NotesSlots.Count; i++)
         {
-            notesSlots[i].Selected = false;
+            NotesSlots[i].Selected = false;
         }
     }
 
     private void OnDisable()
     {
-        var noteSlot = notesSlots.Find(lambaExpression => lambaExpression.Selected);
+        var noteSlot = NotesSlots.Find(lambaExpression => lambaExpression.Selected);
         if (noteSlot != null)
             noteSlot.Selected = false;
         noteContent.Reset();
@@ -37,7 +43,7 @@ public class Diary : MonoBehaviour
 
     private void Update()
     {
-        var noteSlot = notesSlots.Find(lambaExpression => lambaExpression.Selected);
+        var noteSlot = NotesSlots.Find(lambaExpression => lambaExpression.Selected);
         if (noteSlot != null && noteContent.Note == null)
         {
             noteContent.gameObject.SetActive(true);
@@ -58,15 +64,15 @@ public class Diary : MonoBehaviour
             var noteSlotGameObject = Instantiate(noteSlotObject.gameObject, notesGroup.transform);
             var noteSlotRectTransform = noteSlotGameObject.GetComponent<RectTransform>();
 
-            if (notesSlots.Count % 2 == 0)
+            if (NotesSlots.Count % 2 == 0)
 
             {
                 noteSlotRectTransform.anchoredPosition = new Vector2(noteSlotRectTransform.anchoredPosition.x,
                     (noteSlotRectTransform.anchoredPosition.y < 0)
                         ? noteSlotRectTransform.anchoredPosition.y +
-                          -(noteSlotRectTransform.sizeDelta.y * notesSlots.Count / 2)
+                          -(noteSlotRectTransform.sizeDelta.y * NotesSlots.Count / 2)
                         : noteSlotRectTransform.anchoredPosition.y +
-                          (noteSlotRectTransform.sizeDelta.y * notesSlots.Count / 2));
+                          (noteSlotRectTransform.sizeDelta.y * NotesSlots.Count / 2));
             }
             else
             {
@@ -74,17 +80,16 @@ public class Diary : MonoBehaviour
                     noteSlotRectTransform.anchoredPosition.x + noteSlotRectTransform.sizeDelta.x,
                     (noteSlotRectTransform.anchoredPosition.y < 0)
                         ? noteSlotRectTransform.anchoredPosition.y +
-                          -(noteSlotRectTransform.sizeDelta.y * (notesSlots.Count - 1) / 2)
+                          -(noteSlotRectTransform.sizeDelta.y * (NotesSlots.Count - 1) / 2)
                         : noteSlotRectTransform.anchoredPosition.y +
-                          (noteSlotRectTransform.sizeDelta.y * (notesSlots.Count - 1) / 2)
+                          (noteSlotRectTransform.sizeDelta.y * (NotesSlots.Count - 1) / 2)
                 );
             }
 
 
             var noteSlot = noteSlotGameObject.GetComponent<NoteSlot>();
-
             noteSlot.FillNote(note);
-            notesSlots.Add(noteSlot);
+            NotesSlots.Add(noteSlot);
         }
     }
 }

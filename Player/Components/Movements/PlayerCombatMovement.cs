@@ -10,6 +10,7 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     private BasicCollisionHandler playerCollisionHandler;
     private PlayerStatusVariables playerStatusVariables;
     private PlayerStatusController playerStatusController;
+    private PlayerHorizontalMovement playerHorizontalMovement;
     private Inventory inventory;
     private Collider2D collider2D;
     private float offsetForThrowableItemPosition;
@@ -24,13 +25,14 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     public PlayerCombatMovement(MonoBehaviour monoBehaviour,
         BasicCollisionHandler playerCollisionHandler,
         PlayerController playerController, PlayerStatusVariables playerStatusVariables,
-        PlayerStatusController playerStatusController,
+        PlayerStatusController playerStatusController, PlayerHorizontalMovement playerHorizontalMovement,
         Inventory inventory,
         float cqcDistance, float offsetForThrowableItemPosition, float rangeForShortThrowableItemPosition) : base(
         monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
         this.playerStatusController = playerStatusController;
+        this.playerHorizontalMovement = playerHorizontalMovement;
         this.monoBehaviour = monoBehaviour;
         this.playerController = playerController;
         this.playerCollisionHandler = playerCollisionHandler;
@@ -210,7 +212,8 @@ public class PlayerCombatMovement : BasicPhysicsMovement
 
                 if (raycastHit.collider != null &&
                     Math.Abs(raycastHit.point.x - monoBehaviour.gameObject.transform.position.x) <
-                    rangeForShortThrowableItemPosition)
+                    rangeForShortThrowableItemPosition &&
+                    raycastHit.point.y < monoBehaviour.gameObject.transform.position.y)
                 {
                     item.transform.position = playerStatusVariables.facingDirection == FacingDirection.Right
                         ? new
@@ -228,7 +231,31 @@ public class PlayerCombatMovement : BasicPhysicsMovement
                 itemUsed = true;
                 playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 break;
-            case ItemType.Analgesics:
+            case ItemType.Morphin:
+                item = InstantiateItem();
+
+                if (item == null) return;
+
+                if (!playerStatusVariables.isMorphinActive && !playerStatusController.LifeIsFull())
+                {
+                    item.GetComponent<Morphin>().Effect(playerStatusController, playerHorizontalMovement,
+                        playerStatusVariables);
+                    itemUsed = true;
+                    playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+                }
+                break;
+            case ItemType.Adrenaline:
+                item = InstantiateItem();
+
+                if (item == null) return;
+
+                if (!playerStatusVariables.isAdrenalineActive)
+                {
+                    item.GetComponent<Adrenaline>().Effect(playerStatusController, playerHorizontalMovement,
+                        playerStatusVariables);
+                    itemUsed = true;
+                    playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+                }
                 break;
             default:
                 Debug.Log("Error");

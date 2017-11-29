@@ -12,12 +12,12 @@ public static class PhysicsHelpers
         float maxSpeed, float direction, Rigidbody2D rigidBody, float surfaceAngle, Vector2 surfaceNormal)
     {
         var velocity = (maxSpeed / 3.6f) * constant;
-        var force = ForceCalcByAcceleration(acceleration, rigidBody.mass) +
+        var force = ForceCalcByAcceleration(acceleration * constant, rigidBody.mass) +
                     FrictionForceCalc(0.4f, Physics2D.gravity.y, rigidBody.mass) +
                     SlopeForceCalc(surfaceAngle, surfaceNormal, direction, rigidBody.mass, Physics2D.gravity.y);
 
 
-        var forceApplied = new Vector2(force * constant, 0) * direction;
+        var forceApplied = new Vector2(force, 0) * direction;
 
         if (!MathHelpers.Approximately(surfaceAngle, 0, float.Epsilon))
         {
@@ -25,7 +25,7 @@ public static class PhysicsHelpers
                                force * MathHelpers.AbsCos(surfaceAngle),
                                force * (!SlopeInclinationRight(surfaceNormal)
                                    ? -MathHelpers.AbsSin(surfaceAngle)
-                                   : MathHelpers.AbsSin(surfaceAngle))) * direction * constant;
+                                   : MathHelpers.AbsSin(surfaceAngle))) * direction;
         }
 
         if (rigidBody.velocity.magnitude > velocity)

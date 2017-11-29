@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class PlayerHorizontalMovement : BasicPhysicsMovement
@@ -6,12 +7,21 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
     public HorizontalMovementState HorizontalMovementState { get; private set; }
     public HorizontalPressMovementState HorizontalPressMovementState { get; private set; }
 
+    public float VelocityMultiplier
+    {
+        get { return velocityMultiplier; }
+        set { velocityMultiplier = value; }
+    }
+
 
     private float maxSpeed;
     private float acceleration;
     private float dodgeForce;
     private float crouchingSpeed;
     private float characterHeight;
+
+    private float velocityMultiplier;
+    private float currentTimeTemporaryEffect;
 
     private Vector2 forceApplied;
 
@@ -37,6 +47,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
         this.playerController = playerController;
         this.playerCollisionHandler = playerCollisionHandler;
         this.player = player;
+        this.VelocityMultiplier = 1f;
     }
 
     public override void StartMovement()
@@ -61,7 +72,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
         playerStatusVariables.isDodging = playerController.Dodge && player.CheckStamina(30, true);
         playerStatusVariables.isRunning = false;
         playerStatusVariables.isJogging = false;
-        
+
         if (!MathHelpers.Approximately(playerController.HorizontalMove, 0, float.Epsilon) &&
             !playerStatusVariables.isDodging)
         {
@@ -128,15 +139,15 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
                 }
                 break;
             case HorizontalMovementState.Walking:
-                forceApplied = Walk(playerController.HorizontalMove, 1);
+                forceApplied = Walk(playerController.HorizontalMove, 1 * VelocityMultiplier);
                 break;
             case HorizontalMovementState.Jogging:
                 player.SpendStamina(5f, false);
-                forceApplied = Jog(playerController.HorizontalMove, 1.5f);
+                forceApplied = Jog(playerController.HorizontalMove, 1.5f * VelocityMultiplier);
                 break;
             case HorizontalMovementState.Running:
                 player.SpendStamina(10f, false);
-                forceApplied = Run(playerController.HorizontalMove, 2f);
+                forceApplied = Run(playerController.HorizontalMove, 2f * VelocityMultiplier);
                 break;
             case HorizontalMovementState.CrouchIdle:
                 if (!playerStatusVariables.isOnAir)

@@ -28,7 +28,8 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         float climbingObstacleSmoothness, float climbLadderVelocity, float minimumFallingDistanceForDamage
         , float minimumDamageForFalling,
         BasicCollisionHandler playerCollisionHandler,
-        PlayerController playerController, PlayerStatusVariables playerStatusVariables, PlayerStatusController player) : base(
+        PlayerController playerController, PlayerStatusVariables playerStatusVariables,
+        PlayerStatusController player) : base(
         monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
@@ -132,7 +133,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
                 var stairsCollider = stairsController.stairsCollider.GetComponent<BoxCollider2D>();
 
                 //A normal é sempre perpendicular ao plano, porém é necessário manter a rotação entre 29 e -29
-                var normal = stairsCollider.transform.up;   
+                var normal = stairsCollider.transform.up;
                 if (CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
                     ? PhysicsHelpers.SlopeInclinationRight(normal)
                         ? rigidbody2D.velocity.y < 0

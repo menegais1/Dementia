@@ -12,7 +12,14 @@ public class CollectibleWeapon : MonoBehaviour
     [SerializeField] private ItemType bulletType;
     [SerializeField] private GameObject weaponInstance;
     [SerializeField] private WeaponType weaponType;
+   
+    private int id;
 
+    public int Id
+    {
+        get { return id; }
+        set { id = value; }
+    }
 
     public GameObject WeaponInstance
     {
