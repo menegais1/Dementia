@@ -159,7 +159,6 @@ public class Inventory : MonoBehaviour
 
     private void CheckForDifferentEquipedWeapon()
     {
-        
         if (description.WeaponSlot != null)
         {
             var equipedWeapon = WeaponsSlots.Find(lambdaExpression =>
@@ -185,9 +184,9 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    public void TakeItem(CollectibleItem item)
+    public ItemSlot TakeItem(CollectibleItem item)
     {
-        if (item == null) return;
+        if (item == null) return null;
 
         WeaponSlot weapon = WeaponsSlots.Find(lambdaExpression =>
             lambdaExpression.BulletType == item.ItemType);
@@ -195,41 +194,42 @@ public class Inventory : MonoBehaviour
         if (weapon != null)
         {
             AddAmmo(weapon, item.Quantity);
-            return;
+            return null;
         }
 
-        if (item.ItemType == ItemType.Nothing) return;
+        if (item.ItemType == ItemType.Nothing) return null;
 
-        if (item.ItemInstance == null && !item.Unequipable) return;
+        if (item.ItemInstance == null && !item.Unequipable) return null;
 
-        AddItem(item);
+        return AddItem(item);
     }
 
-    public void TakeWeapon(CollectibleWeapon weapon)
+    public WeaponSlot TakeWeapon(CollectibleWeapon weapon)
     {
-        if (weapon == null) return;
-        if (weapon.WeaponInstance == null || weapon.WeaponType == WeaponType.Nothing) return;
-        AddWeapon(weapon);
+        if (weapon == null) return null;
+        if (weapon.WeaponInstance == null || weapon.WeaponType == WeaponType.Nothing) return null;
+        return AddWeapon(weapon);
     }
 
 
-    private void AddItem(CollectibleItem item)
+    private ItemSlot AddItem(CollectibleItem item)
     {
         for (int i = 0; i < ItensSlots.Count; i++)
         {
             if (ItensSlots[i].Type == ItemType.Nothing)
             {
                 ItensSlots[i].FillItem(item);
-                break;
+                return ItensSlots[i];
             }
 
             if (ItensSlots[i].Type == item.ItemType)
             {
                 ItensSlots[i].Quantity += item.Quantity;
                 ItensSlots[i].RenderItem();
-                break;
+                return ItensSlots[i];
             }
         }
+        return null;
     }
 
     private void AddAmmo(WeaponSlot weapon, int quantity)
@@ -244,7 +244,7 @@ public class Inventory : MonoBehaviour
         weapon.RenderWeapon();
     }
 
-    private void AddWeapon(CollectibleWeapon weapon)
+    private WeaponSlot AddWeapon(CollectibleWeapon weapon)
     {
         for (int i = 0; i < WeaponsSlots.Count; i++)
         {
@@ -259,8 +259,9 @@ public class Inventory : MonoBehaviour
                     AddAmmo(WeaponsSlots[i], item.Quantity);
                     item.Reset();
                 }
-                break;
+                return weaponsSlots[i];
             }
         }
+        return null;
     }
 }

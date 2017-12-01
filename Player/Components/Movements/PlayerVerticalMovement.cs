@@ -285,6 +285,11 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         return playerCollisionHandler.CheckGroundForJump(0.1f);
     }
 
+    public void ClimbStairs()
+    {
+        
+    }
+    
     private Transform GetLadderPosition()
     {
         var contactFilter2D = new ContactFilter2D

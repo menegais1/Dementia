@@ -21,13 +21,15 @@ public class PlayerCombatMovement : BasicPhysicsMovement
     private Vector3 throwableItemPosition;
 
     private float cqcDistance;
+    private float cqcDamage;
 
     public PlayerCombatMovement(MonoBehaviour monoBehaviour,
         BasicCollisionHandler playerCollisionHandler,
         PlayerController playerController, PlayerStatusVariables playerStatusVariables,
         PlayerStatusController playerStatusController, PlayerHorizontalMovement playerHorizontalMovement,
         Inventory inventory,
-        float cqcDistance, float offsetForThrowableItemPosition, float rangeForShortThrowableItemPosition) : base(
+        float cqcDistance, float cqcDamage, float offsetForThrowableItemPosition,
+        float rangeForShortThrowableItemPosition) : base(
         monoBehaviour)
     {
         this.playerStatusVariables = playerStatusVariables;
@@ -41,6 +43,7 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         this.offsetForThrowableItemPosition = offsetForThrowableItemPosition;
         this.rangeForShortThrowableItemPosition = rangeForShortThrowableItemPosition;
         this.cqcDistance = cqcDistance;
+        this.cqcDamage = cqcDamage;
 
         this.throwableItemPosition =
             new Vector3(playerCollisionHandler.BoxColliderBounds.topRight.x + offsetForThrowableItemPosition,
@@ -277,10 +280,6 @@ public class PlayerCombatMovement : BasicPhysicsMovement
             .GetComponent<Item>();
     }
 
-    public void TakeDamage()
-    {
-    }
-
     public void Shoot()
     {
         if (currentWeapon == null) return;
@@ -308,7 +307,18 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         RaycastHit2D ray = Physics2D.Raycast(
             monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
             playerStatusVariables.facingDirection == FacingDirection.Right ? Vector2.right : Vector2.right * -1,
-            cqcDistance);
+            cqcDistance, LayerMask.GetMask("Enemy"));
+
+        if (ray.collider != null)
+        {
+            var enemy = ray.collider.GetComponent<Enemy>();
+            if (enemy != null)
+            {
+                enemy.TakeDamage(cqcDamage);
+            }
+        }
+
+        playerController.RevokeControl(0.3f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
 
         Debug.DrawRay(monoBehaviour.gameObject.transform.TransformPoint(capsuleCollider2D.offset),
             playerStatusVariables.facingDirection == FacingDirection.Right ? Vector2.right : Vector2.right * -1,

@@ -12,12 +12,14 @@ public class SaveData
         public int id;
         public int ammo;
         public int magazine;
+        public bool isEquiped;
 
-        public Weapon(int id, int ammo, int magazine)
+        public Weapon(int id, int ammo, int magazine, bool isEquiped)
         {
             this.id = id;
             this.ammo = ammo;
             this.magazine = magazine;
+            this.isEquiped = isEquiped;
         }
     }
 
@@ -37,11 +39,13 @@ public class SaveData
     {
         public int id;
         public int quantity;
+        public bool isEquiped;
 
-        public Item(int id, int quantity)
+        public Item(int id, int quantity, bool isEquiped)
         {
             this.id = id;
             this.quantity = quantity;
+            this.isEquiped = isEquiped;
         }
     }
 
@@ -49,10 +53,14 @@ public class SaveData
     private class Enemy
     {
         public int id;
+        public float xPosition;
+        public float yPosition;
 
-        public Enemy(int id)
+        public Enemy(int id, float xPosition, float yPosition)
         {
             this.id = id;
+            this.xPosition = xPosition;
+            this.yPosition = yPosition;
         }
     }
 
@@ -61,8 +69,8 @@ public class SaveData
     private List<Weapon> inventoryWeapons;
     private List<Item> inventoryItens;
     private List<Note> inventoryNotes;
+    private List<Enemy> currentEnemiesInWorld;
 
-    private List<int> currentEnemiesIdInWorld;
     private List<int> currentItensIdInWorld;
     private List<int> currentWeaponsIdInWorld;
     private List<int> currentNotesIdInWorld;
@@ -73,6 +81,7 @@ public class SaveData
 
     public void Save(GameObject gameDataHolder)
     {
+        if (gameDataHolder == null) return;
         var playerManager = gameDataHolder.GetComponentInChildren<PlayerManager>(true);
         var inGameMenuController = gameDataHolder.GetComponentInChildren<InGameMenuController>(true);
 
@@ -115,7 +124,11 @@ public class SaveData
             if (inventoryItem != null)
             {
                 item.Quantity = inventoryItem.quantity;
-                inGameMenuController.MenuControllerInventory.TakeItem(item);
+                var itemSlot = inGameMenuController.MenuControllerInventory.TakeItem(item);
+                var color = inventoryItem.isEquiped ? new Color(0.42f, 0.16f, 0.11f) : new Color(0.2f, 0.2f, 0.2f);
+                itemSlot.Equip(color, inventoryItem.isEquiped);
+                inGameMenuController.MenuControllerInventory.CheckForCurrentItem();
+
                 item.DestroyItem();
             }
             else if (!currentItensIdInWorld.Exists(lamdaExpression => lamdaExpression == item.Id))
@@ -138,7 +151,10 @@ public class SaveData
             {
                 weapon.Ammo = inventoryWeapon.ammo;
                 weapon.Magazine = inventoryWeapon.magazine;
-                inGameMenuController.MenuControllerInventory.TakeWeapon(weapon);
+                var weaponSlot = inGameMenuController.MenuControllerInventory.TakeWeapon(weapon);
+                var color = inventoryWeapon.isEquiped ? new Color(0.42f, 0.16f, 0.11f) : new Color(0.2f, 0.2f, 0.2f);
+                weaponSlot.Equip(color, inventoryWeapon.isEquiped);
+                inGameMenuController.MenuControllerInventory.CheckForCurrentWeapon();
                 weapon.DestroyWeapon();
             }
             else if (!currentWeaponsIdInWorld.Exists(lamdaExpression => lamdaExpression == weapon.Id))
@@ -178,9 +194,15 @@ public class SaveData
                 continue;
             }
 
-            if (!currentEnemiesIdInWorld.Exists(lamdaExpression => lamdaExpression == enemy.Id))
+            var currentEnemy = currentEnemiesInWorld.Find(lamdaExpression => lamdaExpression.id == enemy.Id);
+            if (currentEnemy == null)
             {
                 enemy.Die();
+            }
+            else
+            {
+                enemy.transform.position = new Vector3(currentEnemy.xPosition, currentEnemy.yPosition,
+                    enemy.transform.position.z);
             }
         }
     }
@@ -193,12 +215,12 @@ public class SaveData
 
         foreach (var weaponSlot in inGameMenuController.MenuControllerInventory.WeaponsSlots)
         {
-            inventoryWeapons.Add(new Weapon(weaponSlot.Id, weaponSlot.Ammo, weaponSlot.Magazine));
+            inventoryWeapons.Add(new Weapon(weaponSlot.Id, weaponSlot.Ammo, weaponSlot.Magazine, weaponSlot.IsEquiped));
         }
 
         foreach (var itemSlot in inGameMenuController.MenuControllerInventory.ItensSlots)
         {
-            inventoryItens.Add(new Item(itemSlot.Id, itemSlot.Quantity));
+            inventoryItens.Add(new Item(itemSlot.Id, itemSlot.Quantity, itemSlot.IsEquiped));
         }
 
         foreach (var noteSlot in inGameMenuController.MenuControllerDiary.NotesSlots)
@@ -211,7 +233,8 @@ public class SaveData
     {
         if (gameDataHolder == null) return;
 
-        currentEnemiesIdInWorld = new List<int>();
+        currentEnemiesInWorld = new List<Enemy>();
+
         currentItensIdInWorld = new List<int>();
         currentNotesIdInWorld = new List<int>();
         currentWeaponsIdInWorld = new List<int>();
@@ -233,7 +256,7 @@ public class SaveData
 
         foreach (var enemy in gameDataHolder.GetComponentsInChildren<global::Enemy>(true))
         {
-            currentEnemiesIdInWorld.Add(enemy.Id);
+            currentEnemiesInWorld.Add(new Enemy(enemy.Id, enemy.transform.position.x, enemy.transform.position.y));
         }
     }
 }

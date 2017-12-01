@@ -127,7 +127,10 @@ public class GameManager : MonoBehaviour
             InitializeGame();
 
             if (newGame)
+            {
                 DeleteSaveData();
+                SaveData();
+            }
             else
                 LoadData(false);
         }
@@ -204,6 +207,8 @@ public class GameManager : MonoBehaviour
 
     public void SaveData()
     {
+        if (gameDataHolder == null) return;
+
         if (!Directory.Exists("Saves"))
             Directory.CreateDirectory("Saves");
 
@@ -222,6 +227,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadData(bool resetScene)
     {
+        if (gameDataHolder == null) return;
         if (ExistsSave())
         {
             if (resetScene)

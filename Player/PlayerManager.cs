@@ -18,6 +18,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private float cameraZoomSize;
     [SerializeField] private float maxAngle;
     [SerializeField] private float cqcDistance;
+    [SerializeField] private float cqcDamage;
     [SerializeField] private float offsetForThrowableItemPosition;
     [SerializeField] private float rangeForShortThrowableItemPosition;
     [SerializeField] private LayerMask layerMaskForCollisions;
@@ -70,7 +71,7 @@ public class PlayerManager : MonoBehaviour
             PlayerStatusVariables, Inventory, diary, InGameMenuController);
 
         CombatMovement = new PlayerCombatMovement(this, PlayerCollisionHandler, PlayerController,
-            PlayerStatusVariables, PlayerStatusController, HorizontalMovement, Inventory, cqcDistance,
+            PlayerStatusVariables, PlayerStatusController, HorizontalMovement, Inventory, cqcDistance, cqcDamage,
             offsetForThrowableItemPosition,
             rangeForShortThrowableItemPosition);
     }

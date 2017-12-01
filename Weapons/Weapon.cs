@@ -3,7 +3,6 @@
 public class Weapon : MonoBehaviour
 {
     private string id;
-    private bool worldStatus;
 
     [SerializeField] private int weaponTypeId;
     [SerializeField] private string name;

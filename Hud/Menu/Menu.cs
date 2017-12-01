@@ -7,17 +7,23 @@ public class Menu : MonoBehaviour
     [SerializeField] private Button optionsMenuButton;
     [SerializeField] private OptionsMenu optionsMenu;
     [SerializeField] private GameObject menuGroup;
+    [SerializeField] private GameObject quitGamePopUp;
+    [SerializeField] private Button quitGamePopUpConfirmButton;
+    [SerializeField] private Button quitGamePopUpCancelButton;
 
     void Start()
     {
         optionsMenuButton.onClick.AddListener(OnOptionsMenuButtonClick);
         mainMenuButton.onClick.AddListener(OnMainMenuButtonClick);
+        quitGamePopUpConfirmButton.onClick.AddListener(OnquitGamePopUpConfirmButtonClick);
+        quitGamePopUpCancelButton.onClick.AddListener(OnquitGamePopUpCancelButtonClick);
     }
 
     private void OnEnable()
     {
         optionsMenu.gameObject.SetActive(false);
         menuGroup.SetActive(true);
+        quitGamePopUp.gameObject.SetActive(false);
     }
 
 
@@ -29,6 +35,18 @@ public class Menu : MonoBehaviour
 
     private void OnMainMenuButtonClick()
     {
-       GameManager.instance.QuitGame();
+        quitGamePopUp.gameObject.SetActive(true);
+        menuGroup.SetActive(false);
+    }
+
+    private void OnquitGamePopUpConfirmButtonClick()
+    {
+        GameManager.instance.QuitGame();
+    }
+
+    private void OnquitGamePopUpCancelButtonClick()
+    {
+        quitGamePopUp.gameObject.SetActive(false);
+        menuGroup.SetActive(true);
     }
 }

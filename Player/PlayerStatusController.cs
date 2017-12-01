@@ -54,18 +54,6 @@ public class PlayerStatusController : MonoBehaviour
         RegenStamina();
     }
 
-    public void SaveGame()
-    {
-    }
-
-    public void ArchiveNotes()
-    {
-    }
-
-    public void LoadGame()
-    {
-    }
-
     public void SpendStamina(float percentOfStaminaToSpent, bool imediate)
     {
         if (CoroutineManager.CheckIfCoroutineExists("RegenStaminaCoroutine"))
@@ -161,7 +149,7 @@ public class PlayerStatusController : MonoBehaviour
         }
         if (deactivateMorphin)
             playerStatusVariables.isMorphinActive = false;
-        
+
         currentLife = originalHealth;
         CoroutineManager.DeleteCoroutine("RegenLifeTemporaryCoroutine");
     }
@@ -172,28 +160,12 @@ public class PlayerStatusController : MonoBehaviour
     }
 
     public void Die()
-    {
-        Debug.Log("morreu");
-    }
-
-    public void UseDiary()
-    {
-    }
-
-    public void CheckSaveItem()
-    {
+    {//Necessário uma tela de morte
+        GameManager.instance.LoadData(true);
     }
 
     public bool CheckStamina(float percentOfStaminaToSpent, bool imediate)
     {
         return currentStamina >= (maxStamina * percentOfStaminaToSpent / 100) * (imediate ? 1 : Time.fixedDeltaTime);
-    }
-
-    public void SelectItens()
-    {
-    }
-
-    public void LoseLife()
-    {
     }
 }

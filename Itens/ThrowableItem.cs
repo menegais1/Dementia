@@ -8,7 +8,6 @@ public class ThrowableItem : Item
     [SerializeField] private float area;
     [SerializeField] private float duration;
     [SerializeField] private float throwForce;
-    [SerializeField] private float torque;
 
     private bool hasExploded;
     private float durationCurrentTime;
@@ -21,7 +20,7 @@ public class ThrowableItem : Item
         rigidbody2D = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         var collider2Ds = GetComponents<Collider2D>();
-        
+
         for (var i = 0; i < collider2Ds.Length; i++)
         {
             if (!collider2Ds[i].isTrigger)
@@ -34,18 +33,47 @@ public class ThrowableItem : Item
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Scenery") || other.CompareTag("Obstacle") && !hasExploded)
+        RaycastHit2D ground = new RaycastHit2D();
+        if (!hasExploded)
+            ground = Physics2D.Raycast(transform.position, Vector2.down, 0.3f,
+                LayerMask.GetMask("Ground", "Stairs Ground"));
+
+        if ((other.CompareTag("Scenery") || other.CompareTag("Obstacle")) && !hasExploded &&
+            ground.collider != null)
         {
+            var angle = Vector2.Angle(ground.normal, Vector2.up);
+
             rigidbody2D.velocity = Vector2.zero;
             rigidbody2D.angularVelocity = 0;
             spriteRenderer.enabled = false;
             hasExploded = true;
             durationCurrentTime = Time.time + duration;
-            CoroutineManager.AddCoroutine(EffectCoroutine(), "EffectCoroutine");
+            CoroutineManager.AddCoroutine(EffectCoroutine(angle, ground.point), "EffectCoroutine");
         }
     }
 
-    private IEnumerator EffectCoroutine()
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        RaycastHit2D ground = new RaycastHit2D();
+        if (!hasExploded)
+            ground = Physics2D.Raycast(transform.position, Vector2.down, 0.3f,
+                LayerMask.GetMask("Ground", "Stairs Ground"));
+
+        if ((other.CompareTag("Scenery") || other.CompareTag("Obstacle")) && !hasExploded &&
+            ground.collider != null)
+        {
+            var angle = Vector2.Angle(ground.normal, Vector2.up);
+
+            rigidbody2D.velocity = Vector2.zero;
+            rigidbody2D.angularVelocity = 0;
+            spriteRenderer.enabled = false;
+            hasExploded = true;
+            durationCurrentTime = Time.time + duration;
+            CoroutineManager.AddCoroutine(EffectCoroutine(angle, ground.point), "EffectCoroutine");
+        }
+    }
+
+    private IEnumerator EffectCoroutine(float areaOfEffectAngle, Vector3 position)
     {
         var contactFilter2D = new ContactFilter2D
         {
@@ -56,9 +84,10 @@ public class ThrowableItem : Item
 
         var collider2Ds = new Collider2D[5];
 
+
         while (Time.time < durationCurrentTime && hasExploded)
         {
-            var areaOfEffect = Physics2D.OverlapBox(transform.position, new Vector2(area, 1), 0,
+            var areaOfEffect = Physics2D.OverlapBox(position, new Vector2(area, 1), areaOfEffectAngle,
                 contactFilter2D, collider2Ds);
 
 
@@ -87,7 +116,5 @@ public class ThrowableItem : Item
     public void Effect(Vector3 aimDirection)
     {
         PhysicsHelpers.AddImpulseForce(throwForce, aimDirection, rigidbody2D);
-
-        rigidbody2D.AddTorque(torque);
     }
 }

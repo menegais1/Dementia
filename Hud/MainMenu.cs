@@ -8,6 +8,10 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private OptionsMenu optionsMenu;
     [SerializeField] private GameObject credits;
     [SerializeField] private GameObject menuGroup;
+    [SerializeField] private GameObject newGamePopUp;
+    [SerializeField] private Button newGamePopUpConfirmButton;
+    [SerializeField] private Button newGamePopUpCancelButton;
+
     [SerializeField] private Button optionsMenuButton;
     [SerializeField] private Button creditsButton;
     [SerializeField] private Button creditsBackButton;
@@ -25,11 +29,14 @@ public class MainMenu : MonoBehaviour
         newGameButton.onClick.AddListener(OnNewGameButtonClick);
         continueGameButton.onClick.AddListener(OnContinueGameButtonClick);
         continueGameButton.gameObject.SetActive(false);
+        newGamePopUpConfirmButton.onClick.AddListener(OnNewGamePopUpConfirmButtonClick);
+        newGamePopUpCancelButton.onClick.AddListener(OnNewGamePopUpCancelButtonClick);
     }
 
     private void OnEnable()
     {
         optionsMenu.gameObject.SetActive(false);
+        newGamePopUp.gameObject.SetActive(false);
         credits.SetActive(false);
         menuGroup.SetActive(true);
     }
@@ -50,7 +57,26 @@ public class MainMenu : MonoBehaviour
 
     private void OnNewGameButtonClick()
     {
+        if (GameManager.instance.ExistsSave())
+        {
+            menuGroup.SetActive(false);
+            newGamePopUp.gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.instance.NewGame();
+        }
+    }
+
+    private void OnNewGamePopUpConfirmButtonClick()
+    {
         GameManager.instance.NewGame();
+    }
+
+    private void OnNewGamePopUpCancelButtonClick()
+    {
+        newGamePopUp.gameObject.SetActive(false);
+        menuGroup.SetActive(true);
     }
 
     private void OnContinueGameButtonClick()
