@@ -107,11 +107,11 @@ public class PlayerStatusController : MonoBehaviour
 
     public void TakeDamage(float lifeToDecrease)
     {
-        currentLife = CurrentLife - lifeToDecrease;
+        currentLife -= lifeToDecrease;
 
-        if (CurrentLife < 0)
+        if (currentLife <= 0)
         {
-            currentLife = 0;
+            Die();
         }
     }
 
@@ -160,7 +160,8 @@ public class PlayerStatusController : MonoBehaviour
     }
 
     public void Die()
-    {//Necessário uma tela de morte
+    {
+        //Necessário uma tela de morte
         GameManager.instance.LoadData(true);
     }
 

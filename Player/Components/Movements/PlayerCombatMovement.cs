@@ -190,6 +190,8 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         Item item = null;
 
         bool itemUsed = false;
+
+        RaycastHit2D raycastHit;
         switch (currentItem.Type)
         {
             case ItemType.Bandages:
@@ -210,7 +212,7 @@ public class PlayerCombatMovement : BasicPhysicsMovement
 
                 if (item == null) return;
 
-                var raycastHit = Physics2D.Raycast(monoBehaviour.gameObject.transform.position,
+                raycastHit = Physics2D.Raycast(monoBehaviour.gameObject.transform.position,
                     playerController.AimDirection);
 
                 if (raycastHit.collider != null &&
@@ -230,7 +232,36 @@ public class PlayerCombatMovement : BasicPhysicsMovement
                     item.transform.position = throwableItemPosition;
                 }
 
-                item.GetComponent<ThrowableItem>().Effect(playerController.AimDirection);
+                item.GetComponent<ThrowableItem>().Effect(playerController.AimDirection, false);
+                itemUsed = true;
+                playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
+                break;
+            case ItemType.Grenade:
+                item = InstantiateItem();
+
+                if (item == null) return;
+
+                raycastHit = Physics2D.Raycast(monoBehaviour.gameObject.transform.position,
+                    playerController.AimDirection);
+
+                if (raycastHit.collider != null &&
+                    Math.Abs(raycastHit.point.x - monoBehaviour.gameObject.transform.position.x) <
+                    rangeForShortThrowableItemPosition &&
+                    raycastHit.point.y < monoBehaviour.gameObject.transform.position.y)
+                {
+                    item.transform.position = playerStatusVariables.facingDirection == FacingDirection.Right
+                        ? new
+                            Vector2(throwableItemPosition.x,
+                                playerCollisionHandler.BoxColliderBounds.bottomRight.y)
+                        : new Vector2(throwableItemPosition.x,
+                            playerCollisionHandler.BoxColliderBounds.bottomLeft.y);
+                }
+                else
+                {
+                    item.transform.position = throwableItemPosition;
+                }
+
+                item.GetComponent<ThrowableItem>().Effect(playerController.AimDirection, true);
                 itemUsed = true;
                 playerController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 break;

@@ -99,56 +99,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
             }
         }
 
-        if (playerStatusVariables.canClimbStairs && !playerStatusVariables.isClimbingStairs)
-        {
-            var collider = GetStairsTrigger();
-
-            if (collider != null)
-            {
-                var stairsController = collider.GetComponent<StairsController>();
-
-
-                if ((CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
-                        ? playerController.HorizontalMove > 0
-                        : playerController.HorizontalMove < 0) &&
-                    (stairsController.stairsTriggerType == StairsTriggerType.TopTrigger
-                        ? playerController.VerticalMovement < 0
-                        : playerController.VerticalMovement > 0))
-                {
-                    SetOnStairsColliders(stairsController);
-                }
-            }
-        }
-        else if (playerStatusVariables.isClimbingStairs &&
-                 (playerCollisionHandler.CheckForLayerCollision(LayerMask.GetMask("Ground"), 0.1f) ||
-                  playerStatusVariables.isOnAir) &&
-                 playerStatusVariables.canClimbStairs)
-        {
-            var collider = GetStairsTrigger();
-
-            if (collider != null)
-            {
-                var stairsController = collider.GetComponent<StairsController>();
-
-                var stairsCollider = stairsController.stairsCollider.GetComponent<BoxCollider2D>();
-
-                //A normal é sempre perpendicular ao plano, porém é necessário manter a rotação entre 29 e -29
-                var normal = stairsCollider.transform.up;
-                if (CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
-                    ? PhysicsHelpers.SlopeInclinationRight(normal)
-                        ? rigidbody2D.velocity.y < 0
-                        : rigidbody2D.velocity.y >= 0
-                    : PhysicsHelpers.SlopeInclinationRight(normal)
-                        ? rigidbody2D.velocity.y >= 0
-                        : rigidbody2D.velocity.y < 0)
-                {
-                    playerStatusVariables.isClimbingStairs = false;
-
-                    PhysicsHelpers.IgnoreCollision(capsuleCollider2D, stairsController.adjacentCollider, false);
-                    stairsController.adjacentCollider.gameObject.layer = LayerMask.NameToLayer("Ground");
-                }
-            }
-        }
+        CheckForClimbingStairs();
 
         if (playerStatusVariables.isOnAir)
         {
@@ -285,11 +236,60 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         return playerCollisionHandler.CheckGroundForJump(0.1f);
     }
 
-    public void ClimbStairs()
+    public void CheckForClimbingStairs()
     {
-        
+        if (playerStatusVariables.canClimbStairs && !playerStatusVariables.isClimbingStairs)
+        {
+            var collider = GetStairsTrigger();
+
+            if (collider != null)
+            {
+                var stairsController = collider.GetComponent<StairsController>();
+
+
+                if ((CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
+                        ? playerController.HorizontalMove > 0
+                        : playerController.HorizontalMove < 0) &&
+                    (stairsController.stairsTriggerType == StairsTriggerType.TopTrigger
+                        ? playerController.VerticalMovement < 0
+                        : playerController.VerticalMovement > 0))
+                {
+                    SetOnStairsColliders(stairsController);
+                }
+            }
+        }
+        else if (playerStatusVariables.isClimbingStairs &&
+                 (playerCollisionHandler.CheckForLayerCollision(LayerMask.GetMask("Ground"), 0.1f) ||
+                  playerStatusVariables.isOnAir) &&
+                 playerStatusVariables.canClimbStairs)
+        {
+            var collider = GetStairsTrigger();
+
+            if (collider != null)
+            {
+                var stairsController = collider.GetComponent<StairsController>();
+
+                var stairsCollider = stairsController.stairsCollider.GetComponent<BoxCollider2D>();
+
+                //A normal é sempre perpendicular ao plano, porém é necessário manter a rotação entre 29 e -29
+                var normal = stairsCollider.transform.up;
+                if (CheckIfObjectIsRight(stairsController.stairsCollider.transform.position)
+                    ? PhysicsHelpers.SlopeInclinationRight(normal)
+                        ? rigidbody2D.velocity.y < 0
+                        : rigidbody2D.velocity.y >= 0
+                    : PhysicsHelpers.SlopeInclinationRight(normal)
+                        ? rigidbody2D.velocity.y >= 0
+                        : rigidbody2D.velocity.y < 0)
+                {
+                    playerStatusVariables.isClimbingStairs = false;
+
+                    PhysicsHelpers.IgnoreCollision(capsuleCollider2D, stairsController.adjacentCollider, false);
+                    stairsController.adjacentCollider.gameObject.layer = LayerMask.NameToLayer("Ground");
+                }
+            }
+        }
     }
-    
+
     private Transform GetLadderPosition()
     {
         var contactFilter2D = new ContactFilter2D
@@ -353,9 +353,10 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
     {
         playerStatusVariables.isClimbingStairs = true;
         PhysicsHelpers.IgnoreCollision(capsuleCollider2D, stairsController.adjacentCollider, true);
-        stairsController.adjacentCollider.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+        stairsController.adjacentCollider.gameObject.layer = LayerMask.NameToLayer("Ground Ignore");
         PhysicsHelpers.IgnoreLayerCollision(rigidbody2D.gameObject.layer, LayerMask.NameToLayer("Stairs Ground"),
             false);
+
         playerCollisionHandler.SetLayerForCollisions(new[] {"Ground", "Stairs Ground"});
     }
 

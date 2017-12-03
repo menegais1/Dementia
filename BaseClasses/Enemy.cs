@@ -44,19 +44,14 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentLife -= damage;
-        CheckLife();
+        if (currentLife <= 0)
+        {
+            Die();
+        }
     }
 
     public void Die()
     {
         Destroy(this.gameObject);
-    }
-
-    public void CheckLife()
-    {
-        if (currentLife <= 0)
-        {
-            Die();
-        }
     }
 }

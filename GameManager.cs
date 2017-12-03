@@ -144,6 +144,7 @@ public class GameManager : MonoBehaviour
     {
         AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneName);
         gameDataHolder = null;
+        CoroutineManager.DeleteAllCoroutines("ResetCurrentSceneAsyncCoroutine");
 
         while (!asyncOperation.isDone)
         {

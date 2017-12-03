@@ -27,7 +27,7 @@ public class Bullet : MonoBehaviour
                 raycastHit2D.collider.CompareTag("Obstacle") || raycastHit2D.collider.CompareTag("Enemy"))
             {
                 var layerCollider = Physics2D.Linecast(lastBulletPosition,
-                    rigidbody2D.position, LayerMask.GetMask("Enemy", "Ground"));
+                    rigidbody2D.position, LayerMask.GetMask("Enemy", "Ground", "Ground Ignore"));
                 if (layerCollider.collider != null &&
                     LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Enemy")
                 {
@@ -37,7 +37,8 @@ public class Bullet : MonoBehaviour
                     raycastHit2D = new RaycastHit2D();
                 }
                 else if (layerCollider.collider != null &&
-                         LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Ground")
+                         (LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Ground" ||
+                          LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Ground Ignore"))
                 {
                     Destroy(this.gameObject);
                     raycastHit2D = new RaycastHit2D();
@@ -52,7 +53,7 @@ public class Bullet : MonoBehaviour
     public void Shoot()
     {
         raycastHit2D = Physics2D.Raycast(initialPosition, initialDirection, maxBulletDistance,
-            LayerMask.GetMask("Enemy", "Ground"));
+            LayerMask.GetMask("Enemy", "Ground", "Ground Ignore"));
         PhysicsHelpers.AddImpulseForce(force, this.rigidbody2D);
         lastBulletPosition = rigidbody2D.position;
         if (raycastHit2D.collider == null)

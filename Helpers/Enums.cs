@@ -107,6 +107,7 @@ public enum ItemType
     RevolverBullet,
     Bandages,
     Molotov,
+    Grenade,
     Morphin,
     Adrenaline,
 }

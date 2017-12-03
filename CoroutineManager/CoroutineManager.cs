@@ -93,6 +93,27 @@ public static class CoroutineManager
         runningCoroutines = new List<CoroutineContainer>();
     }
 
+    public static void DeleteAllCoroutines(string name)
+    {
+        List<CoroutineContainer> deleteCoroutines = new List<CoroutineContainer>();
+        foreach (var coroutineContainer in runningCoroutines)
+        {
+            if (coroutineContainer.Name != name)
+            {
+                monoBehaviourInstance.StopCoroutine(coroutineContainer.Coroutine);
+                deleteCoroutines.Add(coroutineContainer);
+            }
+        }
+        foreach (var coroutineContainer in deleteCoroutines)
+        {
+            runningCoroutines.Remove(coroutineContainer);
+        }
+        foreach (var coroutineContainer in runningCoroutines)
+        {
+            Debug.Log(coroutineContainer.Name);
+        }
+    }
+
     public static CoroutineContainer FindCoroutine(string name, System.Object instanceCoroutineWasCalled)
     {
         return runningCoroutines.Find(lambdaCoroutine =>
