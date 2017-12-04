@@ -6,9 +6,13 @@ public class Description : MonoBehaviour
     [SerializeField] private Text descriptionText;
     [SerializeField] private Toggle equip;
     [SerializeField] private Button discard;
-    [SerializeField] private Canvas popUp;
+    [SerializeField] private GameObject discardPopUp;
     [SerializeField] private Button discardAcceptPopUp;
     [SerializeField] private Button discardDeclinePopUp;
+
+    [SerializeField] private Button quickItemSelectionButton;
+    [SerializeField] private QuickItemSelection quickItemSelectionPopUp;
+
 
     private Text equipLabel;
 
@@ -46,10 +50,10 @@ public class Description : MonoBehaviour
         set { discard = value; }
     }
 
-    public Canvas PopUp
+    public GameObject DiscardPopUp
     {
-        get { return popUp; }
-        set { popUp = value; }
+        get { return discardPopUp; }
+        set { discardPopUp = value; }
     }
 
     private void Start()
@@ -59,11 +63,15 @@ public class Description : MonoBehaviour
         equipLabel = equip.gameObject.GetComponentInChildren<Text>();
 
         equip.onValueChanged.AddListener(OnEquip);
-        discard.onClick.AddListener(OpenPopUp);
+        discard.onClick.AddListener(OpenDiscardPopUp);
         discardAcceptPopUp.onClick.AddListener(OnDiscard);
-        discardDeclinePopUp.onClick.AddListener(ClosePopUp);
+        discardDeclinePopUp.onClick.AddListener(CloseDiscardPopUp);
 
-        PopUp.gameObject.SetActive(false);
+        quickItemSelectionButton.onClick.AddListener(OpenQuickItemSelectionPopUp);
+
+        discardPopUp.gameObject.SetActive(false);
+        quickItemSelectionPopUp.gameObject.SetActive(false);
+        quickItemSelectionButton.gameObject.SetActive(false);
     }
 
     private void OnEquip(bool equip)
@@ -80,14 +88,20 @@ public class Description : MonoBehaviour
         }
     }
 
-    private void OpenPopUp()
+    private void OpenDiscardPopUp()
     {
-        PopUp.gameObject.SetActive(true);
+        discardPopUp.gameObject.SetActive(true);
     }
 
-    private void ClosePopUp()
+    private void OpenQuickItemSelectionPopUp()
     {
-        PopUp.gameObject.SetActive(false);
+        quickItemSelectionPopUp.gameObject.SetActive(true);
+        quickItemSelectionPopUp.CurrentItem = itemSlot;
+    }
+
+    private void CloseDiscardPopUp()
+    {
+        discardPopUp.gameObject.SetActive(false);
     }
 
     private void OnDiscard()
@@ -100,7 +114,7 @@ public class Description : MonoBehaviour
         {
             weaponSlot.Reset();
         }
-        ClosePopUp();
+        CloseDiscardPopUp();
     }
 
     public void RenderDescription(ItemSlot item)
@@ -121,6 +135,7 @@ public class Description : MonoBehaviour
             else
             {
                 equip.gameObject.SetActive(true);
+                quickItemSelectionButton.gameObject.SetActive(true);
                 equip.isOn = item.IsEquiped;
             }
         }
@@ -131,6 +146,7 @@ public class Description : MonoBehaviour
         if (weapon != null)
         {
             gameObject.SetActive(true);
+            quickItemSelectionButton.gameObject.SetActive(false);
             descriptionText.text = weapon.Description;
 
             weaponSlot = weapon;
@@ -143,8 +159,11 @@ public class Description : MonoBehaviour
     public void RenderDescription()
     {
         gameObject.SetActive(false);
-        popUp.gameObject.SetActive(false);
+        DiscardPopUp.gameObject.SetActive(false);
         equip.gameObject.SetActive(true);
+        quickItemSelectionButton.gameObject.SetActive(false);
+        quickItemSelectionPopUp.gameObject.SetActive(false);
+
         descriptionText.text = "";
 
         weaponSlot = null;

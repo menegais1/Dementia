@@ -131,3 +131,10 @@ public enum AimDirection
     DownRight,
     DownLeft,
 }
+
+public enum ItemQuickSelectionSlot
+{
+    None,
+    First,
+    Second,
+}

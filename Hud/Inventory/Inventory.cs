@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
     private WeaponSlot currentWeapon;
     private ItemSlot currentItem;
-    private List<Item> quickSelectionItens;
+    private List<ItemSlot> quickSelectionItens;
 
     private InGameMenuController inGameMenuController;
 
@@ -38,6 +39,12 @@ public class Inventory : MonoBehaviour
         set { weaponsSlots = value; }
     }
 
+    public List<ItemSlot> QuickSelectionItens
+    {
+        get { return quickSelectionItens; }
+        set { quickSelectionItens = value; }
+    }
+
 
     void Start()
     {
@@ -62,6 +69,11 @@ public class Inventory : MonoBehaviour
         if (WeaponsSlots == null)
         {
             WeaponsSlots = new List<WeaponSlot>();
+        }
+
+        if (quickSelectionItens == null)
+        {
+            quickSelectionItens = new List<ItemSlot> {null, null};
         }
 
         for (var i = 0; i < ItensSlots.Count; i++)
@@ -108,6 +120,7 @@ public class Inventory : MonoBehaviour
         }
 
         CheckForCurrentItem();
+        CheckForQuickSelectionItem();
         CheckForCurrentWeapon();
     }
 
@@ -115,6 +128,18 @@ public class Inventory : MonoBehaviour
     {
         CurrentItem = ItensSlots.Find(lambdaExpression =>
             lambdaExpression.IsEquiped);
+    }
+
+    public void CheckForQuickSelectionItem()
+    {
+        quickSelectionItens[0] = itensSlots.Find(lambdaExpression =>
+            lambdaExpression.QuickSelectionSlot == ItemQuickSelectionSlot.First);
+
+        quickSelectionItens[1] = itensSlots.Find(lambdaExpression =>
+            lambdaExpression.QuickSelectionSlot == ItemQuickSelectionSlot.Second);
+
+        Debug.Log(quickSelectionItens[0] != null ? quickSelectionItens[0].Name : "");
+        Debug.Log(quickSelectionItens[1] != null ? quickSelectionItens[1].Name : "");
     }
 
     public void CheckForCurrentWeapon()
@@ -214,18 +239,18 @@ public class Inventory : MonoBehaviour
 
     private ItemSlot AddItem(CollectibleItem item)
     {
+        var inventoryItem = ItensSlots.Find(lambdaExpression => lambdaExpression.Type == item.ItemType);
+        if (inventoryItem != null)
+        {
+            inventoryItem.Quantity += item.Quantity;
+            inventoryItem.RenderItem();
+            return inventoryItem;
+        }
         for (int i = 0; i < ItensSlots.Count; i++)
         {
             if (ItensSlots[i].Type == ItemType.Nothing)
             {
                 ItensSlots[i].FillItem(item);
-                return ItensSlots[i];
-            }
-
-            if (ItensSlots[i].Type == item.ItemType)
-            {
-                ItensSlots[i].Quantity += item.Quantity;
-                ItensSlots[i].RenderItem();
                 return ItensSlots[i];
             }
         }

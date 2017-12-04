@@ -13,6 +13,7 @@ public class ItemSlot : MonoBehaviour
     private ItemType type;
     private Toggle toggle;
     private bool isEquiped;
+    private ItemQuickSelectionSlot quickSelectionSlot;
     private bool unequipable;
     private int id;
 
@@ -82,9 +83,16 @@ public class ItemSlot : MonoBehaviour
         set { unequipable = value; }
     }
 
+    public ItemQuickSelectionSlot QuickSelectionSlot
+    {
+        get { return quickSelectionSlot; }
+        set { quickSelectionSlot = value; }
+    }
+
 
     private void Start()
     {
+        QuickSelectionSlot = ItemQuickSelectionSlot.None;
         Type = ItemType.Nothing;
         nameText.text = "";
         quantityText.text = "";
@@ -98,6 +106,7 @@ public class ItemSlot : MonoBehaviour
 
     public void Reset()
     {
+        QuickSelectionSlot = ItemQuickSelectionSlot.None;
         Type = ItemType.Nothing;
         nameText.text = "";
         quantityText.text = "";

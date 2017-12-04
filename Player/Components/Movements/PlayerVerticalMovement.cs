@@ -414,10 +414,10 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
 
     private IEnumerator ClimbOntoObstacleCoroutine(Vector2 position, float changeRate)
     {
-        do
+        while (playerStatusVariables.isCrouching)
         {
             yield return new WaitForFixedUpdate();
-        } while (playerStatusVariables.isCrouching);
+        }
 
         var playerSizeX = (position.x > rigidbody2D.position.x)
             ? capsuleCollider2D.size.x / 2
@@ -429,15 +429,20 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         var initialPositionForY = rigidbody2D.position;
         var initialPositionForX = new Vector2(rigidbody2D.position.x, desiredPositionY);
 
-
+        // Bug Corrigido, usar a posição do rigidBody no lerp era a causa, pode ser um quirck do unity
         while (!MathHelpers.Approximately(rigidbody2D.position.x, desiredPositionX, 0.01f) ||
                !MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, 0.01f))
         {
-            if (!MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, float.Epsilon))
+            if (!MathHelpers.Approximately(rigidbody2D.position.y, desiredPositionY, 0.001f))
             {
                 f += changeRate;
+                if (f >= 1)
+                {
+                    f = 1;
+                }
+              
                 rigidbody2D.MovePosition(Vector2.Lerp(initialPositionForY,
-                    new Vector2(rigidbody2D.position.x, desiredPositionY), f));
+                    new Vector2(initialPositionForY.x, desiredPositionY), f));
             }
             else
             {
@@ -447,8 +452,12 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
                     f = 0;
                 }
                 f += changeRate;
+                if (f >= 1)
+                {
+                    f = 1;
+                }
                 rigidbody2D.MovePosition(Vector2.Lerp(initialPositionForX,
-                    new Vector2(desiredPositionX, rigidbody2D.position.y), f));
+                    new Vector2(desiredPositionX, initialPositionForX.y), f));
             }
 
 
