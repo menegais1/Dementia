@@ -15,9 +15,15 @@ public class Enemy : MonoBehaviour
         set { id = value; }
     }
 
+    public float CurrentLife
+    {
+        get { return currentLife; }
+        set { currentLife = value; }
+    }
+
     private void Start()
     {
-        currentLife = maxLife;
+        CurrentLife = maxLife;
     }
 
 
@@ -43,8 +49,8 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        currentLife -= damage;
-        if (currentLife <= 0)
+        CurrentLife -= damage;
+        if (CurrentLife <= 0)
         {
             Die();
         }

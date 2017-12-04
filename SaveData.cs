@@ -40,12 +40,14 @@ public class SaveData
         public int id;
         public int quantity;
         public bool isEquiped;
+        public ItemQuickSelectionSlot ItemQuickSelectionSlot;
 
-        public Item(int id, int quantity, bool isEquiped)
+        public Item(int id, int quantity, bool isEquiped, ItemQuickSelectionSlot itemQuickSelectionSlot)
         {
             this.id = id;
             this.quantity = quantity;
             this.isEquiped = isEquiped;
+            this.ItemQuickSelectionSlot = itemQuickSelectionSlot;
         }
     }
 
@@ -55,12 +57,14 @@ public class SaveData
         public int id;
         public float xPosition;
         public float yPosition;
+        public float life;
 
-        public Enemy(int id, float xPosition, float yPosition)
+        public Enemy(int id, float xPosition, float yPosition, float life)
         {
             this.id = id;
             this.xPosition = xPosition;
             this.yPosition = yPosition;
+            this.life = life;
         }
     }
 
@@ -90,7 +94,10 @@ public class SaveData
         yPosition = playerManager.transform.position.y;
         InitializeInventoryData(inGameMenuController);
         InitializeCurrentWorldData(gameDataHolder);
-
+        foreach (var inventoryNote in inventoryNotes)
+        {
+            Debug.Log(inventoryNote.id);
+        }
         Debug.Log("Save");
     }
 
@@ -127,11 +134,14 @@ public class SaveData
                 var itemSlot = inGameMenuController.MenuControllerInventory.TakeItem(item);
                 var color = inventoryItem.isEquiped ? new Color(0.42f, 0.16f, 0.11f) : new Color(0.2f, 0.2f, 0.2f);
                 itemSlot.Equip(color, inventoryItem.isEquiped);
+                itemSlot.QuickSelectionSlot = inventoryItem.ItemQuickSelectionSlot;
+
                 inGameMenuController.MenuControllerInventory.CheckForCurrentItem();
+                inGameMenuController.MenuControllerInventory.CheckForQuickSelectionItem();
 
                 item.DestroyItem();
             }
-            else if (!currentItensIdInWorld.Exists(lamdaExpression => lamdaExpression == item.Id))
+            else if (!currentItensIdInWorld.Exists(lambdaExpression => lambdaExpression == item.Id))
             {
                 item.DestroyItem();
             }
@@ -157,7 +167,7 @@ public class SaveData
                 inGameMenuController.MenuControllerInventory.CheckForCurrentWeapon();
                 weapon.DestroyWeapon();
             }
-            else if (!currentWeaponsIdInWorld.Exists(lamdaExpression => lamdaExpression == weapon.Id))
+            else if (!currentWeaponsIdInWorld.Exists(lambdaExpression => lambdaExpression == weapon.Id))
             {
                 weapon.DestroyWeapon();
             }
@@ -172,13 +182,13 @@ public class SaveData
             {
                 continue;
             }
-            var inventoryNote = inventoryNotes.Find(lamdaExpression => lamdaExpression.id == note.Id);
+            var inventoryNote = inventoryNotes.Find(lambdaExpression => lambdaExpression.id == note.Id);
             if (inventoryNote != null)
             {
                 inGameMenuController.MenuControllerDiary.TakeNote(note);
                 note.DestroyNote();
             }
-            else if (!currentNotesIdInWorld.Exists(lamdaExpression => lamdaExpression == note.Id))
+            else if (!currentNotesIdInWorld.Exists(lambdaExpression => lambdaExpression == note.Id))
             {
                 note.DestroyNote();
             }
@@ -194,7 +204,7 @@ public class SaveData
                 continue;
             }
 
-            var currentEnemy = currentEnemiesInWorld.Find(lamdaExpression => lamdaExpression.id == enemy.Id);
+            var currentEnemy = currentEnemiesInWorld.Find(lambdaExpression => lambdaExpression.id == enemy.Id);
             if (currentEnemy == null)
             {
                 enemy.Die();
@@ -203,6 +213,7 @@ public class SaveData
             {
                 enemy.transform.position = new Vector3(currentEnemy.xPosition, currentEnemy.yPosition,
                     enemy.transform.position.z);
+                enemy.CurrentLife = currentEnemy.life;
             }
         }
     }
@@ -220,7 +231,8 @@ public class SaveData
 
         foreach (var itemSlot in inGameMenuController.MenuControllerInventory.ItensSlots)
         {
-            inventoryItens.Add(new Item(itemSlot.Id, itemSlot.Quantity, itemSlot.IsEquiped));
+            inventoryItens.Add(
+                new Item(itemSlot.Id, itemSlot.Quantity, itemSlot.IsEquiped, itemSlot.QuickSelectionSlot));
         }
 
         foreach (var noteSlot in inGameMenuController.MenuControllerDiary.NotesSlots)
@@ -256,7 +268,8 @@ public class SaveData
 
         foreach (var enemy in gameDataHolder.GetComponentsInChildren<global::Enemy>(true))
         {
-            currentEnemiesInWorld.Add(new Enemy(enemy.Id, enemy.transform.position.x, enemy.transform.position.y));
+            currentEnemiesInWorld.Add(new Enemy(enemy.Id, enemy.transform.position.x, enemy.transform.position.y,
+                enemy.CurrentLife));
         }
     }
 }

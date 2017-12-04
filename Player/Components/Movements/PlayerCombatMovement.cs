@@ -80,6 +80,14 @@ public class PlayerCombatMovement : BasicPhysicsMovement
             {
                 CombatPressMovementState = CombatPressMovementState.Shoot;
             }
+            else if (playerController.QuickItemSelectionSlot1)
+            {
+                CombatPressMovementState = CombatPressMovementState.Slot1;
+            }
+            else if (playerController.QuickItemSelectionSlot2)
+            {
+                CombatPressMovementState = CombatPressMovementState.Slot2;
+            }
             else if (playerController.UseItemPress)
             {
                 CombatPressMovementState = CombatPressMovementState.UseItem;
@@ -120,6 +128,12 @@ public class PlayerCombatMovement : BasicPhysicsMovement
                 UseItem();
                 break;
             case CombatPressMovementState.None:
+                break;
+            case CombatPressMovementState.Slot1:
+                EquipQuickItemSelection(ItemQuickSelectionSlot.First);
+                break;
+            case CombatPressMovementState.Slot2:
+                EquipQuickItemSelection(ItemQuickSelectionSlot.Second);
                 break;
             default:
                 Debug.Log("Error");
@@ -166,6 +180,30 @@ public class PlayerCombatMovement : BasicPhysicsMovement
         {
             GameObject.Destroy(currentWeapon.gameObject);
             currentWeapon = null;
+        }
+    }
+
+    private void EquipQuickItemSelection(ItemQuickSelectionSlot itemQuickSelectionSlot)
+    {
+        if (itemQuickSelectionSlot == ItemQuickSelectionSlot.First)
+        {
+            if (inventory.QuickSelectionItens[0] == null) return;
+            if (inventory.CurrentItem != null)
+            {
+                inventory.CurrentItem.Equip(new Color(0.2f, 0.2f, 0.2f), false);
+            }
+            inventory.QuickSelectionItens[0].Equip(new Color(0.42f, 0.16f, 0.11f), true);
+            inventory.CheckForCurrentItem();
+        }
+        else if (itemQuickSelectionSlot == ItemQuickSelectionSlot.Second)
+        {
+            if (inventory.QuickSelectionItens[1] == null) return;
+            if (inventory.CurrentItem != null)
+            {
+                inventory.CurrentItem.Equip(new Color(0.2f, 0.2f, 0.2f), false);
+            }
+            inventory.QuickSelectionItens[1].Equip(new Color(0.42f, 0.16f, 0.11f), true);
+            inventory.CheckForCurrentItem();
         }
     }
 

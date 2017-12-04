@@ -7,13 +7,7 @@ public class Diary : MonoBehaviour
     [SerializeField] private GameObject notesGroup;
     [SerializeField] private NoteContent noteContent;
 
-    private List<NoteSlot> notesSlots;
-
-    public List<NoteSlot> NotesSlots
-    {
-        get { return notesSlots; }
-        set { notesSlots = value; }
-    }
+    public List<NoteSlot> NotesSlots { get; set; }
 
     void Start()
     {
@@ -43,6 +37,10 @@ public class Diary : MonoBehaviour
 
     private void Update()
     {
+        foreach (var notesSlot in NotesSlots)
+        {
+            Debug.Log(notesSlot.TextNoteName.text);
+        }
         var noteSlot = NotesSlots.Find(lambaExpression => lambaExpression.Selected);
         if (noteSlot != null && noteContent.Note == null)
         {
@@ -90,6 +88,7 @@ public class Diary : MonoBehaviour
             var noteSlot = noteSlotGameObject.GetComponent<NoteSlot>();
             noteSlot.FillNote(note);
             NotesSlots.Add(noteSlot);
+            
         }
     }
 }

@@ -41,6 +41,8 @@ public enum CombatPressMovementState
     Reload,
     Cqc,
     UseItem,
+    Slot1,
+    Slot2,
 }
 
 public enum VerticalMovementState

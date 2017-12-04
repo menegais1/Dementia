@@ -11,6 +11,7 @@ public class PlayerStatusController : MonoBehaviour
     [SerializeField] private float currentLife;
     [SerializeField] private float maxLife;
     [SerializeField] private Slider staminaBar;
+    [SerializeField] private Slider lifeBar;
 
     private bool canSave;
     private int diaryState;
@@ -44,6 +45,9 @@ public class PlayerStatusController : MonoBehaviour
         timeTrackerForSpendingStamina = Time.time;
         staminaBar.maxValue = maxStamina;
         staminaBar.minValue = 0;
+        lifeBar.maxValue = maxLife;
+        lifeBar.minValue = 0;
+        lifeBar.value = currentLife;
         staminaBar.value = currentStamina;
         playerStatusVariables = GetComponent<PlayerStatusVariables>();
         StaminaRegenMultiplier = 1;
@@ -108,6 +112,7 @@ public class PlayerStatusController : MonoBehaviour
     public void TakeDamage(float lifeToDecrease)
     {
         currentLife -= lifeToDecrease;
+        lifeBar.value = currentLife;
 
         if (currentLife <= 0)
         {
@@ -122,6 +127,7 @@ public class PlayerStatusController : MonoBehaviour
         {
             currentLife = maxLife;
         }
+        lifeBar.value = currentLife;
     }
 
     public void RegenLifeTemporary(float duration, float lifeToRegen, bool deactivateMorphin)
@@ -134,8 +140,7 @@ public class PlayerStatusController : MonoBehaviour
     public IEnumerator RegenLifeTemporaryCoroutine(float lifeToRegen, bool deactivateMorphin)
     {
         originalHealth = CurrentLife;
-        currentLife = CurrentLife + lifeToRegen;
-
+        RegenLife(lifeToRegen);
         while (regenLifeTemporaryTime > Time.time)
         {
             if (CurrentLife > originalHealth)
@@ -151,6 +156,7 @@ public class PlayerStatusController : MonoBehaviour
             playerStatusVariables.isMorphinActive = false;
 
         currentLife = originalHealth;
+        lifeBar.value = currentLife;
         CoroutineManager.DeleteCoroutine("RegenLifeTemporaryCoroutine");
     }
 

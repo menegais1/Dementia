@@ -8,13 +8,14 @@ public class NoteSlot : MonoBehaviour
     [SerializeField] private Text textNoteName;
     private string noteContent;
     private bool selected;
-    private int id;
+    private int id = -1;
 
     public int Id
     {
         get { return id; }
         set { id = value; }
     }
+
     public Button ButtonNote
     {
         get { return buttonNote; }
@@ -39,11 +40,11 @@ public class NoteSlot : MonoBehaviour
         set { selected = value; }
     }
 
-    void Start()
+    private void Start()
     {
         buttonNote = GetComponent<Button>();
         buttonNote.onClick.AddListener(OnSelectNote);
-        id = -1;
+       
     }
 
     private void OnSelectNote()

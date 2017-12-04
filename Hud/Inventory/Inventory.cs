@@ -137,9 +137,6 @@ public class Inventory : MonoBehaviour
 
         quickSelectionItens[1] = itensSlots.Find(lambdaExpression =>
             lambdaExpression.QuickSelectionSlot == ItemQuickSelectionSlot.Second);
-
-        Debug.Log(quickSelectionItens[0] != null ? quickSelectionItens[0].Name : "");
-        Debug.Log(quickSelectionItens[1] != null ? quickSelectionItens[1].Name : "");
     }
 
     public void CheckForCurrentWeapon()
@@ -153,6 +150,12 @@ public class Inventory : MonoBehaviour
         ItemSlot itemSelected = ItensSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
         WeaponSlot weaponSelected = WeaponsSlots.Find(lambdaExpression => lambdaExpression.Toggle.isOn);
 
+
+        if (itemSelected != null && quickSelectionItens != null)
+        {
+            description.QuickItemSelectionPopUp.QuickItemSelectionList = quickSelectionItens;
+            description.QuickItemSelectionPopUp.UpdateTexts();
+        }
 
         if (itemSelected != null)
         {

@@ -9,6 +9,7 @@ public class Description : MonoBehaviour
     [SerializeField] private GameObject discardPopUp;
     [SerializeField] private Button discardAcceptPopUp;
     [SerializeField] private Button discardDeclinePopUp;
+    [SerializeField] private Button discardPopUpBackgroundButton;
 
     [SerializeField] private Button quickItemSelectionButton;
     [SerializeField] private QuickItemSelection quickItemSelectionPopUp;
@@ -56,6 +57,12 @@ public class Description : MonoBehaviour
         set { discardPopUp = value; }
     }
 
+    public QuickItemSelection QuickItemSelectionPopUp
+    {
+        get { return quickItemSelectionPopUp; }
+        set { quickItemSelectionPopUp = value; }
+    }
+
     private void Start()
     {
         descriptionText.text = "";
@@ -66,11 +73,12 @@ public class Description : MonoBehaviour
         discard.onClick.AddListener(OpenDiscardPopUp);
         discardAcceptPopUp.onClick.AddListener(OnDiscard);
         discardDeclinePopUp.onClick.AddListener(CloseDiscardPopUp);
-
+        discardPopUpBackgroundButton.onClick.AddListener(CloseDiscardPopUp);
+        
         quickItemSelectionButton.onClick.AddListener(OpenQuickItemSelectionPopUp);
 
         discardPopUp.gameObject.SetActive(false);
-        quickItemSelectionPopUp.gameObject.SetActive(false);
+        QuickItemSelectionPopUp.gameObject.SetActive(false);
         quickItemSelectionButton.gameObject.SetActive(false);
     }
 
@@ -95,8 +103,8 @@ public class Description : MonoBehaviour
 
     private void OpenQuickItemSelectionPopUp()
     {
-        quickItemSelectionPopUp.gameObject.SetActive(true);
-        quickItemSelectionPopUp.CurrentItem = itemSlot;
+        QuickItemSelectionPopUp.gameObject.SetActive(true);
+        QuickItemSelectionPopUp.CurrentItem = itemSlot;
     }
 
     private void CloseDiscardPopUp()
@@ -162,7 +170,7 @@ public class Description : MonoBehaviour
         DiscardPopUp.gameObject.SetActive(false);
         equip.gameObject.SetActive(true);
         quickItemSelectionButton.gameObject.SetActive(false);
-        quickItemSelectionPopUp.gameObject.SetActive(false);
+        QuickItemSelectionPopUp.gameObject.SetActive(false);
 
         descriptionText.text = "";
 

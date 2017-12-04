@@ -11,6 +11,7 @@ public class QuickItemSelection : MonoBehaviour
     [SerializeField] private Text quickItemSelectionPopUpSlot2Text;
 
     [SerializeField] private Button quickItemSelectionPopUpBackButton;
+    [SerializeField] private Button quickItemSelectionPopUpBackgroundButton;
 
     private ItemSlot currentItem;
     private List<ItemSlot> quickItemSelectionList;
@@ -29,9 +30,10 @@ public class QuickItemSelection : MonoBehaviour
 
     private void Start()
     {
-        quickItemSelectionPopUpSlot1.onClick.AddListener(SelectSlot1);
-        quickItemSelectionPopUpSlot2.onClick.AddListener(SelectSlot2);
+        quickItemSelectionPopUpSlot1.onClick.AddListener(OnSelectSlot1);
+        quickItemSelectionPopUpSlot2.onClick.AddListener(OnSelectSlot2);
         quickItemSelectionPopUpBackButton.onClick.AddListener(OnBackButton);
+        quickItemSelectionPopUpBackgroundButton.onClick.AddListener(OnBackButton);
     }
 
     private void OnEnable()
@@ -55,7 +57,19 @@ public class QuickItemSelection : MonoBehaviour
         }
     }
 
-    private void SelectSlot1()
+    public void UpdateTexts()
+    {
+        if (quickItemSelectionList[0] != null && quickItemSelectionList[0].Type != ItemType.Nothing)
+        {
+            quickItemSelectionPopUpSlot1Text.text = QuickItemSelectionList[0].Name;
+        }
+        if (quickItemSelectionList[1] != null && quickItemSelectionList[1].Type != ItemType.Nothing)
+        {
+            quickItemSelectionPopUpSlot2Text.text = QuickItemSelectionList[1].Name;
+        }
+    }
+
+    private void OnSelectSlot1()
     {
         if (currentItem == null) return;
         if (quickItemSelectionList[0] != null && quickItemSelectionList[0].Type != ItemType.Nothing)
@@ -68,7 +82,7 @@ public class QuickItemSelection : MonoBehaviour
         quickItemSelectionList[0].QuickSelectionSlot = ItemQuickSelectionSlot.First;
     }
 
-    private void SelectSlot2()
+    private void OnSelectSlot2()
     {
         if (quickItemSelectionList[1] != null && quickItemSelectionList[1].Type != ItemType.Nothing)
         {

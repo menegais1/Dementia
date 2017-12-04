@@ -28,6 +28,8 @@ public sealed class PlayerController : BasicHumanoidController
     public bool UseItemPress { get; private set; }
     public bool ReloadPress { get; private set; }
     public bool CqcPress { get; private set; }
+    public bool QuickItemSelectionSlot1 { get; private set; }
+    public bool QuickItemSelectionSlot2 { get; private set; }
     public Vector3 AimDirection { get; private set; }
 
     private RevokeControlVariables revokeControlVariables;
@@ -109,6 +111,8 @@ public sealed class PlayerController : BasicHumanoidController
             ShootPress = automaticWeapon ? Input.GetButton("Shoot") : Input.GetButtonDown("Shoot");
             UseItemPress = Input.GetButtonDown("Use Item");
             AimDirection = Camera.main.ScreenToWorldPoint(Input.mousePosition) - playerTransform.position;
+            QuickItemSelectionSlot1 = Input.GetButtonDown("Quick Item Selection 1");
+            QuickItemSelectionSlot2 = Input.GetButtonDown("Quick Item Selection 2");
         }
         else
         {
@@ -118,6 +122,8 @@ public sealed class PlayerController : BasicHumanoidController
             UseItemPress = false;
             ShootPress = false;
             AimDirection = Vector3.zero;
+            QuickItemSelectionSlot1 = false;
+            QuickItemSelectionSlot2 = false;
         }
     }
 
