@@ -1,12 +1,24 @@
 ﻿using UnityEngine;
 
-public class ApostleStatusVariables
+public class ApostleStatusVariables : MonoBehaviour
 {
     public bool isJogging;
 
     public bool isOnAir;
 
     public bool canJump;
+
+    public bool isClimbingLadder;
+
+    public bool isClimbingObstacle;
+
+    public bool canClimbLadder;
+
+    public bool canClimbStairs;
+
+    public bool canClimbObstacle;
+
+    public bool isClimbingStairs;
 
     public FacingDirection facingDirection;
 
@@ -16,9 +28,8 @@ public class ApostleStatusVariables
         facingDirection = FacingDirection.Right;
     }
 
-
     public bool CheckIsOnAir()
     {
-        return !canJump || isOnAir;
+        return !isClimbingObstacle && !isClimbingLadder && !canJump || isOnAir;
     }
 }

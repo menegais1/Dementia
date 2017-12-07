@@ -6,6 +6,11 @@ public class ApostleManager : MonoBehaviour
     [SerializeField] private float acceleration;
     [SerializeField] private float maxAngle;
     [SerializeField] private LayerMask layerMaskForCollisions;
+    [SerializeField] private float climbingLadderSmoothness;
+    [SerializeField] private float climbingObstacleSmoothness;
+    [SerializeField] private float climbLadderVelocity;
+    [SerializeField] private float minimumFallingDistanceForDamage;
+    [SerializeField] private float minimumDamageForFalling;
 
     public ApostleHorizontalMovement HorizontalMovement { get; private set; }
     public ApostleVerticalMovement VerticalMovement { get; private set; }
@@ -13,17 +18,18 @@ public class ApostleManager : MonoBehaviour
     public BasicCollisionHandler ApostleCollisionHandler { get; private set; }
     public ApostleStatusVariables ApostleStatusVariables { get; private set; }
     public ApostleInputHandler ApostleInputHandler { get; private set; }
-    public Enemy Enemy { get; private set; }
+    public Enemy Apostle { get; private set; }
 
 
     void Start()
     {
-        ApostleStatusVariables = new ApostleStatusVariables();
-        Enemy = GetComponent<Enemy>();
+        ApostleStatusVariables = GetComponent<ApostleStatusVariables>();
+        Apostle = GetComponent<Enemy>();
+        ApostleInputHandler = GetComponent<ApostleInputHandler>();
 
-        ApostleCollisionHandler = new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
+        ApostleCollisionHandler =
+            new BasicCollisionHandler(this, maxAngle, layerMaskForCollisions);
 
-        ApostleInputHandler = new ApostleInputHandler(this, ApostleCollisionHandler, ApostleStatusVariables);
 
         ApostleController = new ApostleController(this, ApostleInputHandler);
 
@@ -32,7 +38,9 @@ public class ApostleManager : MonoBehaviour
             ApostleStatusVariables);
 
         VerticalMovement =
-            new ApostleVerticalMovement(this, ApostleCollisionHandler, ApostleController, ApostleStatusVariables);
+            new ApostleVerticalMovement(this, climbingLadderSmoothness, climbingObstacleSmoothness, climbLadderVelocity,
+                minimumFallingDistanceForDamage, minimumDamageForFalling, ApostleCollisionHandler, ApostleController,
+                ApostleStatusVariables, Apostle);
     }
 
     void Update()
@@ -41,6 +49,8 @@ public class ApostleManager : MonoBehaviour
         HorizontalMovement.StartMovement();
         HorizontalMovement.PressMovementHandler();
         VerticalMovement.StartMovement();
+        VerticalMovement.PressMovementHandler();
+
     }
 
     void FixedUpdate()

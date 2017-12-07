@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 
-public sealed class ApostleController : BasicHumanoidController
+public sealed class ApostleController : BasicController
 {
     public float HorizontalMove { get; private set; }
     public bool Jog { get; private set; }
     public bool Run { get; private set; }
+
+    public float VerticalMovement { get; private set; }
+    public bool ClimbObstaclePress { get; private set; }
+    public bool ClimbLadderPress { get; private set; }
 
     private RevokeControlVariables revokeControlVariables;
     private MonoBehaviour monoBehaviour;
@@ -22,9 +26,9 @@ public sealed class ApostleController : BasicHumanoidController
     {
         if (!revokeControlVariables.horizontalMovementControl)
         {
-            HorizontalMove = apostleInputHandler.GetHorizontalInput();
-            Run = Input.GetButton("Running");
-            Jog = Input.GetButtonDown("Jogging");
+            HorizontalMove = Input.GetAxisRaw("Horizontal");
+            Run = false;
+            Jog = false;
         }
         else
         {
@@ -36,10 +40,40 @@ public sealed class ApostleController : BasicHumanoidController
 
     public override void CheckForVerticalInput()
     {
+        if (!revokeControlVariables.verticalMovementControl)
+        {
+            ClimbObstaclePress = Input.GetButtonDown("Climb Obstacle");
+            ClimbLadderPress = Input.GetButtonDown("Climb Ladder");
+            VerticalMovement = GetClimbLadderMovement();
+        }
+        else
+        {
+            ClimbObstaclePress = false;
+            ClimbLadderPress = false;
+            VerticalMovement = !revokeControlVariables.ladderMovementControl ? GetClimbLadderMovement() : 0;
+        }
     }
 
     public override void CheckForMiscellaneousInput()
     {
+    }
+
+
+    private float GetClimbLadderMovement()
+    {
+        if ((Input.GetKey("w") && Input.GetKey("s")) || (!Input.GetKey("w") && !Input.GetKey("s")))
+        {
+            return 0;
+        }
+        if (Input.GetKey("w"))
+        {
+            return !MathHelpers.Approximately(VerticalMovement, -1, float.Epsilon) ? 1 : 0;
+        }
+        if (Input.GetKey("s"))
+        {
+            return !MathHelpers.Approximately(VerticalMovement, 1, float.Epsilon) ? -1 : 0;
+        }
+        return 0;
     }
 
     public void RevokeControl(bool revoke, ControlTypeToRevoke controlTypeToRevoke)

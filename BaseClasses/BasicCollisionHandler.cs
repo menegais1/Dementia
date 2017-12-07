@@ -121,6 +121,18 @@ public class BasicCollisionHandler
             Color.green);
     }
 
+    public RaycastHit2D CastRightwardRay(LayerMask layerMask)
+    {
+        return Physics2D.Raycast(BoxColliderBounds.bottomRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
+            capsuleCollider2D.transform.right, 5, layerMask.value);
+    }
+
+    public virtual RaycastHit2D CastLeftwardRay(LayerMask layerMask)
+    {
+        return Physics2D.Raycast(BoxColliderBounds.bottomLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
+            capsuleCollider2D.transform.right * -1, 5, layerMask.value);
+    }
+
     public virtual bool CheckGroundForJump(float distance)
     {
         if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))

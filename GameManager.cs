@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     private List<CollectibleNote> initializeNotes;
     private List<Enemy> initializeEnemies;
     private string currentSceneName;
+    private Resolution nativeResolution;
 
     public static GameManager instance;
 
@@ -46,6 +47,12 @@ public class GameManager : MonoBehaviour
         set { initializeEnemies = value; }
     }
 
+    public Resolution NativeResolution
+    {
+        get { return nativeResolution; }
+        set { nativeResolution = value; }
+    }
+
     private void Start()
     {
         if (instance == null)
@@ -60,7 +67,10 @@ public class GameManager : MonoBehaviour
         }
 
         CoroutineManager.SetMonoBehaviourInstance(this);
-
+        if (nativeResolution.height == 0)
+        {
+            CoroutineManager.AddCoroutine(GetNativeResolutionCoroutine(), "GetNativeResolutionCoroutine");
+        }
 
         currentSceneName = SceneManager.GetActiveScene().name;
 
@@ -245,5 +255,17 @@ public class GameManager : MonoBehaviour
 
             saveFile.Close();
         }
+    }
+
+    private IEnumerator GetNativeResolutionCoroutine()
+    {
+        var initialResolution = Screen.currentResolution;
+        Screen.SetResolution(initialResolution.width, initialResolution.height, false,
+            initialResolution.refreshRate);
+        yield return new WaitForSeconds(0.2f);
+        NativeResolution = Screen.currentResolution;
+        Screen.SetResolution(initialResolution.width, initialResolution.height, true,
+            initialResolution.refreshRate);
+        CoroutineManager.DeleteCoroutine("GetNativeResolutionCoroutine");
     }
 }

@@ -83,6 +83,8 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
                 playerController.RevokeControl(0.3f, false, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 PhysicsHelpers.SwitchGravity(rigidbody2D, true, currentGravityScale);
                 PhysicsHelpers.ResetVelocityY(rigidbody2D);
+                rigidbody2D.isKinematic = false;
+
                 CoroutineManager.DeleteCoroutine("ClimbOntoLadderCoroutine");
             }
         }
@@ -95,6 +97,8 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
                 playerStatusVariables.isClimbingObstacle = false;
                 playerController.RevokeControl(0.3f, false, ControlTypeToRevoke.AllMovement, monoBehaviour);
                 PhysicsHelpers.SwitchGravity(rigidbody2D, true, currentGravityScale);
+                rigidbody2D.isKinematic = false;
+
                 CoroutineManager.DeleteCoroutine("ClimbOntoObstacleCoroutine");
             }
         }
@@ -227,7 +231,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         {
             PhysicsHelpers.IgnoreLayerCollision(rigidbody2D.gameObject.layer, LayerMask.NameToLayer("Stairs Ground"),
                 true);
-            playerCollisionHandler.SetLayerForCollisions(new[] {"Ground"});
+            playerCollisionHandler.SetLayerForCollisions(new[] {"Ground","Ground Ignore"});
         }
     }
 
@@ -365,6 +369,8 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         PhysicsHelpers.SwitchGravity(rigidbody2D, false, currentGravityScale);
         PhysicsHelpers.ResetVelocityX(rigidbody2D);
         PhysicsHelpers.ResetVelocityY(rigidbody2D);
+        rigidbody2D.isKinematic = true;
+
         playerController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
 
         var coroutine = CoroutineManager.FindCoroutine("ClimbOntoObstacleCoroutine");
@@ -382,6 +388,8 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
         PhysicsHelpers.SwitchGravity(rigidbody2D, false, currentGravityScale);
         PhysicsHelpers.ResetVelocityX(rigidbody2D);
         PhysicsHelpers.ResetVelocityY(rigidbody2D);
+        rigidbody2D.isKinematic = true;
+
         playerController.RevokeControl(true, ControlTypeToRevoke.AllMovement);
 
         var coroutine = CoroutineManager.FindCoroutine("ClimbOntoLadderCoroutine");
@@ -440,7 +448,7 @@ public class PlayerVerticalMovement : BasicPhysicsMovement
                 {
                     f = 1;
                 }
-              
+
                 rigidbody2D.MovePosition(Vector2.Lerp(initialPositionForY,
                     new Vector2(initialPositionForY.x, desiredPositionY), f));
             }

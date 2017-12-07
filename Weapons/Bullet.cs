@@ -33,7 +33,7 @@ public class Bullet : MonoBehaviour
                 {
                     Destroy(this.gameObject);
                     var apostleManager = layerCollider.transform.GetComponent<ApostleManager>();
-                    apostleManager.Enemy.TakeDamage(damage);
+                    apostleManager.Apostle.TakeDamage(damage);
                     raycastHit2D = new RaycastHit2D();
                 }
                 else if (layerCollider.collider != null &&

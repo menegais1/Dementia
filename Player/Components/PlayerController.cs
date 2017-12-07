@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 
-public sealed class PlayerController : BasicHumanoidController
+public sealed class PlayerController : BasicController
 {
     public float HorizontalMove { get; private set; }
     public bool Jog { get; private set; }
@@ -66,7 +66,7 @@ public sealed class PlayerController : BasicHumanoidController
         if (!revokeControlVariables.verticalMovementControl)
         {
             Jump = Input.GetButtonDown("Jump");
-            ClimbObstaclePress = Input.GetButtonDown("Climb Obstacles");
+            ClimbObstaclePress = Input.GetButtonDown("Climb Obstacle");
             ClimbLadderPress = Input.GetButtonDown("Climb Ladder");
             VerticalMovement = GetClimbLadderMovement();
         }

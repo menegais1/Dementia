@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public abstract class BasicHumanoidController
+public abstract class BasicController
 {
     protected class RevokeControlVariables
     {
@@ -21,19 +21,19 @@ public abstract class BasicHumanoidController
         ControlTypeToRevoke controlTypeToRevoke, RevokeControlVariables revokeControlVariables,
         MonoBehaviour monoBehaviour)
     {
-        var coroutine = CoroutineManager.FindCoroutine("RevokeControlCoroutine");
+        var coroutine = CoroutineManager.FindCoroutine("RevokeControlCoroutine", monoBehaviour);
         if (coroutine == null)
         {
             CoroutineManager.AddCoroutine(
-                RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, revokeControlVariables, true),
-                "RevokeControlCoroutine");
+                RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, revokeControlVariables, true, monoBehaviour),
+                "RevokeControlCoroutine", monoBehaviour);
         }
         else if (!coroutine.IsRunning)
         {
-            CoroutineManager.DeleteCoroutine("RevokeControlCoroutine");
+            CoroutineManager.DeleteCoroutine("RevokeControlCoroutine", monoBehaviour);
             CoroutineManager.AddCoroutine(
-                RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, revokeControlVariables, true),
-                "RevokeControlCoroutine");
+                RevokeControlCoroutine(timeToRevoke, controlTypeToRevoke, revokeControlVariables, true, monoBehaviour),
+                "RevokeControlCoroutine", monoBehaviour);
         }
     }
 
@@ -45,7 +45,7 @@ public abstract class BasicHumanoidController
 
     protected static IEnumerator RevokeControlCoroutine(float time, ControlTypeToRevoke controlTypeToRevoke,
         RevokeControlVariables revokeControlVariables,
-        bool revoke)
+        bool revoke, MonoBehaviour monoBehaviour)
     {
         for (var i = 0; i < 1; i++)
         {
@@ -53,7 +53,7 @@ public abstract class BasicHumanoidController
             yield return new WaitForSeconds(time);
         }
         RevokeControlSelection(revoke, controlTypeToRevoke, revokeControlVariables, true);
-        CoroutineManager.FindCoroutine("RevokeControlCoroutine").IsRunning = false;
+        CoroutineManager.FindCoroutine("RevokeControlCoroutine", monoBehaviour).IsRunning = false;
     }
 
 
@@ -63,7 +63,7 @@ public abstract class BasicHumanoidController
         if (negate)
         {
             revoke = !revoke;
-        }      
+        }
 
         switch (controlTypeToRevoke)
         {

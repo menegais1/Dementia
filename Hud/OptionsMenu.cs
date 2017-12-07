@@ -6,6 +6,18 @@ using UnityEngine.UI;
 
 public class OptionsMenu : MonoBehaviour
 {
+    private struct StandardResolution
+    {
+        public double width;
+        public double height;
+
+        public StandardResolution(double width, double heigth)
+        {
+            this.width = width;
+            this.height = heigth;
+        }
+    }
+
     private int totalVol;
     private int musicVol;
     private int soundEffectsVol;
@@ -20,7 +32,15 @@ public class OptionsMenu : MonoBehaviour
 
     private Resolution selectedResolution;
     private Resolution currentResolution;
+    private Resolution nativeResolution;
 
+    private StandardResolution[] resolutions =
+    {
+        new StandardResolution(640, 480), new StandardResolution(800, 600), new StandardResolution(1024, 768),
+        new StandardResolution(1152, 864), new StandardResolution(1280, 960), new StandardResolution(1400, 1050),
+        new StandardResolution(1600, 1200), new StandardResolution(1280, 720), new StandardResolution(1366, 768),
+        new StandardResolution(1600, 900), new StandardResolution(1920, 1080)
+    };
 
     private void Start()
     {
@@ -33,15 +53,18 @@ public class OptionsMenu : MonoBehaviour
         fourByThree = new List<string>();
         sixteenByNine = new List<string>();
 
-        InitializeResolutionsLists();
+        nativeResolution = GameManager.instance.NativeResolution;
         currentResolution = Screen.currentResolution;
+
+        InitializeResolutionsLists();
 
         selectedResolution = new Resolution
         {
             width = currentResolution.width,
             height = currentResolution.height,
-            refreshRate = 60
+            refreshRate = currentResolution.refreshRate,
         };
+
         ratioDropdown.value =
             MathHelpers.Approximately(GetResolutionRatio(currentResolution.width, currentResolution.height),
                 4.00 / 3.00, float.Epsilon)
@@ -57,6 +80,17 @@ public class OptionsMenu : MonoBehaviour
 
     private void OnEnable()
     {
+        if (currentResolution.height == 0 || selectedResolution.height == 0)
+        {
+            currentResolution = Screen.currentResolution;
+            selectedResolution = new Resolution
+            {
+                width = currentResolution.width,
+                height = currentResolution.height,
+                refreshRate = currentResolution.refreshRate,
+            };
+        }
+
         applyButton.gameObject.SetActive(false);
         if (!selectedResolution.Equals(currentResolution))
         {
@@ -67,7 +101,14 @@ public class OptionsMenu : MonoBehaviour
 
     private void Update()
     {
-        applyButton.gameObject.SetActive(!Equals(selectedResolution, currentResolution));
+        if (!selectedResolution.Equals(currentResolution) && !applyButton.gameObject.activeSelf)
+        {
+            applyButton.gameObject.SetActive(true);
+        }
+        else if (applyButton.gameObject.activeSelf && selectedResolution.Equals(currentResolution))
+        {
+            applyButton.gameObject.SetActive(false);
+        }
     }
 
     private double GetResolutionRatio(double width, double height)
@@ -75,21 +116,15 @@ public class OptionsMenu : MonoBehaviour
         return width / height;
     }
 
-    private string GetResolutionRatioInText(double width, double height)
-    {
-        return MathHelpers.Approximately(width / height, (double) 4 / 3, float.Epsilon) ? "4:3" : "16:9";
-    }
-
-
     private Resolution GetResolutionFromText(string resolutionText, Resolution resolution)
     {
         var resolutionTextHolder = resolutionText.Replace(" ", "");
         var resolutionWidth =
             resolutionTextHolder.Substring(0, resolutionTextHolder.IndexOf("x", StringComparison.Ordinal));
-        var resolutionHeigth =
+        var resolutionHeight =
             resolutionTextHolder.Substring(resolutionTextHolder.IndexOf("x", StringComparison.Ordinal) + 1);
         resolution.width = int.Parse(resolutionWidth);
-        resolution.height = int.Parse(resolutionHeigth);
+        resolution.height = int.Parse(resolutionHeight);
         return resolution;
     }
 
@@ -100,28 +135,33 @@ public class OptionsMenu : MonoBehaviour
 
     private void InitializeResolutionsLists()
     {
-        for (var i = 0; i < Screen.resolutions.Length; i++)
+        for (var i = 0; i < resolutions.Length; i++)
         {
-            var resolution = Screen.resolutions[i];
-            double width = resolution.width;
-            double height = resolution.height;
+            var resolution = resolutions[i];
+            AddResolutionToList(resolution.width, resolution.height);
+        }
 
-            if (MathHelpers.Approximately(width / height, 4.00 / 3.00, 0.001) &&
-                resolution.height >= 480)
+        AddResolutionToList(nativeResolution.width, nativeResolution.height);
+    }
+
+    private void AddResolutionToList(double width, double height)
+    {
+        if (MathHelpers.Approximately(width / height, 4.00 / 3.00, 0.001) &&
+            (height >= 480 && height <= nativeResolution.height))
+        {
+            var resolutionToText = width + " x " + height;
+            if (!fourByThree.Exists(lambdaExpression => lambdaExpression == resolutionToText))
             {
-                var resolutionToText = width + " x " + height;
-                if (!fourByThree.Exists(lambdaExpression => lambdaExpression == resolutionToText))
-                {
-                    fourByThree.Add(resolutionToText);
-                }
+                fourByThree.Add(resolutionToText);
             }
-            else if (MathHelpers.Approximately(width / height, 16.00 / 9.00, 0.001))
+        }
+        else if (MathHelpers.Approximately(width / height, 16.00 / 9.00, 0.001) &&
+                 height <= nativeResolution.height)
+        {
+            var resolutionToText = width + " x " + height;
+            if (!sixteenByNine.Exists(lambdaExpression => lambdaExpression == resolutionToText))
             {
-                var resolutionToText = width + " x " + height;
-                if (!sixteenByNine.Exists(lambdaExpression => lambdaExpression == resolutionToText))
-                {
-                    sixteenByNine.Add(resolutionToText);
-                }
+                sixteenByNine.Add(resolutionToText);
             }
         }
     }
@@ -215,6 +255,7 @@ public class OptionsMenu : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         currentResolution = Screen.currentResolution;
         ResetDropdownValues();
+        applyButton.gameObject.SetActive(false);
         CoroutineManager.DeleteCoroutine("ChangeResolutionCoroutine");
     }
 }

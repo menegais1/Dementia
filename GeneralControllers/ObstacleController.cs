@@ -3,23 +3,34 @@
 public class ObstacleController : MonoBehaviour
 {
     private PlayerStatusVariables playerStatusVariables;
+    private ApostleStatusVariables apostleStatusVariables;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.gameObject.tag.Equals("Player")) return;
-        playerStatusVariables = other.GetComponent<PlayerManager>().PlayerStatusVariables;
+        if ((!other.CompareTag("Player") && !other.CompareTag("Enemy")) || other.isTrigger) return;
+
+        if (other.CompareTag("Player"))
+            playerStatusVariables = other.GetComponent<PlayerManager>().PlayerStatusVariables;
+        else if (other.CompareTag("Enemy"))
+            apostleStatusVariables = other.GetComponent<ApostleManager>().ApostleStatusVariables;
     }
 
     public void OnTriggerStay2D(Collider2D other)
     {
-        if (!other.gameObject.tag.Equals("Player")) return;
-        playerStatusVariables.canClimbObstacle = true;
+        if ((!other.CompareTag("Player") && !other.CompareTag("Enemy")) || other.isTrigger) return;
+        if (other.CompareTag("Player"))
+            playerStatusVariables.canClimbObstacle = true;
+        else if (other.CompareTag("Enemy"))
+            apostleStatusVariables.canClimbObstacle = true;
     }
 
 
     public void OnTriggerExit2D(Collider2D other)
     {
-        if (!other.gameObject.tag.Equals("Player")) return;
-        playerStatusVariables.canClimbObstacle = false;
+        if ((!other.CompareTag("Player") && !other.CompareTag("Enemy")) || other.isTrigger) return;
+        if (other.CompareTag("Player"))
+            playerStatusVariables.canClimbObstacle = false;
+        else if (other.CompareTag("Enemy"))
+            apostleStatusVariables.canClimbObstacle = false;
     }
 }

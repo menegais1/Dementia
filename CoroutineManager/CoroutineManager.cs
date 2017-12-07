@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 
@@ -136,7 +137,7 @@ public static class CoroutineManager
     public static CoroutineContainer FindCoroutine(string name)
     {
         return runningCoroutines.Find(lambdaCoroutine =>
-            lambdaCoroutine.Name == name);
+            lambdaCoroutine.Name == name && lambdaCoroutine.InstanceCoroutineWasCalled == null);
     }
 
     public static bool CheckIfCoroutineExists(string name, System.Object instanceCoroutineWasCalled)

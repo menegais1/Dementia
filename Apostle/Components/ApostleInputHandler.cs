@@ -1,20 +1,55 @@
 ﻿using UnityEngine;
 
-public class ApostleInputHandler
+public class ApostleInputHandler : MonoBehaviour
 {
     private BasicCollisionHandler apostleCollisionHandler;
     private ApostleStatusVariables apostleStatusVariables;
     private MonoBehaviour monoBehaviour;
 
     private float horizontalMovement;
+    private BoxCollider2D triggerArea;
+    private PlayerStatusController player;
 
-    public ApostleInputHandler(MonoBehaviour monoBehaviour, BasicCollisionHandler apostleCollisionHandler,
-        ApostleStatusVariables apostleStatusVariables)
+    private void Start()
     {
-        this.monoBehaviour = monoBehaviour;
-        this.apostleCollisionHandler = apostleCollisionHandler;
-        this.apostleStatusVariables = apostleStatusVariables;
+        this.triggerArea = GetComponent<BoxCollider2D>();
+        var mainCamera = Camera.main;
+        var height = mainCamera.orthographicSize * 2;
+        var width = mainCamera.aspect * height;
+        triggerArea.size = new Vector2((width / 2) + (width / 12), height / 2);
+        triggerArea.offset = new Vector2(width / 5, 0);
+
+        var apostleManager = GetComponent<ApostleManager>();
+        this.apostleCollisionHandler = apostleManager.ApostleCollisionHandler;
+        this.apostleStatusVariables = apostleManager.ApostleStatusVariables;
         this.horizontalMovement = 1f;
+    }
+
+    private void Update()
+    {
+        if (apostleStatusVariables.facingDirection == FacingDirection.Right && triggerArea.offset.x < 0)
+        {
+            triggerArea.offset = new Vector2(-triggerArea.offset.x, 0);
+        }
+        else if (apostleStatusVariables.facingDirection == FacingDirection.Left && triggerArea.offset.x > 0)
+        {
+            triggerArea.offset = new Vector2(-triggerArea.offset.x, 0);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+    }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
     }
 
     public float GetHorizontalInput()

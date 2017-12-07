@@ -31,6 +31,7 @@ public class ApostleHorizontalMovement : BasicPhysicsMovement
     public override void StartMovement()
     {
         apostleController.CheckForHorizontalInput();
+
         CheckFacingDirection();
 
         if (apostleController.Jog)
