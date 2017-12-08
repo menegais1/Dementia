@@ -297,7 +297,8 @@ public class ApostleVerticalMovement : BasicPhysicsMovement
 
         var ladderColliders = new Collider2D[1];
         capsuleCollider2D.GetContacts(contactFilter2D, ladderColliders);
-        return ladderColliders[0].transform;
+
+        return ladderColliders[0] != null ? ladderColliders[0].transform : null;
     }
 
     private Collider2D GetStairsTrigger()

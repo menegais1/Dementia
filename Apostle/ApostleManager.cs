@@ -45,12 +45,12 @@ public class ApostleManager : MonoBehaviour
 
     void Update()
     {
-        ApostleCollisionHandler.StartCollisions(HorizontalMovement.HorizontalMovementState);
+        ApostleCollisionHandler.StartCollisions(HorizontalMovement.HorizontalMovementState,
+            ApostleStatusVariables.facingDirection);
         HorizontalMovement.StartMovement();
         HorizontalMovement.PressMovementHandler();
         VerticalMovement.StartMovement();
         VerticalMovement.PressMovementHandler();
-
     }
 
     void FixedUpdate()

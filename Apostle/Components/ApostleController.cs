@@ -26,7 +26,8 @@ public sealed class ApostleController : BasicController
     {
         if (!revokeControlVariables.horizontalMovementControl)
         {
-            HorizontalMove = Input.GetAxisRaw("Horizontal");
+            // HorizontalMove = Input.GetAxisRaw("Horizontal");
+            HorizontalMove = apostleInputHandler.MovementDirectionValue;
             Run = false;
             Jog = false;
         }

@@ -78,7 +78,8 @@ public class PlayerManager : MonoBehaviour
 
     void Update()
     {
-        PlayerCollisionHandler.StartCollisions(HorizontalMovement.HorizontalMovementState);
+        PlayerCollisionHandler.StartCollisions(HorizontalMovement.HorizontalMovementState,
+            PlayerStatusVariables.facingDirection);
         HorizontalMovement.StartMovement();
         HorizontalMovement.PressMovementHandler();
         VerticalMovement.StartMovement();

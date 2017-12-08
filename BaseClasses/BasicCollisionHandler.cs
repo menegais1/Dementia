@@ -2,11 +2,11 @@
 
 public class RaycastHit2DPoints
 {
-    public RaycastHit2D bottomLeftRay;
-    public RaycastHit2D bottomRightRay;
-    public RaycastHit2D bottomMidRay;
-    public RaycastHit2D bottomMidRightwardRay;
-    public RaycastHit2D bottomMidLeftwardRay;
+    public RaycastHit2D midLeftDownwardRay;
+    public RaycastHit2D midRightDownwardRay;
+    public RaycastHit2D bottomMidDownwardRay;
+    public RaycastHit2D midRightRightwardRay;
+    public RaycastHit2D midLeftLeftwardRay;
 }
 
 
@@ -14,7 +14,7 @@ public class BasicCollisionHandler
 {
     public struct ColliderBounds
     {
-        public Vector2 bottomRight, bottomLeft, bottomMid;
+        public Vector2 midRight, midLeft, bottomMid;
         public Vector2 topRight, topLeft;
     }
 
@@ -52,23 +52,25 @@ public class BasicCollisionHandler
     }
 
 
-    public virtual void StartCollisions(HorizontalMovementState horizontalMovementState)
+    public virtual void StartCollisions(HorizontalMovementState horizontalMovementState,
+        FacingDirection facingDirection)
     {
         UpdateColliderBounds();
         CastDownwardRays();
         CastLateralRays();
         CheckGroundForSlopes();
         CheckGroundForFall(horizontalMovementState);
+        CheckBottom(facingDirection);
     }
 
     protected virtual void UpdateColliderBounds()
     {
         var center = capsuleCollider2D.offset;
         offsetForPerifericalRays = capsuleCollider2D.size.y / 2;
-        boxColliderBounds.bottomLeft =
+        boxColliderBounds.midLeft =
             capsuleCollider2D.transform.TransformPoint(new Vector2(center.x - capsuleCollider2D.size.x / 2,
                 center.y));
-        boxColliderBounds.bottomRight =
+        boxColliderBounds.midRight =
             capsuleCollider2D.transform.TransformPoint(new Vector2(center.x + capsuleCollider2D.size.x / 2,
                 center.y));
         boxColliderBounds.bottomMid = capsuleCollider2D.transform.TransformPoint(new Vector2(
@@ -87,49 +89,49 @@ public class BasicCollisionHandler
     {
         var direction = capsuleCollider2D.transform.up * -1;
 
-        RaycastHit2DPoints.bottomLeftRay =
-            Physics2D.Raycast(BoxColliderBounds.bottomLeft, direction, 1f + offsetForPerifericalRays,
+        RaycastHit2DPoints.midLeftDownwardRay =
+            Physics2D.Raycast(BoxColliderBounds.midLeft, direction, 1f + offsetForPerifericalRays,
                 layerMaskForCollisions.value);
-        RaycastHit2DPoints.bottomRightRay =
-            Physics2D.Raycast(BoxColliderBounds.bottomRight, direction, 1f + offsetForPerifericalRays,
+        RaycastHit2DPoints.midRightDownwardRay =
+            Physics2D.Raycast(BoxColliderBounds.midRight, direction, 1f + offsetForPerifericalRays,
                 layerMaskForCollisions.value);
-        RaycastHit2DPoints.bottomMidRay = Physics2D.Raycast(
+        RaycastHit2DPoints.bottomMidDownwardRay = Physics2D.Raycast(
             BoxColliderBounds.bottomMid, direction, 1f,
             layerMaskForCollisions.value);
 
-        Debug.DrawRay(BoxColliderBounds.bottomLeft, direction, Color.red);
+        Debug.DrawRay(BoxColliderBounds.midLeft, direction, Color.red);
         Debug.DrawRay(BoxColliderBounds.bottomMid, direction,
             Color.green);
-        Debug.DrawRay(BoxColliderBounds.bottomRight, direction, Color.blue);
+        Debug.DrawRay(BoxColliderBounds.midRight, direction, Color.blue);
     }
 
     protected virtual void CastLateralRays()
     {
         var direction = capsuleCollider2D.transform.up * -1;
 
-        RaycastHit2DPoints.bottomMidLeftwardRay =
-            Physics2D.Raycast(BoxColliderBounds.bottomLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
+        RaycastHit2DPoints.midLeftLeftwardRay =
+            Physics2D.Raycast(BoxColliderBounds.midLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
                 capsuleCollider2D.transform.right * -1);
-        RaycastHit2DPoints.bottomMidRightwardRay =
-            Physics2D.Raycast(BoxColliderBounds.bottomRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
+        RaycastHit2DPoints.midRightRightwardRay =
+            Physics2D.Raycast(BoxColliderBounds.midRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
                 capsuleCollider2D.transform.right);
 
-        Debug.DrawRay(BoxColliderBounds.bottomRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
+        Debug.DrawRay(BoxColliderBounds.midRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
             capsuleCollider2D.transform.right, Color.red);
-        Debug.DrawRay(BoxColliderBounds.bottomLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
+        Debug.DrawRay(BoxColliderBounds.midLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
             capsuleCollider2D.transform.right * -1,
             Color.green);
     }
 
     public RaycastHit2D CastRightwardRay(LayerMask layerMask)
     {
-        return Physics2D.Raycast(BoxColliderBounds.bottomRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
+        return Physics2D.Raycast(BoxColliderBounds.midRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
             capsuleCollider2D.transform.right, 5, layerMask.value);
     }
 
     public virtual RaycastHit2D CastLeftwardRay(LayerMask layerMask)
     {
-        return Physics2D.Raycast(BoxColliderBounds.bottomLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
+        return Physics2D.Raycast(BoxColliderBounds.midLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
             capsuleCollider2D.transform.right * -1, 5, layerMask.value);
     }
 
@@ -137,13 +139,13 @@ public class BasicCollisionHandler
     {
         if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
         {
-            distance = RaycastHit2DPoints.bottomMidRay.distance <= distance ||
-                       RaycastHit2DPoints.bottomMidRay.distance > 0.25f
+            distance = RaycastHit2DPoints.bottomMidDownwardRay.distance <= distance ||
+                       RaycastHit2DPoints.bottomMidDownwardRay.distance > 0.25f
                 ? distance
-                : RaycastHit2DPoints.bottomMidRay.distance;
+                : RaycastHit2DPoints.bottomMidDownwardRay.distance;
         }
-        return RaycastHit2DPoints.bottomMidRay.collider != null &&
-               RaycastHit2DPoints.bottomMidRay.distance <= distance;
+        return RaycastHit2DPoints.bottomMidDownwardRay.collider != null &&
+               RaycastHit2DPoints.bottomMidDownwardRay.distance <= distance;
     }
 
     public virtual bool CheckGroundWithPerifericalRays(float distance, bool rightRay)
@@ -153,44 +155,44 @@ public class BasicCollisionHandler
         {
             if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
             {
-                distance = RaycastHit2DPoints.bottomRightRay.distance <= distance ||
-                           RaycastHit2DPoints.bottomRightRay.distance > 0.25f + offsetForPerifericalRays
+                distance = RaycastHit2DPoints.midRightDownwardRay.distance <= distance ||
+                           RaycastHit2DPoints.midRightDownwardRay.distance > 0.25f + offsetForPerifericalRays
                     ? distance
-                    : RaycastHit2DPoints.bottomRightRay.distance;
+                    : RaycastHit2DPoints.midRightDownwardRay.distance;
             }
-            return RaycastHit2DPoints.bottomRightRay.collider != null &&
-                   RaycastHit2DPoints.bottomRightRay.distance <= distance;
+            return RaycastHit2DPoints.midRightDownwardRay.collider != null &&
+                   RaycastHit2DPoints.midRightDownwardRay.distance <= distance;
         }
 
         if (!MathHelpers.Approximately(SurfaceAngle, 0, float.Epsilon))
         {
-            distance = RaycastHit2DPoints.bottomLeftRay.distance <= distance ||
-                       RaycastHit2DPoints.bottomLeftRay.distance > 0.25f + offsetForPerifericalRays
+            distance = RaycastHit2DPoints.midLeftDownwardRay.distance <= distance ||
+                       RaycastHit2DPoints.midLeftDownwardRay.distance > 0.25f + offsetForPerifericalRays
                 ? distance
-                : RaycastHit2DPoints.bottomLeftRay.distance;
+                : RaycastHit2DPoints.midLeftDownwardRay.distance;
         }
-        return RaycastHit2DPoints.bottomLeftRay.collider != null &&
-               RaycastHit2DPoints.bottomLeftRay.distance <= distance;
+        return RaycastHit2DPoints.midLeftDownwardRay.collider != null &&
+               RaycastHit2DPoints.midLeftDownwardRay.distance <= distance;
     }
 
     protected virtual void CheckGroundForSlopes()
     {
         if (!spriteRenderer.flipX &&
-            RaycastHit2DPoints.bottomRightRay.collider != null)
+            RaycastHit2DPoints.midRightDownwardRay.collider != null)
         {
-            var rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomRightRay.normal, Vector2.up);
-            var surfaceNormal = RaycastHit2DPoints.bottomRightRay.normal;
+            var rotationAngle = Vector2.Angle(RaycastHit2DPoints.midRightDownwardRay.normal, Vector2.up);
+            var surfaceNormal = RaycastHit2DPoints.midRightDownwardRay.normal;
 
-            if (RaycastHit2DPoints.bottomRightRay.normal.x > 0 && rotationAngle > SurfaceAngle)
+            if (RaycastHit2DPoints.midRightDownwardRay.normal.x > 0 && rotationAngle > SurfaceAngle)
             {
-                rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomLeftRay.normal, Vector2.up);
-                surfaceNormal = RaycastHit2DPoints.bottomLeftRay.normal;
+                rotationAngle = Vector2.Angle(RaycastHit2DPoints.midLeftDownwardRay.normal, Vector2.up);
+                surfaceNormal = RaycastHit2DPoints.midLeftDownwardRay.normal;
             }
-            else if (MathHelpers.Approximately(RaycastHit2DPoints.bottomRightRay.normal.x, 0, 0.05f) &&
+            else if (MathHelpers.Approximately(RaycastHit2DPoints.midRightDownwardRay.normal.x, 0, 0.05f) &&
                      rotationAngle < SurfaceAngle)
             {
-                rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomMidRay.normal, Vector2.up);
-                surfaceNormal = RaycastHit2DPoints.bottomMidRay.normal;
+                rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomMidDownwardRay.normal, Vector2.up);
+                surfaceNormal = RaycastHit2DPoints.bottomMidDownwardRay.normal;
             }
 
             if (rotationAngle <= maxAngle)
@@ -200,20 +202,20 @@ public class BasicCollisionHandler
             }
         }
         else if (spriteRenderer.flipX &&
-                 RaycastHit2DPoints.bottomLeftRay.collider != null)
+                 RaycastHit2DPoints.midLeftDownwardRay.collider != null)
         {
-            var rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomLeftRay.normal, Vector2.up);
-            var surfaceNormal = RaycastHit2DPoints.bottomLeftRay.normal;
-            if (RaycastHit2DPoints.bottomLeftRay.normal.x < 0 && rotationAngle > SurfaceAngle)
+            var rotationAngle = Vector2.Angle(RaycastHit2DPoints.midLeftDownwardRay.normal, Vector2.up);
+            var surfaceNormal = RaycastHit2DPoints.midLeftDownwardRay.normal;
+            if (RaycastHit2DPoints.midLeftDownwardRay.normal.x < 0 && rotationAngle > SurfaceAngle)
             {
-                rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomRightRay.normal, Vector2.up);
-                surfaceNormal = RaycastHit2DPoints.bottomRightRay.normal;
+                rotationAngle = Vector2.Angle(RaycastHit2DPoints.midRightDownwardRay.normal, Vector2.up);
+                surfaceNormal = RaycastHit2DPoints.midRightDownwardRay.normal;
             }
-            else if (MathHelpers.Approximately(RaycastHit2DPoints.bottomLeftRay.normal.x, 0, 0.05f) &&
+            else if (MathHelpers.Approximately(RaycastHit2DPoints.midLeftDownwardRay.normal.x, 0, 0.05f) &&
                      rotationAngle < SurfaceAngle)
             {
-                rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomMidRay.normal, Vector2.up);
-                surfaceNormal = RaycastHit2DPoints.bottomMidRay.normal;
+                rotationAngle = Vector2.Angle(RaycastHit2DPoints.bottomMidDownwardRay.normal, Vector2.up);
+                surfaceNormal = RaycastHit2DPoints.bottomMidDownwardRay.normal;
             }
 
             if (rotationAngle <= maxAngle)
@@ -248,6 +250,24 @@ public class BasicCollisionHandler
                 PhysicsHelpers.AddImpulseForce(30f, true, rigidbody2D);
             }
         }
+    }
+
+    public void CheckBottom(FacingDirection facingDirection)
+    {
+        ContactFilter2D contactFilter2D = new ContactFilter2D
+        {
+            useTriggers = false,
+            useLayerMask = true,
+            layerMask = LayerMask.GetMask("Enemy", "Player"),
+        };
+
+        var raycastHit2Ds = new RaycastHit2D[1];
+
+        Physics2D.Raycast(
+            BoxColliderBounds.bottomMid, Vector2.down,
+            contactFilter2D, raycastHit2Ds, 0.5f);
+        if (raycastHit2Ds[0].collider == null) return;
+        PhysicsHelpers.AddImpulseForce(30f, facingDirection != FacingDirection.Right, rigidbody2D);
     }
 
     public virtual void SetLayerForCollisions(string[] layersName)

@@ -20,6 +20,12 @@ public class ApostleStatusVariables : MonoBehaviour
 
     public bool isClimbingStairs;
 
+    public bool isAggroed;
+
+    public bool inAggroRange;
+
+    public bool isPatrolling;
+
     public FacingDirection facingDirection;
 
 

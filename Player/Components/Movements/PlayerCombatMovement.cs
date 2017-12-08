@@ -261,9 +261,9 @@ public class PlayerCombatMovement : BasicPhysicsMovement
                     item.transform.position = playerStatusVariables.facingDirection == FacingDirection.Right
                         ? new
                             Vector2(throwableItemPosition.x,
-                                playerCollisionHandler.BoxColliderBounds.bottomRight.y)
+                                playerCollisionHandler.BoxColliderBounds.midRight.y)
                         : new Vector2(throwableItemPosition.x,
-                            playerCollisionHandler.BoxColliderBounds.bottomLeft.y);
+                            playerCollisionHandler.BoxColliderBounds.midLeft.y);
                 }
                 else
                 {
@@ -290,9 +290,9 @@ public class PlayerCombatMovement : BasicPhysicsMovement
                     item.transform.position = playerStatusVariables.facingDirection == FacingDirection.Right
                         ? new
                             Vector2(throwableItemPosition.x,
-                                playerCollisionHandler.BoxColliderBounds.bottomRight.y)
+                                playerCollisionHandler.BoxColliderBounds.midRight.y)
                         : new Vector2(throwableItemPosition.x,
-                            playerCollisionHandler.BoxColliderBounds.bottomLeft.y);
+                            playerCollisionHandler.BoxColliderBounds.midLeft.y);
                 }
                 else
                 {
