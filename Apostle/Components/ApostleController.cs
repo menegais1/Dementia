@@ -43,7 +43,7 @@ public sealed class ApostleController : BasicController
     {
         if (!revokeControlVariables.verticalMovementControl)
         {
-            ClimbObstaclePress = Input.GetButtonDown("Climb Obstacle");
+            ClimbObstaclePress =apostleInputHandler.ClimbObstacleValue;
             ClimbLadderPress = Input.GetButtonDown("Climb Ladder");
             VerticalMovement = GetClimbLadderMovement();
         }

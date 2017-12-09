@@ -5,7 +5,7 @@ public struct NavigationInfo
 {
     public Transform transform;
     public BoxCollider2D boxCollider2D;
-    public Vector2 topMostColliderPosition;
+    public ColliderBounds colliderBounds;
     public NavigationNodeType type;
 
     public NavigationInfo(Transform transform, BoxCollider2D boxCollider2D, NavigationNodeType type)
@@ -13,9 +13,39 @@ public struct NavigationInfo
         this.transform = transform;
         this.boxCollider2D = boxCollider2D;
         this.type = type;
+        colliderBounds = new ColliderBounds();
 
+        UpdateColliderBounds(boxCollider2D);
+    }
+
+    private void UpdateColliderBounds(BoxCollider2D boxCollider2D)
+    {
         var center = boxCollider2D.offset;
-        this.topMostColliderPosition =
+
+        colliderBounds.midLeft =
+            boxCollider2D.transform.TransformPoint(new Vector2(center.x - boxCollider2D.size.x / 2,
+                center.y));
+        colliderBounds.midRight =
+            boxCollider2D.transform.TransformPoint(new Vector2(center.x + boxCollider2D.size.x / 2,
+                center.y));
+
+        colliderBounds.bottomMid = boxCollider2D.transform.TransformPoint(new Vector2(
+            center.x,
+            center.y - boxCollider2D.size.y / 2));
+        colliderBounds.bottomLeft = boxCollider2D.transform.TransformPoint(new Vector2(
+            center.x - boxCollider2D.size.x / 2,
+            center.y - boxCollider2D.size.y / 2));
+        colliderBounds.bottomRight = boxCollider2D.transform.TransformPoint(new Vector2(
+            center.x + boxCollider2D.size.x / 2,
+            center.y - boxCollider2D.size.y / 2));
+
+        colliderBounds.topLeft =
+            boxCollider2D.transform.TransformPoint(new Vector2(center.x - boxCollider2D.size.x / 2,
+                center.y + boxCollider2D.size.y / 2));
+        colliderBounds.topRight =
+            boxCollider2D.transform.TransformPoint(new Vector2(center.x + boxCollider2D.size.x / 2,
+                center.y + boxCollider2D.size.y / 2));
+        colliderBounds.topMid =
             boxCollider2D.transform.TransformPoint(new Vector2(center.x,
                 center.y + boxCollider2D.size.y / 2));
     }
@@ -23,23 +53,17 @@ public struct NavigationInfo
 
 public class Navigation : MonoBehaviour
 {
-    private List<NavigationInfo> verticalNavigationInfoList;
     private MonoBehaviour monoBehaviour;
     private GameObject gameDataHolder;
 
 
-    public List<NavigationInfo> VerticalNavigationInfoList
-    {
-        get { return verticalNavigationInfoList; }
-        set { verticalNavigationInfoList = value; }
-    }
+    public List<NavigationInfo> WorldNavigationInfo { get; set; }
 
-    public Navigation()
+    public void Awake()
     {
         gameDataHolder = GameObject.FindGameObjectWithTag("Game Data Holder");
         if (gameDataHolder == null) return;
-        VerticalNavigationInfoList = new List<NavigationInfo>();
-
+        WorldNavigationInfo = new List<NavigationInfo>();
         var obstacles = gameDataHolder.GetComponentsInChildren<ObstacleController>();
         var stairsList = gameDataHolder.GetComponentsInChildren<StairsController>();
         var ladders = gameDataHolder.GetComponentsInChildren<LadderController>();
@@ -50,10 +74,10 @@ public class Navigation : MonoBehaviour
             var obstacleCollider = obstacle.Collider2D;
             if (!obstacleTransform.CompareTag("Obstacle")) continue;
 
-            if (!VerticalNavigationInfoList.Exists(
+            if (!WorldNavigationInfo.Exists(
                 lambdaExpression => lambdaExpression.transform == obstacleTransform))
             {
-                VerticalNavigationInfoList.Add(new NavigationInfo(obstacleTransform, obstacleCollider,
+                WorldNavigationInfo.Add(new NavigationInfo(obstacleTransform, obstacleCollider,
                     NavigationNodeType.Obstacle));
             }
         }
@@ -64,9 +88,9 @@ public class Navigation : MonoBehaviour
             var stairsCollider = stairs.transform.GetComponentInChildren<BoxCollider2D>();
             if (!stairsTransform.CompareTag("Stairs")) continue;
 
-            if (!VerticalNavigationInfoList.Exists(lambdaExpression => lambdaExpression.transform == stairsTransform))
+            if (!WorldNavigationInfo.Exists(lambdaExpression => lambdaExpression.transform == stairsTransform))
             {
-                VerticalNavigationInfoList.Add(new NavigationInfo(stairsTransform, stairsCollider,
+                WorldNavigationInfo.Add(new NavigationInfo(stairsTransform, stairsCollider,
                     NavigationNodeType.Stairs));
             }
         }
@@ -78,11 +102,12 @@ public class Navigation : MonoBehaviour
             var ladderTransform = ladder.transform;
             var ladderCollider = ladder.ladderCollider;
 
-            if (!VerticalNavigationInfoList.Exists(lambdaExpression => lambdaExpression.transform == ladderTransform))
+            if (!WorldNavigationInfo.Exists(lambdaExpression => lambdaExpression.transform == ladderTransform))
             {
-                VerticalNavigationInfoList.Add(new NavigationInfo(ladderTransform, ladderCollider,
+                WorldNavigationInfo.Add(new NavigationInfo(ladderTransform, ladderCollider,
                     NavigationNodeType.Ladder));
             }
         }
+        
     }
 }

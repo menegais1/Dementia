@@ -9,15 +9,15 @@ public class RaycastHit2DPoints
     public RaycastHit2D midLeftLeftwardRay;
 }
 
+public struct ColliderBounds
+{
+    public Vector2 midRight, midLeft;
+    public Vector2 topRight, topLeft, topMid;
+    public Vector2 bottomMid, bottomRight, bottomLeft;
+}
 
 public class BasicCollisionHandler
 {
-    public struct ColliderBounds
-    {
-        public Vector2 midRight, midLeft, bottomMid;
-        public Vector2 topRight, topLeft;
-    }
-
     protected float maxAngle;
     protected float offsetForPerifericalRays;
     protected LayerMask layerMaskForCollisions;
@@ -33,10 +33,16 @@ public class BasicCollisionHandler
         get { return boxColliderBounds; }
     }
 
+    public CapsuleCollider2D CapsuleCollider2D
+    {
+        get { return capsuleCollider2D; }
+        set { capsuleCollider2D = value; }
+    }
+
     protected ColliderBounds boxColliderBounds;
 
     protected SpriteRenderer spriteRenderer;
-    protected CapsuleCollider2D capsuleCollider2D;
+    private CapsuleCollider2D capsuleCollider2D;
     protected Rigidbody2D rigidbody2D;
 
     public BasicCollisionHandler(MonoBehaviour monoBehaviour, float maxAngle,
@@ -44,7 +50,7 @@ public class BasicCollisionHandler
     {
         this.RaycastHit2DPoints = new RaycastHit2DPoints();
         this.maxAngle = maxAngle;
-        this.capsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
+        this.CapsuleCollider2D = monoBehaviour.GetComponent<CapsuleCollider2D>();
         this.rigidbody2D = monoBehaviour.GetComponent<Rigidbody2D>();
         this.DistanceForJump = 0.1f;
         this.spriteRenderer = monoBehaviour.GetComponent<SpriteRenderer>();
@@ -65,29 +71,32 @@ public class BasicCollisionHandler
 
     protected virtual void UpdateColliderBounds()
     {
-        var center = capsuleCollider2D.offset;
-        offsetForPerifericalRays = capsuleCollider2D.size.y / 2;
+        var center = CapsuleCollider2D.offset;
+        offsetForPerifericalRays = CapsuleCollider2D.size.y / 2;
         boxColliderBounds.midLeft =
-            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x - capsuleCollider2D.size.x / 2,
+            CapsuleCollider2D.transform.TransformPoint(new Vector2(center.x - CapsuleCollider2D.size.x / 2,
                 center.y));
         boxColliderBounds.midRight =
-            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x + capsuleCollider2D.size.x / 2,
+            CapsuleCollider2D.transform.TransformPoint(new Vector2(center.x + CapsuleCollider2D.size.x / 2,
                 center.y));
-        boxColliderBounds.bottomMid = capsuleCollider2D.transform.TransformPoint(new Vector2(
+        boxColliderBounds.bottomMid = CapsuleCollider2D.transform.TransformPoint(new Vector2(
             center.x,
-            center.y - capsuleCollider2D.size.y / 2));
+            center.y - CapsuleCollider2D.size.y / 2));
         boxColliderBounds.topLeft =
-            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x - capsuleCollider2D.size.x / 2,
-                center.y + capsuleCollider2D.size.y / 2));
+            CapsuleCollider2D.transform.TransformPoint(new Vector2(center.x - CapsuleCollider2D.size.x / 2,
+                center.y + CapsuleCollider2D.size.y / 2));
 
         boxColliderBounds.topRight =
-            capsuleCollider2D.transform.TransformPoint(new Vector2(center.x + capsuleCollider2D.size.x / 2,
-                center.y + capsuleCollider2D.size.y / 2));
+            CapsuleCollider2D.transform.TransformPoint(new Vector2(center.x + CapsuleCollider2D.size.x / 2,
+                center.y + CapsuleCollider2D.size.y / 2));
+        boxColliderBounds.topMid =
+            CapsuleCollider2D.transform.TransformPoint(new Vector2(center.x,
+                center.y + CapsuleCollider2D.size.y / 2));
     }
 
     protected virtual void CastDownwardRays()
     {
-        var direction = capsuleCollider2D.transform.up * -1;
+        var direction = CapsuleCollider2D.transform.up * -1;
 
         RaycastHit2DPoints.midLeftDownwardRay =
             Physics2D.Raycast(BoxColliderBounds.midLeft, direction, 1f + offsetForPerifericalRays,
@@ -107,32 +116,32 @@ public class BasicCollisionHandler
 
     protected virtual void CastLateralRays()
     {
-        var direction = capsuleCollider2D.transform.up * -1;
+        var direction = CapsuleCollider2D.transform.up * -1;
 
         RaycastHit2DPoints.midLeftLeftwardRay =
-            Physics2D.Raycast(BoxColliderBounds.midLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
-                capsuleCollider2D.transform.right * -1);
+            Physics2D.Raycast(BoxColliderBounds.midLeft + (Vector2.down * (CapsuleCollider2D.size.y / 4)),
+                CapsuleCollider2D.transform.right * -1);
         RaycastHit2DPoints.midRightRightwardRay =
-            Physics2D.Raycast(BoxColliderBounds.midRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
-                capsuleCollider2D.transform.right);
+            Physics2D.Raycast(BoxColliderBounds.midRight + (Vector2.down * (CapsuleCollider2D.size.y / 4)),
+                CapsuleCollider2D.transform.right);
 
-        Debug.DrawRay(BoxColliderBounds.midRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
-            capsuleCollider2D.transform.right, Color.red);
-        Debug.DrawRay(BoxColliderBounds.midLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
-            capsuleCollider2D.transform.right * -1,
+        Debug.DrawRay(BoxColliderBounds.midRight + (Vector2.down * (CapsuleCollider2D.size.y / 4)),
+            CapsuleCollider2D.transform.right, Color.red);
+        Debug.DrawRay(BoxColliderBounds.midLeft + (Vector2.down * (CapsuleCollider2D.size.y / 4)),
+            CapsuleCollider2D.transform.right * -1,
             Color.green);
     }
 
     public RaycastHit2D CastRightwardRay(LayerMask layerMask)
     {
-        return Physics2D.Raycast(BoxColliderBounds.midRight + (Vector2.down * (capsuleCollider2D.size.y / 4)),
-            capsuleCollider2D.transform.right, 5, layerMask.value);
+        return Physics2D.Raycast(BoxColliderBounds.midRight + (Vector2.down * (CapsuleCollider2D.size.y / 4)),
+            CapsuleCollider2D.transform.right, 5, layerMask.value);
     }
 
     public virtual RaycastHit2D CastLeftwardRay(LayerMask layerMask)
     {
-        return Physics2D.Raycast(BoxColliderBounds.midLeft + (Vector2.down * (capsuleCollider2D.size.y / 4)),
-            capsuleCollider2D.transform.right * -1, 5, layerMask.value);
+        return Physics2D.Raycast(BoxColliderBounds.midLeft + (Vector2.down * (CapsuleCollider2D.size.y / 4)),
+            CapsuleCollider2D.transform.right * -1, 5, layerMask.value);
     }
 
     public virtual bool CheckGroundForJump(float distance)

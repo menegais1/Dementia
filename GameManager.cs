@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     private List<Enemy> initializeEnemies;
     private string currentSceneName;
     private Resolution nativeResolution;
-
+    private Navigation navigation;
     public static GameManager instance;
 
     public List<CollectibleItem> InitializeItens
@@ -51,6 +51,12 @@ public class GameManager : MonoBehaviour
     {
         get { return nativeResolution; }
         set { nativeResolution = value; }
+    }
+
+    public Navigation NavigationAcessor
+    {
+        get { return navigation; }
+        set { navigation = value; }
     }
 
     private void Start()
@@ -113,6 +119,7 @@ public class GameManager : MonoBehaviour
         {
             InitializeEnemies[i].Id = GenerateId(i);
         }
+        navigation = GameObject.FindGameObjectWithTag("Navigation").GetComponent<Navigation>();
     }
 
 

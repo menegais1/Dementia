@@ -5,7 +5,7 @@ using UnityEngine;
 public class StairsController : MonoBehaviour
 {
     public Collider2D adjacentCollider;
-    public Collider2D stairsCollider;
+    public BoxCollider2D stairsCollider;
     public StairsTriggerType stairsTriggerType;
     private PlayerStatusVariables playerStatusVariables;
     private ApostleStatusVariables apostleStatusVariables;

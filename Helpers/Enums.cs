@@ -45,6 +45,15 @@ public enum CombatPressMovementState
     Slot2,
 }
 
+public enum NavigationNodeType
+{
+    None,
+    Ladder,
+    Obstacle,
+    Stairs,
+    Player
+}
+
 public enum VerticalMovementState
 {
     Grounded,

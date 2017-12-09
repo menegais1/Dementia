@@ -5,10 +5,20 @@ using UnityEngine;
 public class LadderController : MonoBehaviour
 {
     public Collider2D adjacentCollider;
+    public BoxCollider2D ladderCollider;
+
     public LadderType ladder;
 
     private PlayerStatusVariables playerStatusVariables;
     private ApostleStatusVariables apostleStatusVariables;
+
+    private void Awake()
+    {
+        if (ladder == LadderType.Ladder)
+        {
+            ladderCollider = GetComponent<BoxCollider2D>();
+        }
+    }
 
     public void OnTriggerEnter2D(Collider2D other)
     {

@@ -4,6 +4,18 @@ public class ObstacleController : MonoBehaviour
 {
     private PlayerStatusVariables playerStatusVariables;
     private ApostleStatusVariables apostleStatusVariables;
+    private BoxCollider2D collider2D;
+
+    public BoxCollider2D Collider2D
+    {
+        get { return collider2D; }
+    }
+
+
+    private void Awake()
+    {
+        collider2D = GetComponentsInParent<BoxCollider2D>()[1];
+    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
