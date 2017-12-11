@@ -13,10 +13,17 @@ public class Bullet : MonoBehaviour
 
     private Vector2 lastBulletPosition;
     private RaycastHit2D raycastHit2D;
+    private ContactFilter2D contactFilter2DForBulletCheck;
 
     public void Awake()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
+        this.contactFilter2DForBulletCheck = new ContactFilter2D()
+        {
+            useTriggers = false,
+            useLayerMask = true,
+            layerMask = LayerMask.GetMask("Ground", "Ground Ignore", "Enemy", "Wall"),
+        };
     }
 
     private void Update()
@@ -26,8 +33,10 @@ public class Bullet : MonoBehaviour
             if (raycastHit2D.collider.CompareTag("Scenery") ||
                 raycastHit2D.collider.CompareTag("Obstacle") || raycastHit2D.collider.CompareTag("Enemy"))
             {
-                var layerCollider = Physics2D.Linecast(lastBulletPosition,
-                    rigidbody2D.position, LayerMask.GetMask("Enemy", "Ground", "Ground Ignore"));
+                var layerColliderList = new RaycastHit2D[1];
+                Physics2D.Linecast(lastBulletPosition,
+                    rigidbody2D.position, contactFilter2DForBulletCheck, layerColliderList);
+                var layerCollider = layerColliderList[0];
                 if (layerCollider.collider != null &&
                     LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Enemy")
                 {
@@ -36,9 +45,10 @@ public class Bullet : MonoBehaviour
                     apostleManager.Apostle.TakeDamage(damage);
                     raycastHit2D = new RaycastHit2D();
                 }
-                else if (layerCollider.collider != null &&
-                         (LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Ground" ||
-                          LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Ground Ignore"))
+                else if ((layerCollider.collider != null &&
+                          (LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Ground" ||
+                           LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Ground Ignore" ||
+                           LayerMask.LayerToName(layerCollider.transform.gameObject.layer) == "Wall")))
                 {
                     Destroy(this.gameObject);
                     raycastHit2D = new RaycastHit2D();
@@ -52,8 +62,10 @@ public class Bullet : MonoBehaviour
 
     public void Shoot()
     {
-        raycastHit2D = Physics2D.Raycast(initialPosition, initialDirection, maxBulletDistance,
-            LayerMask.GetMask("Enemy", "Ground", "Ground Ignore"));
+        var raycastHit2DList = new RaycastHit2D[1];
+        Physics2D.Raycast(initialPosition, initialDirection,
+            contactFilter2DForBulletCheck, raycastHit2DList, maxBulletDistance);
+        raycastHit2D = raycastHit2DList[0];
         PhysicsHelpers.AddImpulseForce(force, this.rigidbody2D);
         lastBulletPosition = rigidbody2D.position;
         if (raycastHit2D.collider == null)

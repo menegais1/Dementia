@@ -68,7 +68,11 @@ public class PlayerStatusController : MonoBehaviour
     void Update()
     {
         RegenStamina();
-
+        if (!MathHelpers.Approximately(lifeBar.value, currentLife, float.Epsilon))
+        {
+            lifeBar.value = currentLife;
+        }
+        
         if (!CheckIfOnTransitionFloor())
         {
             navigation.CheckForCurrentFloor(transform, collider2D, ref currentFloor, ref currentTransitionFloor);

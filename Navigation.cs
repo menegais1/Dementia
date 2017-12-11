@@ -13,7 +13,6 @@ public struct Floor
 {
     public int number;
     public Transform transform;
-    public List<Floor> consecutiveFloors;
     public List<TransitionFloor> transitionFloors;
     public FloorInfo FloorInfo;
     public Collider2D collider2D;
@@ -24,7 +23,6 @@ public struct Floor
         this.transform = transform;
         FloorInfo = new FloorInfo();
         transitionFloors = new List<TransitionFloor>();
-        consecutiveFloors = new List<Floor>();
         this.collider2D = collider2D;
         UpdateFloorInfo(collider2D);
     }
@@ -82,7 +80,21 @@ public struct TransitionFloor
     public Transform transform;
     public ColliderBounds colliderBounds;
 
-    public TransitionFloor(Floor firstFloor, Floor secondFloor, Transform transform, ColliderBounds colliderBounds,
+    public TransitionFloor(Floor firstFloor, Floor secondFloor, Transform transform,
+        ColliderBounds colliderBounds,
+        TransitionFloorType type)
+    {
+        floors = new List<Floor>()
+        {
+            firstFloor,
+            secondFloor
+        };
+        this.transform = transform;
+        this.type = type;
+        this.colliderBounds = colliderBounds;
+    }
+
+    public TransitionFloor(Floor firstFloor, Floor secondFloor,
         TransitionFloorType type)
     {
         floors = new List<Floor>()
@@ -91,9 +103,23 @@ public struct TransitionFloor
             secondFloor
         };
 
-        this.transform = transform;
+        this.transform = null;
         this.type = type;
-        this.colliderBounds = colliderBounds;
+        this.colliderBounds = new ColliderBounds();
+    }
+}
+
+public struct ConsecutiveFloor
+{
+    public List<Floor> floors;
+
+    public ConsecutiveFloor(Floor firstFloor, Floor secondFloor)
+    {
+        floors = new List<Floor>()
+        {
+            firstFloor,
+            secondFloor
+        };
     }
 }
 
@@ -172,8 +198,8 @@ public class Navigation : MonoBehaviour
     public List<Floor> floorList;
     public List<NavigationInfo> WorldNavigationInfo { get; set; }
     public List<TransitionFloor> transitionFloorList { get; set; }
-
-    private ContactFilter2D contactFilter2D;
+    public List<ConsecutiveFloor> consecutiveFloorList { get; set; }
+    private ContactFilter2D contactFilter2DForFloorCheck;
 
     public void Awake()
     {
@@ -182,10 +208,12 @@ public class Navigation : MonoBehaviour
         WorldNavigationInfo = new List<NavigationInfo>();
         this.floorList = new List<Floor>();
         this.transitionFloorList = new List<TransitionFloor>();
+        this.consecutiveFloorList = new List<ConsecutiveFloor>();
+
         var obstacles = gameDataHolder.GetComponentsInChildren<ObstacleController>();
         var stairsList = gameDataHolder.GetComponentsInChildren<StairsController>();
         var ladders = gameDataHolder.GetComponentsInChildren<LadderController>();
-        this.contactFilter2D = new ContactFilter2D()
+        this.contactFilter2DForFloorCheck = new ContactFilter2D()
         {
             useTriggers = false,
             useLayerMask = true,
@@ -299,16 +327,20 @@ public class Navigation : MonoBehaviour
                     if (floorNumber1.number < floorNumber2.number)
                     {
                         floorNumber1.transitionFloors.Add(new TransitionFloor(floorNumber1, floorNumber2,
-                            navigationInfo.transform, navigationInfo.colliderBounds, TransitionFloorType.Ladder));
+                            navigationInfo.transform, navigationInfo.colliderBounds,
+                            TransitionFloorType.Ladder));
                         floorNumber2.transitionFloors.Add(new TransitionFloor(floorNumber1, floorNumber2,
-                            navigationInfo.transform, navigationInfo.colliderBounds, TransitionFloorType.Ladder));
+                            navigationInfo.transform, navigationInfo.colliderBounds,
+                            TransitionFloorType.Ladder));
                     }
                     else
                     {
                         floorNumber1.transitionFloors.Add(new TransitionFloor(floorNumber2, floorNumber1,
-                            navigationInfo.transform, navigationInfo.colliderBounds, TransitionFloorType.Ladder));
+                            navigationInfo.transform, navigationInfo.colliderBounds,
+                            TransitionFloorType.Ladder));
                         floorNumber2.transitionFloors.Add(new TransitionFloor(floorNumber2, floorNumber1,
-                            navigationInfo.transform, navigationInfo.colliderBounds, TransitionFloorType.Ladder));
+                            navigationInfo.transform, navigationInfo.colliderBounds,
+                            TransitionFloorType.Ladder));
                     }
                     break;
                 case TransitionFloorType.Obstacle:
@@ -336,19 +368,23 @@ public class Navigation : MonoBehaviour
                             if (floorNumber1.number < floorNumber2.number)
                             {
                                 floorNumber1.transitionFloors.Add(new TransitionFloor(floorNumber1, floorNumber2,
-                                    boxCollider2D.transform, navigationInfo.colliderBounds,
+                                    boxCollider2D.transform,
+                                    navigationInfo.colliderBounds,
                                     TransitionFloorType.Obstacle));
                                 floorNumber2.transitionFloors.Add(new TransitionFloor(floorNumber1, floorNumber2,
-                                    boxCollider2D.transform, navigationInfo.colliderBounds,
+                                    boxCollider2D.transform,
+                                    navigationInfo.colliderBounds,
                                     TransitionFloorType.Obstacle));
                             }
                             else
                             {
                                 floorNumber1.transitionFloors.Add(new TransitionFloor(floorNumber2, floorNumber1,
-                                    boxCollider2D.transform, navigationInfo.colliderBounds,
+                                    boxCollider2D.transform,
+                                    navigationInfo.colliderBounds,
                                     TransitionFloorType.Obstacle));
                                 floorNumber2.transitionFloors.Add(new TransitionFloor(floorNumber2, floorNumber1,
-                                    boxCollider2D.transform, navigationInfo.colliderBounds,
+                                    boxCollider2D.transform,
+                                    navigationInfo.colliderBounds,
                                     TransitionFloorType.Obstacle));
                             }
                         }
@@ -382,16 +418,20 @@ public class Navigation : MonoBehaviour
                     if (floorNumber1.number < floorNumber2.number)
                     {
                         floorNumber1.transitionFloors.Add(new TransitionFloor(floorNumber1, floorNumber2,
-                            navigationInfo.transform, navigationInfo.colliderBounds, TransitionFloorType.Stairs));
+                            navigationInfo.transform, navigationInfo.colliderBounds,
+                            TransitionFloorType.Stairs));
                         floorNumber2.transitionFloors.Add(new TransitionFloor(floorNumber1, floorNumber2,
-                            navigationInfo.transform, navigationInfo.colliderBounds, TransitionFloorType.Stairs));
+                            navigationInfo.transform, navigationInfo.colliderBounds,
+                            TransitionFloorType.Stairs));
                     }
                     else
                     {
                         floorNumber1.transitionFloors.Add(new TransitionFloor(floorNumber2, floorNumber1,
-                            navigationInfo.transform, navigationInfo.colliderBounds, TransitionFloorType.Stairs));
+                            navigationInfo.transform, navigationInfo.colliderBounds,
+                            TransitionFloorType.Stairs));
                         floorNumber2.transitionFloors.Add(new TransitionFloor(floorNumber2, floorNumber1,
-                            navigationInfo.transform, navigationInfo.colliderBounds, TransitionFloorType.Stairs));
+                            navigationInfo.transform, navigationInfo.colliderBounds,
+                            TransitionFloorType.Stairs));
                     }
 
                     break;
@@ -401,77 +441,52 @@ public class Navigation : MonoBehaviour
         }
         foreach (var outerFloor in this.floorList)
         {
+            var teste = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            teste.transform.position = outerFloor.FloorInfo.startPointX;
+            var teste1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            teste1.transform.position = outerFloor.FloorInfo.endPointX;
+
+            foreach (var innerFloor in this.floorList)
+            {
+                float tresholdX = 0.7f;
+                float tresholdY = 0.6f;
+                var center = outerFloor.collider2D.transform.TransformPoint(outerFloor.collider2D.offset);
+                if (!MathHelpers.Approximately(outerFloor.transform.rotation.z, 0, float.Epsilon) ||
+                    !MathHelpers.Approximately(innerFloor.transform.rotation.z, 0, float.Epsilon))
+                {
+                    tresholdX = 0.7f;
+                    tresholdY = 2f;
+                }
+
+                if (MathHelpers.Approximately(outerFloor.FloorInfo.endPointX.y,
+                        innerFloor.FloorInfo.startPointX.y,
+                        tresholdY) && MathHelpers.Approximately(
+                        outerFloor.FloorInfo.endPointX.x,
+                        innerFloor.FloorInfo.startPointX.x,
+                        tresholdX) && outerFloor.number != innerFloor.number)
+                {
+                    outerFloor.transitionFloors.Add(new TransitionFloor(innerFloor, outerFloor,
+                        TransitionFloorType.Consecutive));
+                    innerFloor.transitionFloors.Add(new TransitionFloor(innerFloor, outerFloor,
+                        TransitionFloorType.Consecutive));
+                }
+                
+            }
+
             foreach (var outerFloorTransitionFloor in outerFloor.transitionFloors)
             {
                 if (!transitionFloorList.Exists(lambdaExpression =>
-                    lambdaExpression.transform == outerFloorTransitionFloor.transform))
+                        lambdaExpression.transform == outerFloorTransitionFloor.transform) &&
+                    outerFloorTransitionFloor.type != TransitionFloorType.Consecutive)
+                {
                     transitionFloorList.Add(outerFloorTransitionFloor);
-            }
-            foreach (var innerFloor in this.floorList)
-            {
-                if (!MathHelpers.Approximately(outerFloor.transform.rotation.z, 0, float.Epsilon))
-                {
-                    if (MathHelpers.Approximately(outerFloor.FloorInfo.endPointX.y,
-                            innerFloor.FloorInfo.startPointX.y,
-                            2f) && MathHelpers.Approximately(
-                            outerFloor.FloorInfo.endPointX.x,
-                            innerFloor.FloorInfo.startPointX.x,
-                            0.7f) && outerFloor.number != innerFloor.number)
-                    {
-                        outerFloor.consecutiveFloors.Add(innerFloor);
-                        innerFloor.consecutiveFloors.Add(outerFloor);
-                        continue;
-                    }
                 }
-                else
+                else if (!transitionFloorList.Exists(lambdaExpression =>
+                    lambdaExpression.floors.Contains(outerFloorTransitionFloor.floors[0]) &&
+                    lambdaExpression.floors.Contains(outerFloorTransitionFloor.floors[1])))
                 {
-                    if (MathHelpers.Approximately(outerFloor.FloorInfo.endPointX.y,
-                            innerFloor.FloorInfo.startPointX.y,
-                            0.6f) && MathHelpers.Approximately(
-                            outerFloor.FloorInfo.endPointX.x,
-                            innerFloor.FloorInfo.startPointX.x,
-                            0.7f) && outerFloor.number != innerFloor.number)
-                    {
-                        outerFloor.consecutiveFloors.Add(innerFloor);
-                        innerFloor.consecutiveFloors.Add(outerFloor);
-                        continue;
-                    }
+                    transitionFloorList.Add(outerFloorTransitionFloor);
                 }
-
-                if (outerFloor.transform.position.x >
-                    innerFloor.FloorInfo.startPointX.x
-                    && outerFloor.transform.position.x <
-                    innerFloor.FloorInfo.endPointX.x
-                    && outerFloor.transform.position.y >
-                    innerFloor.FloorInfo.startPointY.y
-                    && outerFloor.transform.position.y <
-                    innerFloor.FloorInfo.endPointY.y && outerFloor.number != innerFloor.number)
-                {
-                    outerFloor.consecutiveFloors.Add(innerFloor);
-                    innerFloor.consecutiveFloors.Add(outerFloor);
-                }
-            }
-        }
-
-//        foreach (var floor in this.floorList)
-//        {
-//            // Debug.Log(floor.transform.name + " [" + floor.number + "]" + " : " + floor.FloorInfo.endPointY);
-//            foreach (var transitionFloor in floor.transitionFloors)
-//            {
-//                Debug.Log(" [" + floor.number + "]" + " : " +
-//                          " floor1 : " + transitionFloor.floors[0].number + "|| floor2 : " +
-//                          transitionFloor.floors[1].number);
-//            }
-//        }
-
-        foreach (var transitionFloor in transitionFloorList)
-        {
-            if (transitionFloor.type == TransitionFloorType.Stairs)
-            {
-                var teste = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                teste.transform.position = transitionFloor.colliderBounds.boundingBoxBottomY;
-                var teste1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                teste1.transform.position = transitionFloor.colliderBounds.boundingBoxTopY;
             }
         }
     }
@@ -496,7 +511,7 @@ public class Navigation : MonoBehaviour
         Collider2D[] colliders2D = new Collider2D[5];
         foreach (var temporaryFloor in temporaryFloors)
         {
-            temporaryFloor.collider2D.GetContacts(this.contactFilter2D, colliders2D);
+            temporaryFloor.collider2D.GetContacts(this.contactFilter2DForFloorCheck, colliders2D);
             if (colliders2D.Where(contactCollider2D => contactCollider2D != null)
                 .Any(contactCollider2D => contactCollider2D == collider2D &&
                                           contactCollider2D.gameObject.layer == transform.gameObject.layer))
@@ -515,6 +530,53 @@ public class Navigation : MonoBehaviour
                 raycastHit2D.collider.transform == currentFloorForTest.transform) return;
         }
         currentFloor = currentFloorForTest;
+    }
+
+    public void CheckForCurrentFloor(Transform transform, Collider2D floorCollider2D, ref Floor currentFloor,
+        ref TransitionFloor currentTransitionFloor)
+    {
+        currentTransitionFloor = new TransitionFloor();
+        var temporaryFloor = this.floorList.Find(lambdaExpression =>
+            lambdaExpression.FloorInfo.startPointX.x <= transform.position.x &&
+            lambdaExpression.FloorInfo.endPointX.x >= transform.position.x &&
+            lambdaExpression.FloorInfo.startPointY.y <= transform.position.y &&
+            lambdaExpression.FloorInfo.endPointY.y >= transform.position.y &&
+            lambdaExpression.collider2D == floorCollider2D);
+
+        if (temporaryFloor.number == 0) return;
+
+        currentFloor = temporaryFloor;
+    }
+
+    public void CheckForCurrentTransitionFloor(Transform transform, Transform transitionFloorTransform,
+        ref Floor currentFloor,
+        ref TransitionFloor currentTransitionFloor, TransitionFloorType type)
+    {
+        currentFloor = new Floor();
+        if (type == TransitionFloorType.Obstacle)
+        {
+            currentTransitionFloor = this.transitionFloorList.Find(lambdaExpression =>
+                MathHelpers.Approximately(lambdaExpression.transform.position.x, transform.position.x, 0.5f) &&
+                MathHelpers.Approximately(lambdaExpression.transform.position.y, transform.position.y, 3f) &&
+                lambdaExpression.transform == transitionFloorTransform);
+        }
+        else if (type == TransitionFloorType.Ladder)
+        {
+            currentTransitionFloor = this.transitionFloorList.Find(lambdaExpression =>
+                MathHelpers.Approximately(lambdaExpression.transform.position.x, transform.position.x, 0.5f) &&
+                transform.position.y >= lambdaExpression.colliderBounds.bottomMid.y &&
+                transform.position.y <= lambdaExpression.colliderBounds.topMid.y &&
+                lambdaExpression.transform == transitionFloorTransform);
+        }
+        else if (type == TransitionFloorType.Stairs)
+        {
+            currentTransitionFloor = this.transitionFloorList.Find(lambdaExpression =>
+                lambdaExpression.colliderBounds.bottomLeft.x <= transform.position.x &&
+                lambdaExpression.colliderBounds.bottomRight.x >= transform.position.x &&
+                lambdaExpression.colliderBounds.boundingBoxBottomY.y <= transform.position.y &&
+                lambdaExpression.colliderBounds.boundingBoxTopY.y >= transform.position.y &&
+                lambdaExpression.transform == transitionFloorTransform);
+        }
     }
 
     public void CheckForCurrentTransitionFloor(Transform transform, CapsuleCollider2D collider2D,
@@ -543,5 +605,10 @@ public class Navigation : MonoBehaviour
                 lambdaExpression.colliderBounds.boundingBoxBottomY.y <= transform.position.y &&
                 lambdaExpression.colliderBounds.boundingBoxTopY.y >= transform.position.y);
         }
+    }
+
+    public List<Floor> GetConsecutiveFloors(Floor initialFloor, Floor finalFloor)
+    {
+        return null;
     }
 }

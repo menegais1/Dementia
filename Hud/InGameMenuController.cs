@@ -38,7 +38,6 @@ public class InGameMenuController : MonoBehaviour
                 break;
             case "Diary":
                 MenuControllerInventory.gameObject.SetActive(false);
-                Debug.Log(MenuControllerMenu);
                 MenuControllerMenu.gameObject.SetActive(false);
                 MenuControllerDiary.gameObject.SetActive(true);
                 break;

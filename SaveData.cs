@@ -94,10 +94,7 @@ public class SaveData
         yPosition = playerManager.transform.position.y;
         InitializeInventoryData(inGameMenuController);
         InitializeCurrentWorldData(gameDataHolder);
-        foreach (var inventoryNote in inventoryNotes)
-        {
-            Debug.Log(inventoryNote.id);
-        }
+    
         Debug.Log("Save");
     }
 

@@ -1,19 +1,42 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+public struct PatrolPointInfo
+{
+    public Transform transform;
+    public Collider2D floorCollider2D;
+    public Floor currentFloor;
+    public TransitionFloor currentTransitionFloor;
+    public TransitionFloorType transitionFloorType;
+
+    public PatrolPointInfo(Transform transform, Collider2D collider2D, TransitionFloorType type)
+    {
+        this.transform = transform;
+        this.floorCollider2D = collider2D;
+        this.transitionFloorType = type;
+        this.currentFloor = new Floor();
+        this.currentTransitionFloor = new TransitionFloor();
+    }
+}
 
 public class ApostleInputHandler : MonoBehaviour
 {
     [SerializeField] private float aggroTime;
     [SerializeField] private Transform startPointTransform;
+    [SerializeField] private Collider2D startPointFloorCollider;
+    [SerializeField] private TransitionFloorType startPointTransitionFloorType;
     [SerializeField] private Transform endPointTransform;
+    [SerializeField] private Collider2D endPointFloorCollider;
+    [SerializeField] private TransitionFloorType endPointTransitionFloorType;
+
+    private PatrolPointInfo startPointPatrolInfo;
+    private PatrolPointInfo endPointPatrolInfo;
 
     private float currentAggroTime;
-
+    private Transform currentAim;
     private Floor currentFloor;
     private TransitionFloor currentTransitionFloor;
+
     private BoxCollider2D triggerArea;
-    private Transform currentAim;
     private Navigation navigation;
     private BasicCollisionHandler apostleCollisionHandler;
     private ApostleStatusVariables apostleStatusVariables;
@@ -46,6 +69,12 @@ public class ApostleInputHandler : MonoBehaviour
         }
         navigation = GameManager.instance.NavigationAcessor;
         CreateTriggerArea();
+
+        startPointPatrolInfo =
+            new PatrolPointInfo(startPointTransform, startPointFloorCollider, startPointTransitionFloorType);
+
+        endPointPatrolInfo =
+            new PatrolPointInfo(endPointTransform, endPointFloorCollider, endPointTransitionFloorType);
     }
 
     private void Update()

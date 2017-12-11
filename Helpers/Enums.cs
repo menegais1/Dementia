@@ -51,6 +51,7 @@ public enum TransitionFloorType
     Ladder,
     Obstacle,
     Stairs,
+    Consecutive,
 }
 
 public enum VerticalMovementState

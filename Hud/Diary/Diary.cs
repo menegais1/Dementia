@@ -37,10 +37,7 @@ public class Diary : MonoBehaviour
 
     private void Update()
     {
-        foreach (var notesSlot in NotesSlots)
-        {
-            Debug.Log(notesSlot.TextNoteName.text);
-        }
+      
         var noteSlot = NotesSlots.Find(lambaExpression => lambaExpression.Selected);
         if (noteSlot != null && noteContent.Note == null)
         {
