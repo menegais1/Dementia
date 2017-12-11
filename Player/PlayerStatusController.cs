@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq.Expressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,9 +14,12 @@ public class PlayerStatusController : MonoBehaviour
     [SerializeField] private Slider staminaBar;
     [SerializeField] private Slider lifeBar;
 
+    private Floor currentFloor;
+    private TransitionFloor currentTransitionFloor;
+
+    private Navigation navigation;
     private bool canSave;
-    private int diaryState;
-    private bool canUseDiary;
+
 
     private float staminaRegenMultiplier;
     private float originalHealth;
@@ -25,6 +29,7 @@ public class PlayerStatusController : MonoBehaviour
     private float timeTrackerForSpendingStamina;
 
     private PlayerStatusVariables playerStatusVariables;
+    private CapsuleCollider2D collider2D;
 
     public float StaminaRegenMultiplier
     {
@@ -50,13 +55,47 @@ public class PlayerStatusController : MonoBehaviour
         lifeBar.value = currentLife;
         staminaBar.value = currentStamina;
         playerStatusVariables = GetComponent<PlayerStatusVariables>();
+        collider2D = GetComponent<CapsuleCollider2D>();
         StaminaRegenMultiplier = 1;
+        if (GameManager.instance.NavigationAcessor == null)
+        {
+            GameManager.instance.NavigationAcessor =
+                GameObject.FindGameObjectWithTag("Navigation").GetComponent<Navigation>();
+        }
+        navigation = GameManager.instance.NavigationAcessor;
     }
 
     void Update()
     {
         RegenStamina();
+
+        if (!CheckIfOnTransitionFloor())
+        {
+            navigation.CheckForCurrentFloor(transform, collider2D, ref currentFloor, ref currentTransitionFloor);
+        }
+        else
+        {
+            if (playerStatusVariables.isClimbingObstacle)
+                navigation.CheckForCurrentTransitionFloor(transform, ref currentFloor, ref currentTransitionFloor,
+                    TransitionFloorType.Obstacle);
+        }
+//        if (currentFloor.number != 0)
+//            Debug.Log(currentFloor.transform.name);
+//        else if (currentTransitionFloor.transform != null)
+//            Debug.Log(currentTransitionFloor.transform.parent.name);
+//        else
+//        {
+//            Debug.Log(currentFloor.transform);
+//            Debug.Log(currentTransitionFloor.transform);
+//        }
     }
+
+    public bool CheckIfOnTransitionFloor()
+    {
+        return playerStatusVariables.isClimbingLadder || playerStatusVariables.isClimbingStairs ||
+               playerStatusVariables.isClimbingObstacle;
+    }
+
 
     public void SpendStamina(float percentOfStaminaToSpent, bool imediate)
     {

@@ -45,13 +45,12 @@ public enum CombatPressMovementState
     Slot2,
 }
 
-public enum NavigationNodeType
+public enum TransitionFloorType
 {
     None,
     Ladder,
     Obstacle,
     Stairs,
-    Player
 }
 
 public enum VerticalMovementState

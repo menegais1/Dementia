@@ -1,24 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Security.Policy;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-
-public struct NavigationNode
-{
-    public Vector3 position;
-    public Transform transform;
-    public NavigationNodeType type;
-
-    public NavigationNode(Vector3 position, Transform transform, NavigationNodeType type)
-    {
-        this.position = position;
-        this.transform = transform;
-        this.type = type;
-    }
-}
 
 public class ApostleInputHandler : MonoBehaviour
 {
@@ -29,20 +11,13 @@ public class ApostleInputHandler : MonoBehaviour
     private float currentAggroTime;
 
     private BoxCollider2D triggerArea;
-    private NavigationNode currentAimNode;
+    private Transform currentAim;
     private List<NavigationInfo> worldNavigationInfo;
 
-    private List<NavigationNode> navigationNodes;
-    private List<NavigationNode> patrollingNavigationNodes;
-    private List<NavigationNode> currentAimNodesHistory;
     private BasicCollisionHandler apostleCollisionHandler;
 
     private ApostleStatusVariables apostleStatusVariables;
     private MonoBehaviour monoBehaviour;
-
-    private bool isOnFirstUpdate;
-    private float timeForCheckNavigation;
-    private float currentTimeForCheckNavigation;
 
     private float movementDirectionValue;
     private bool climbObstacleValue;
@@ -62,43 +37,16 @@ public class ApostleInputHandler : MonoBehaviour
         var apostleManager = GetComponent<ApostleManager>();
         this.apostleCollisionHandler = apostleManager.ApostleCollisionHandler;
         this.apostleStatusVariables = apostleManager.ApostleStatusVariables;
-        if (GameManager.instance.NavigationAcessor == null)
-        {
-            GameManager.instance.NavigationAcessor =
-                GameObject.FindGameObjectWithTag("Navigation").GetComponent<Navigation>();
-        }
-        worldNavigationInfo = GameManager.instance.NavigationAcessor.WorldNavigationInfo;
-
-
+        currentAim = endPointTransform;
         CreateTriggerArea();
-
-        patrollingNavigationNodes = new List<NavigationNode>
-        {
-            new NavigationNode(startPointTransform.position, startPointTransform, NavigationNodeType.None),
-            new NavigationNode(endPointTransform.position, endPointTransform, NavigationNodeType.None)
-        };
-        currentAimNode = new NavigationNode(startPointTransform.position, startPointTransform, NavigationNodeType.None);
-        isOnFirstUpdate = true;
     }
 
     private void Update()
     {
-        if (isOnFirstUpdate)
-        {
-            CheckForNavigationNodes(endPointTransform.position, ref patrollingNavigationNodes);
-
-            foreach (var patrollingNavigationNode in patrollingNavigationNodes)
-            {
-                Debug.Log(patrollingNavigationNode.transform.name);
-            }
-            isOnFirstUpdate = false;
-        }
-
         SetTriggerAreaDirection();
         if (Time.time >= currentAggroTime && apostleStatusVariables.isAggroed && !apostleStatusVariables.inAggroRange)
         {
-            currentAimNode =
-                new NavigationNode(startPointTransform.position, startPointTransform, NavigationNodeType.None);
+            currentAim = startPointTransform;
             apostleStatusVariables.isAggroed = false;
         }
 
@@ -106,39 +54,19 @@ public class ApostleInputHandler : MonoBehaviour
 
         if (apostleStatusVariables.isPatrolling)
         {
-            foreach (var patrollingNavigationNode in patrollingNavigationNodes)
+            if (MathHelpers.Approximately(transform.position.x, startPointTransform.position.x, 0.3f))
             {
-                if (currentAimNode.position == patrollingNavigationNode.position &&
-                    MathHelpers.Approximately(transform.position, patrollingNavigationNode.position,
-                        apostleCollisionHandler.CapsuleCollider2D.size.y / 2))
-                {
-
-                    var index = patrollingNavigationNodes.FindIndex(lambdaExpression =>
-                        lambdaExpression.Equals(patrollingNavigationNode));
-                    if (patrollingNavigationNodes.Count == index + 1)
-                    {
-                        patrollingNavigationNodes.Reverse();
-                        break;
-                    }
-                    climbObstacleValue = patrollingNavigationNode.type == NavigationNodeType.Obstacle;
-
-
-                    currentAimNode = patrollingNavigationNodes[index + 1];
-
-                    if (currentAimNode.type == NavigationNodeType.Obstacle &&
-                        currentAimNode.transform == patrollingNavigationNode.transform ||
-                        currentAimNode.position.y - transform.position.y <=
-                        -apostleCollisionHandler.CapsuleCollider2D.size.y / 2)
-                    {
-                        currentAimNode = patrollingNavigationNodes[index + 2];
-                    }
-                }
+                currentAim = endPointTransform;
+            }
+            else if (MathHelpers.Approximately(transform.position.x, endPointTransform.position.x, 0.3f))
+            {
+                currentAim = startPointTransform;
             }
         }
 
-        if (!currentAimNode.Equals(null))
+        if (!currentAim.Equals(null))
             movementDirectionValue =
-                MovementDirection(currentAimNode.position);
+                MovementDirection(currentAim.position);
 
         //Debug.Log(!currentAimNode.Equals(null) ? currentAimNode.transform.name : "");
     }
@@ -149,8 +77,7 @@ public class ApostleInputHandler : MonoBehaviour
         var playerManager = other.GetComponent<PlayerManager>();
         if (CheckIfPositionIsOnSight(playerManager.transform.position))
         {
-            currentAimNode = new NavigationNode(playerManager.transform.position, playerManager.transform,
-                NavigationNodeType.Player);
+            currentAim = playerManager.transform;
 
             apostleStatusVariables.isAggroed = true;
             apostleStatusVariables.inAggroRange = true;
@@ -165,8 +92,8 @@ public class ApostleInputHandler : MonoBehaviour
         var playerManager = other.GetComponent<PlayerManager>();
         if (CheckIfPositionIsOnSight(playerManager.transform.position))
         {
-            currentAimNode = new NavigationNode(playerManager.transform.position, playerManager.transform,
-                NavigationNodeType.Player);
+            currentAim = playerManager.transform;
+
             apostleStatusVariables.isAggroed = true;
             apostleStatusVariables.inAggroRange = true;
         }
@@ -181,7 +108,7 @@ public class ApostleInputHandler : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        if (!currentAimNode.Equals(null))
+        if (!currentAim.Equals(null))
         {
             currentAggroTime = Time.time + aggroTime;
             apostleStatusVariables.inAggroRange = false;
@@ -225,134 +152,5 @@ public class ApostleInputHandler : MonoBehaviour
         {
             triggerArea.offset = new Vector2(-triggerArea.offset.x, 0);
         }
-    }
-
-
-    public void CheckForNavigationNodes(Vector3 endPointPosition, ref List<NavigationNode> navigationNodes)
-    {
-        var startingPoint = endPointPosition.x > transform.position.x
-            ? apostleCollisionHandler.BoxColliderBounds.topRight
-            : apostleCollisionHandler.BoxColliderBounds.topLeft;
-        var xDirection = endPointPosition.x - startingPoint.x;
-        var yDirection = endPointPosition.y - startingPoint.y;
-        var raycastHit2D = Physics2D.RaycastAll(startingPoint, new Vector3(xDirection, yDirection, 0),
-            Mathf.Abs(endPointPosition.x - startingPoint.x), LayerMask.GetMask("Ground"));
-
-        if (!MathHelpers.Approximately(endPointPosition.y,
-            transform.position.y, apostleCollisionHandler.CapsuleCollider2D.size.y / 2))
-        {
-            var possibleNavigationNodes = new List<NavigationInfo>();
-
-            foreach (var navigationInfo in worldNavigationInfo)
-            {
-                if (MathHelpers.Approximately(navigationInfo.colliderBounds.topMid.y, endPointPosition.y,
-                    apostleCollisionHandler.CapsuleCollider2D.size.y / 2))
-                {
-                    possibleNavigationNodes.Add(navigationInfo);
-                }
-            }
-
-            if (possibleNavigationNodes.Count <= 0) return;
-
-            possibleNavigationNodes = possibleNavigationNodes.OrderBy(lambdaExpression =>
-                Mathf.Abs(lambdaExpression.transform.position.x - endPointPosition.x)).ToList();
-
-
-            var navigationNode = InsertNewHeightNavigationNode(possibleNavigationNodes);
-            if (!navigationNodes.Exists(lambdaExpression => lambdaExpression.transform == navigationNode.transform))
-            {
-                navigationNodes.Insert(navigationNodes.FindIndex(lambdaExpression =>
-                    lambdaExpression.position == endPointPosition), navigationNode);
-
-                CheckForNavigationNodes(navigationNode.position, ref navigationNodes);
-            }
-        }
-        else
-        {
-            foreach (var hit2D in raycastHit2D)
-            {
-                if (hit2D.collider != null && hit2D.collider.CompareTag("Obstacle") &&
-                    !navigationNodes.Exists(lambdaExpression => lambdaExpression.transform == hit2D.transform))
-                {
-                    var possibleNavigationNodes = new List<NavigationInfo>();
-                    foreach (var navigationInfo in worldNavigationInfo)
-                    {
-                        if (navigationInfo.transform == hit2D.transform)
-                        {
-                            possibleNavigationNodes.Add(navigationInfo);
-                        }
-                    }
-                    if (possibleNavigationNodes.Count <= 0) return;
-
-                    possibleNavigationNodes = possibleNavigationNodes.OrderBy(lambdaExpression =>
-                        Mathf.Abs(lambdaExpression.transform.position.x - endPointPosition.x)).ToList();
-
-                    var navigationNode = InsertNewObstacleNavigationNode(possibleNavigationNodes);
-                    navigationNodes.InsertRange(navigationNodes.FindIndex(lambdaExpression =>
-                        lambdaExpression.position == endPointPosition), navigationNode);
-
-                    CheckForNavigationNodes(navigationNode[0].position, ref navigationNodes);
-                }
-            }
-        }
-    }
-
-    private NavigationNode InsertNewHeightNavigationNode(List<NavigationInfo> possibleNavigationNodes)
-    {
-        Vector3 position = Vector3.zero;
-        if (possibleNavigationNodes[0].type == NavigationNodeType.Obstacle)
-        {
-            if (possibleNavigationNodes[0].transform.position.x > transform.position.x)
-            {
-                position =
-                    possibleNavigationNodes[0].colliderBounds.bottomLeft;
-                position = new Vector2(position.x - apostleCollisionHandler.CapsuleCollider2D.size.x / 2,
-                    position.y + apostleCollisionHandler.CapsuleCollider2D.size.y / 2);
-            }
-            else
-            {
-                position =
-                    possibleNavigationNodes[0].colliderBounds.bottomRight;
-                position = new Vector2(position.x + apostleCollisionHandler.CapsuleCollider2D.size.x / 2,
-                    position.y + apostleCollisionHandler.CapsuleCollider2D.size.y / 2);
-            }
-        }
-        return new NavigationNode(position, possibleNavigationNodes[0].transform, possibleNavigationNodes[0].type);
-    }
-
-    private List<NavigationNode> InsertNewObstacleNavigationNode(List<NavigationInfo> possibleNavigationNodes)
-    {
-        Vector3 firstPosition = Vector3.zero;
-        Vector3 secondPosition = Vector3.zero;
-        if (possibleNavigationNodes[0].type == NavigationNodeType.Obstacle)
-        {
-            if (possibleNavigationNodes[0].transform.position.x > transform.position.x)
-            {
-                firstPosition =
-                    possibleNavigationNodes[0].colliderBounds.bottomLeft;
-                firstPosition = new Vector2(firstPosition.x - apostleCollisionHandler.CapsuleCollider2D.size.x / 2,
-                    firstPosition.y + apostleCollisionHandler.CapsuleCollider2D.size.y / 2);
-                secondPosition = possibleNavigationNodes[0].colliderBounds.bottomRight;
-                secondPosition = new Vector2(secondPosition.x + apostleCollisionHandler.CapsuleCollider2D.size.x / 2,
-                    secondPosition.y + apostleCollisionHandler.CapsuleCollider2D.size.y / 2);
-            }
-            else
-            {
-                firstPosition =
-                    possibleNavigationNodes[0].colliderBounds.bottomRight;
-                firstPosition = new Vector2(firstPosition.x + apostleCollisionHandler.CapsuleCollider2D.size.x / 2,
-                    firstPosition.y + apostleCollisionHandler.CapsuleCollider2D.size.y / 2);
-                secondPosition = possibleNavigationNodes[0].colliderBounds.bottomLeft;
-                secondPosition = new Vector2(secondPosition.x - apostleCollisionHandler.CapsuleCollider2D.size.x / 2,
-                    secondPosition.y + apostleCollisionHandler.CapsuleCollider2D.size.y / 2);
-            }
-        }
-        return new List<NavigationNode>()
-        {
-            new NavigationNode(firstPosition, possibleNavigationNodes[0].transform,
-                possibleNavigationNodes[0].type),
-            new NavigationNode(secondPosition, possibleNavigationNodes[0].transform,
-                possibleNavigationNodes[0].type)
-        };
     }
 }
