@@ -14,6 +14,7 @@ public struct ColliderBounds
     public Vector2 midRight, midLeft;
     public Vector2 topRight, topLeft, topMid;
     public Vector2 bottomMid, bottomRight, bottomLeft;
+    public Vector2 boundingBoxBottomY, boundingBoxTopY;
 }
 
 public class BasicCollisionHandler

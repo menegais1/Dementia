@@ -10,12 +10,12 @@ public class ApostleInputHandler : MonoBehaviour
 
     private float currentAggroTime;
 
+    private Floor currentFloor;
+    private TransitionFloor currentTransitionFloor;
     private BoxCollider2D triggerArea;
     private Transform currentAim;
-    private List<NavigationInfo> worldNavigationInfo;
-
+    private Navigation navigation;
     private BasicCollisionHandler apostleCollisionHandler;
-
     private ApostleStatusVariables apostleStatusVariables;
     private MonoBehaviour monoBehaviour;
 
@@ -38,12 +38,45 @@ public class ApostleInputHandler : MonoBehaviour
         this.apostleCollisionHandler = apostleManager.ApostleCollisionHandler;
         this.apostleStatusVariables = apostleManager.ApostleStatusVariables;
         currentAim = endPointTransform;
+
+        if (GameManager.instance.NavigationAcessor == null)
+        {
+            GameManager.instance.NavigationAcessor =
+                GameObject.FindGameObjectWithTag("Navigation").GetComponent<Navigation>();
+        }
+        navigation = GameManager.instance.NavigationAcessor;
         CreateTriggerArea();
     }
 
     private void Update()
     {
         SetTriggerAreaDirection();
+
+        if (!CheckIfOnTransitionFloor())
+        {
+            navigation.CheckForCurrentFloor(transform, apostleCollisionHandler.CapsuleCollider2D, ref currentFloor,
+                ref currentTransitionFloor);
+        }
+        else
+        {
+            if (apostleStatusVariables.isClimbingObstacle)
+                navigation.CheckForCurrentTransitionFloor(transform, apostleCollisionHandler.CapsuleCollider2D,
+                    ref currentFloor,
+                    ref currentTransitionFloor,
+                    TransitionFloorType.Obstacle);
+            else if (apostleStatusVariables.isClimbingLadder)
+                navigation.CheckForCurrentTransitionFloor(transform, apostleCollisionHandler.CapsuleCollider2D,
+                    ref currentFloor,
+                    ref currentTransitionFloor,
+                    TransitionFloorType.Ladder);
+            else if (apostleStatusVariables.isClimbingStairs)
+                navigation.CheckForCurrentTransitionFloor(transform, apostleCollisionHandler.CapsuleCollider2D,
+                    ref currentFloor,
+                    ref currentTransitionFloor,
+                    TransitionFloorType.Stairs);
+        }
+
+
         if (Time.time >= currentAggroTime && apostleStatusVariables.isAggroed && !apostleStatusVariables.inAggroRange)
         {
             currentAim = startPointTransform;
@@ -70,6 +103,52 @@ public class ApostleInputHandler : MonoBehaviour
 
         //Debug.Log(!currentAimNode.Equals(null) ? currentAimNode.transform.name : "");
     }
+
+    public bool CheckIfOnTransitionFloor()
+    {
+        return apostleStatusVariables.isClimbingLadder || apostleStatusVariables.isClimbingStairs ||
+               apostleStatusVariables.isClimbingObstacle;
+    }
+
+    private bool CheckIfPositionIsOnSight(Vector3 position)
+    {
+        var startingPoint = position.x > transform.position.x
+            ? apostleCollisionHandler.BoxColliderBounds.topRight
+            : apostleCollisionHandler.BoxColliderBounds.topLeft;
+        var xDirection = position.x - startingPoint.x;
+        var yDirection = position.y - startingPoint.y;
+        var ray = Physics2D.Raycast(startingPoint, new Vector2(xDirection, yDirection), triggerArea.size.x,
+            LayerMask.GetMask("Ground", "Player"));
+        return ray.collider != null && ray.collider.gameObject.layer == LayerMask.NameToLayer("Player");
+    }
+
+    private float MovementDirection(Vector3 position)
+    {
+        return position.x > transform.position.x ? 1 : -1;
+    }
+
+    private void CreateTriggerArea()
+    {
+        this.triggerArea = GetComponent<BoxCollider2D>();
+        var mainCamera = Camera.main;
+        var height = mainCamera.orthographicSize * 2;
+        var width = mainCamera.aspect * height;
+        triggerArea.size = new Vector2((width / 2) + (width / 12), height / 2);
+        triggerArea.offset = new Vector2(width / 5, 0);
+    }
+
+    private void SetTriggerAreaDirection()
+    {
+        if (apostleStatusVariables.facingDirection == FacingDirection.Right && triggerArea.offset.x < 0)
+        {
+            triggerArea.offset = new Vector2(-triggerArea.offset.x, 0);
+        }
+        else if (apostleStatusVariables.facingDirection == FacingDirection.Left && triggerArea.offset.x > 0)
+        {
+            triggerArea.offset = new Vector2(-triggerArea.offset.x, 0);
+        }
+    }
+
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -112,45 +191,6 @@ public class ApostleInputHandler : MonoBehaviour
         {
             currentAggroTime = Time.time + aggroTime;
             apostleStatusVariables.inAggroRange = false;
-        }
-    }
-
-    private bool CheckIfPositionIsOnSight(Vector3 position)
-    {
-        var startingPoint = position.x > transform.position.x
-            ? apostleCollisionHandler.BoxColliderBounds.topRight
-            : apostleCollisionHandler.BoxColliderBounds.topLeft;
-        var xDirection = position.x - startingPoint.x;
-        var yDirection = position.y - startingPoint.y;
-        var ray = Physics2D.Raycast(startingPoint, new Vector2(xDirection, yDirection), triggerArea.size.x,
-            LayerMask.GetMask("Ground", "Player"));
-        return ray.collider != null && ray.collider.gameObject.layer == LayerMask.NameToLayer("Player");
-    }
-
-    private float MovementDirection(Vector3 position)
-    {
-        return position.x > transform.position.x ? 1 : -1;
-    }
-
-    private void CreateTriggerArea()
-    {
-        this.triggerArea = GetComponent<BoxCollider2D>();
-        var mainCamera = Camera.main;
-        var height = mainCamera.orthographicSize * 2;
-        var width = mainCamera.aspect * height;
-        triggerArea.size = new Vector2((width / 2) + (width / 12), height / 2);
-        triggerArea.offset = new Vector2(width / 5, 0);
-    }
-
-    private void SetTriggerAreaDirection()
-    {
-        if (apostleStatusVariables.facingDirection == FacingDirection.Right && triggerArea.offset.x < 0)
-        {
-            triggerArea.offset = new Vector2(-triggerArea.offset.x, 0);
-        }
-        else if (apostleStatusVariables.facingDirection == FacingDirection.Left && triggerArea.offset.x > 0)
-        {
-            triggerArea.offset = new Vector2(-triggerArea.offset.x, 0);
         }
     }
 }

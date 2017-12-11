@@ -76,18 +76,18 @@ public class PlayerStatusController : MonoBehaviour
         else
         {
             if (playerStatusVariables.isClimbingObstacle)
-                navigation.CheckForCurrentTransitionFloor(transform, ref currentFloor, ref currentTransitionFloor,
+                navigation.CheckForCurrentTransitionFloor(transform, collider2D, ref currentFloor,
+                    ref currentTransitionFloor,
                     TransitionFloorType.Obstacle);
+            else if (playerStatusVariables.isClimbingLadder)
+                navigation.CheckForCurrentTransitionFloor(transform, collider2D, ref currentFloor,
+                    ref currentTransitionFloor,
+                    TransitionFloorType.Ladder);
+            else if (playerStatusVariables.isClimbingStairs)
+                navigation.CheckForCurrentTransitionFloor(transform, collider2D, ref currentFloor,
+                    ref currentTransitionFloor,
+                    TransitionFloorType.Stairs);
         }
-//        if (currentFloor.number != 0)
-//            Debug.Log(currentFloor.transform.name);
-//        else if (currentTransitionFloor.transform != null)
-//            Debug.Log(currentTransitionFloor.transform.parent.name);
-//        else
-//        {
-//            Debug.Log(currentFloor.transform);
-//            Debug.Log(currentTransitionFloor.transform);
-//        }
     }
 
     public bool CheckIfOnTransitionFloor()
