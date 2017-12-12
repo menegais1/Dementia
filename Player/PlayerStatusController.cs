@@ -92,6 +92,7 @@ public class PlayerStatusController : MonoBehaviour
                     ref currentTransitionFloor,
                     TransitionFloorType.Stairs);
         }
+        
     }
 
     public bool CheckIfOnTransitionFloor()

@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using UnityEngine;
 
 public struct PatrolPointInfo
 {
@@ -8,13 +11,30 @@ public struct PatrolPointInfo
     public TransitionFloor currentTransitionFloor;
     public TransitionFloorType transitionFloorType;
 
-    public PatrolPointInfo(Transform transform, Collider2D collider2D, TransitionFloorType type)
+    public PatrolPointInfo(Transform transform, Collider2D collider2D, TransitionFloorType type, Navigation navigation)
     {
         this.transform = transform;
         this.floorCollider2D = collider2D;
         this.transitionFloorType = type;
         this.currentFloor = new Floor();
         this.currentTransitionFloor = new TransitionFloor();
+        navigation.CheckForCurrentFloor(transform, floorCollider2D, ref currentFloor, ref currentTransitionFloor);
+        navigation.CheckForCurrentTransitionFloor(transform,
+            ref currentFloor, ref currentTransitionFloor, type);
+    }
+}
+
+public struct NavigationNode
+{
+    public Transform transform;
+    public TransitionFloorType type;
+    public List<Floor> floors;
+
+    public NavigationNode(Transform transform, TransitionFloorType type, List<Floor> floors)
+    {
+        this.transform = transform;
+        this.type = type;
+        this.floors = floors;
     }
 }
 
@@ -30,9 +50,12 @@ public class ApostleInputHandler : MonoBehaviour
 
     private PatrolPointInfo startPointPatrolInfo;
     private PatrolPointInfo endPointPatrolInfo;
+    private List<TransitionFloor> patrolTransitionFloorList;
 
     private float currentAggroTime;
-    private Transform currentAim;
+    private NavigationNode currentAimNode;
+    private List<NavigationNode> navigationNodes;
+
     private Floor currentFloor;
     private TransitionFloor currentTransitionFloor;
 
@@ -60,8 +83,6 @@ public class ApostleInputHandler : MonoBehaviour
         var apostleManager = GetComponent<ApostleManager>();
         this.apostleCollisionHandler = apostleManager.ApostleCollisionHandler;
         this.apostleStatusVariables = apostleManager.ApostleStatusVariables;
-        currentAim = endPointTransform;
-
         if (GameManager.instance.NavigationAcessor == null)
         {
             GameManager.instance.NavigationAcessor =
@@ -71,10 +92,34 @@ public class ApostleInputHandler : MonoBehaviour
         CreateTriggerArea();
 
         startPointPatrolInfo =
-            new PatrolPointInfo(startPointTransform, startPointFloorCollider, startPointTransitionFloorType);
+            new PatrolPointInfo(startPointTransform, startPointFloorCollider, startPointTransitionFloorType,
+                navigation);
 
         endPointPatrolInfo =
-            new PatrolPointInfo(endPointTransform, endPointFloorCollider, endPointTransitionFloorType);
+            new PatrolPointInfo(endPointTransform, endPointFloorCollider, endPointTransitionFloorType, navigation);
+
+        patrolTransitionFloorList = new List<TransitionFloor>();
+
+
+        navigation.CalculatePath(startPointPatrolInfo.currentFloor, endPointPatrolInfo.currentFloor,
+            patrolTransitionFloorList);
+
+        currentAimNode = new NavigationNode(startPointTransform, TransitionFloorType.None, null);
+
+        navigationNodes = new List<NavigationNode>
+        {
+            new NavigationNode(startPointTransform, TransitionFloorType.None, null),
+            new NavigationNode(endPointTransform, TransitionFloorType.None, null),
+        };
+
+        foreach (var transitionFloor in patrolTransitionFloorList)
+        {
+            if (transitionFloor.transform == null) continue;
+
+            navigationNodes.Insert(
+                navigationNodes.FindIndex(lambdaExpression => lambdaExpression.transform == endPointTransform),
+                new NavigationNode(transitionFloor.transform, transitionFloor.type, transitionFloor.floors));
+        }
     }
 
     private void Update()
@@ -108,7 +153,7 @@ public class ApostleInputHandler : MonoBehaviour
 
         if (Time.time >= currentAggroTime && apostleStatusVariables.isAggroed && !apostleStatusVariables.inAggroRange)
         {
-            currentAim = startPointTransform;
+            currentAimNode = new NavigationNode(startPointTransform, TransitionFloorType.None, null);
             apostleStatusVariables.isAggroed = false;
         }
 
@@ -116,20 +161,59 @@ public class ApostleInputHandler : MonoBehaviour
 
         if (apostleStatusVariables.isPatrolling)
         {
-            if (MathHelpers.Approximately(transform.position.x, startPointTransform.position.x, 0.3f))
+            foreach (var node in navigationNodes)
             {
-                currentAim = endPointTransform;
-            }
-            else if (MathHelpers.Approximately(transform.position.x, endPointTransform.position.x, 0.3f))
-            {
-                currentAim = startPointTransform;
+                if (currentAimNode.transform == node.transform &&
+                    MathHelpers.Approximately(transform.position, node.transform.position,
+                        apostleCollisionHandler.CapsuleCollider2D.size.y / 2))
+                {
+                    var index = navigationNodes.FindIndex(lambdaExpression =>
+                        lambdaExpression.Equals(node));
+
+                    if (navigationNodes.Count == index + 1)
+                    {
+                        navigationNodes.Reverse();
+                        break;
+                    }
+
+
+                    currentAimNode = navigationNodes[index + 1];
+                    if (currentAimNode.type == TransitionFloorType.Obstacle)
+                    {
+                        if (currentAimNode.transform.position.y < transform.position.y)
+                        {
+                            currentAimNode = navigationNodes[index + 2];
+                        }
+                    }
+                }
             }
         }
 
-        if (!currentAim.Equals(null))
-            movementDirectionValue =
-                MovementDirection(currentAim.position);
 
+        if (currentAimNode.transform != null)
+        {
+            movementDirectionValue =
+                MovementDirection(currentAimNode.transform.position);
+
+            switch (currentAimNode.type)
+            {
+                case TransitionFloorType.None:
+                    break;
+                case TransitionFloorType.Ladder:
+                    break;
+                case TransitionFloorType.Obstacle:
+                    climbObstacleValue =
+                        MathHelpers.Approximately(transform.position, currentAimNode.transform.position,
+                            apostleCollisionHandler.CapsuleCollider2D.size.y);
+                    break;
+                case TransitionFloorType.Stairs:
+                    break;
+                case TransitionFloorType.Consecutive:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
         //Debug.Log(!currentAimNode.Equals(null) ? currentAimNode.transform.name : "");
     }
 
@@ -185,7 +269,7 @@ public class ApostleInputHandler : MonoBehaviour
         var playerManager = other.GetComponent<PlayerManager>();
         if (CheckIfPositionIsOnSight(playerManager.transform.position))
         {
-            currentAim = playerManager.transform;
+            currentAimNode = new NavigationNode(playerManager.transform, TransitionFloorType.None, null);
 
             apostleStatusVariables.isAggroed = true;
             apostleStatusVariables.inAggroRange = true;
@@ -200,7 +284,7 @@ public class ApostleInputHandler : MonoBehaviour
         var playerManager = other.GetComponent<PlayerManager>();
         if (CheckIfPositionIsOnSight(playerManager.transform.position))
         {
-            currentAim = playerManager.transform;
+            currentAimNode = new NavigationNode(playerManager.transform, TransitionFloorType.None, null);
 
             apostleStatusVariables.isAggroed = true;
             apostleStatusVariables.inAggroRange = true;
@@ -216,7 +300,7 @@ public class ApostleInputHandler : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        if (!currentAim.Equals(null))
+        if (currentAimNode.transform != null)
         {
             currentAggroTime = Time.time + aggroTime;
             apostleStatusVariables.inAggroRange = false;
