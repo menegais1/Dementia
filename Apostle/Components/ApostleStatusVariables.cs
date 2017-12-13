@@ -26,6 +26,9 @@ public class ApostleStatusVariables : MonoBehaviour
 
     public bool isPatrolling;
 
+    public bool isAttacking;
+
+
     public FacingDirection facingDirection;
 
 

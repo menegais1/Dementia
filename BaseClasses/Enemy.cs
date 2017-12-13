@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
@@ -39,26 +40,34 @@ public class Enemy : MonoBehaviour
 
         if (apostleController.AttackPress)
         {
-            PrimaryAttack();
+            if (!apostleStatusVariables.isAttacking)
+            {
+                CoroutineManager.AddCoroutine(PrimaryAttack(), "PrimaryAttackCoroutine", this);
+            }
         }
     }
 
-    public void PrimaryAttack()
+    public IEnumerator PrimaryAttack()
     {
+        apostleStatusVariables.isAttacking = true;
+        yield return new WaitForSeconds(0.6f);
         RaycastHit2D ray = Physics2D.Raycast(
             transform.position,
             apostleStatusVariables.facingDirection == FacingDirection.Right ? Vector2.right : Vector2.right * -1,
             range, LayerMask.GetMask("Player"));
 
-        if (ray.collider != null)
+        if (ray.collider != null &&
+            !Physics.GetIgnoreLayerCollision(LayerMask.NameToLayer("Enemy"), LayerMask.NameToLayer("Player")))
         {
-            var enemy = ray.collider.GetComponent<PlayerStatusController>();
-            if (enemy != null)
+            var player = ray.collider.GetComponent<PlayerStatusController>();
+            if (player != null)
             {
-                enemy.TakeDamage(baseDamage);
+                player.TakeDamage(baseDamage);
             }
         }
-        apostleController.RevokeControl(0.5f, true, ControlTypeToRevoke.AllMovement, this);
+        apostleController.RevokeControl(1f, true, ControlTypeToRevoke.AllMovement, this);
+        apostleStatusVariables.isAttacking = false;
+        CoroutineManager.DeleteCoroutine("PrimaryAttackCoroutine", this);
     }
 
     public void TakeDamage(float damage)
