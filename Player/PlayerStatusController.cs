@@ -72,7 +72,7 @@ public class PlayerStatusController : MonoBehaviour
         {
             lifeBar.value = currentLife;
         }
-        
+
         if (!CheckIfOnTransitionFloor())
         {
             navigation.CheckForCurrentFloor(transform, collider2D, ref currentFloor, ref currentTransitionFloor);
@@ -92,7 +92,6 @@ public class PlayerStatusController : MonoBehaviour
                     ref currentTransitionFloor,
                     TransitionFloorType.Stairs);
         }
-        
     }
 
     public bool CheckIfOnTransitionFloor()

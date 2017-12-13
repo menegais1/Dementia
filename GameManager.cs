@@ -82,7 +82,7 @@ public class GameManager : MonoBehaviour
 
 
         mainMenuSceneName = "Main Menu";
-        mainSceneName = "Prototype";
+        mainSceneName = "Final";
     }
 
 

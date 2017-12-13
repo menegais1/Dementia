@@ -75,6 +75,7 @@ public class PlayerStatusVariables : MonoBehaviour
 
     public bool CheckCanAim()
     {
-        return !isClimbingObstacle && !isClimbingLadder && !isOnAir && !isDodging && !isJogging && !isRunning;
+        return !isClimbingObstacle && !isClimbingLadder && !isOnAir && !isDodging && !isJogging && !isRunning &&
+               !isCrouching;
     }
 }

@@ -156,7 +156,7 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
                 }
                 break;
             case HorizontalMovementState.CrouchWalking:
-                forceApplied = CrouchWalk(playerController.HorizontalMove, 1f);
+                forceApplied = CrouchWalk(playerController.HorizontalMove, 0.75f);
                 break;
             default:
                 Debug.Log("ERRO");
@@ -246,13 +246,14 @@ public class PlayerHorizontalMovement : BasicPhysicsMovement
 
     public void Raise()
     {
-        if (capsuleCollider2D.size.y < characterHeight)
+        if (capsuleCollider2D.size.y < characterHeight &&
+            Physics2D.Raycast(rigidbody2D.position, Vector2.up).distance >= characterHeight)
         {
             capsuleCollider2D.size = new Vector2(capsuleCollider2D.size.x, capsuleCollider2D.size.y + crouchingSpeed);
             capsuleCollider2D.offset =
                 new Vector2(capsuleCollider2D.offset.x, capsuleCollider2D.offset.y + (crouchingSpeed / 2));
         }
-        else
+        else if (MathHelpers.Approximately(capsuleCollider2D.size.y, characterHeight, 0.1f))
         {
             playerStatusVariables.isCrouching = false;
         }

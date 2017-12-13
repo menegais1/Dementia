@@ -10,6 +10,8 @@ public sealed class ApostleController : BasicController
     public bool ClimbObstaclePress { get; private set; }
     public bool ClimbLadderPress { get; private set; }
 
+    public bool AttackPress { get; private set; }
+
     private RevokeControlVariables revokeControlVariables;
     private MonoBehaviour monoBehaviour;
     private ApostleInputHandler apostleInputHandler;
@@ -59,6 +61,17 @@ public sealed class ApostleController : BasicController
     {
     }
 
+    public void CheckForCombatInput()
+    {
+        if (!revokeControlVariables.combatMovementControl)
+        {
+            AttackPress = apostleInputHandler.AttackPressValue;
+        }
+        else
+        {
+            AttackPress = false;
+        }
+    }
 
     private float GetClimbLadderMovement()
     {

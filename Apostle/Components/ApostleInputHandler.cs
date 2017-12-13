@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using UnityEngine;
 
 public struct PatrolPointInfo
@@ -16,7 +15,7 @@ public struct PatrolPointInfo
         this.transform = transform;
         this.floorCollider2D = collider2D;
         this.transitionFloorType = type;
-        this.currentFloor = new Floor();
+        this.currentFloor = new Floor(-1);
         this.currentTransitionFloor = new TransitionFloor();
         navigation.CheckForCurrentFloor(transform, floorCollider2D, ref currentFloor, ref currentTransitionFloor);
         navigation.CheckForCurrentTransitionFloor(transform,
@@ -41,6 +40,7 @@ public struct NavigationNode
 public class ApostleInputHandler : MonoBehaviour
 {
     [SerializeField] private float aggroTime;
+    [SerializeField] private float rangeForAttack;
     [SerializeField] private Transform startPointTransform;
     [SerializeField] private Collider2D startPointFloorCollider;
     [SerializeField] private TransitionFloorType startPointTransitionFloorType;
@@ -67,6 +67,12 @@ public class ApostleInputHandler : MonoBehaviour
 
     private float movementDirectionValue;
     private bool climbObstacleValue;
+    private bool attackPressValue;
+
+    public bool AttackPressValue
+    {
+        get { return attackPressValue; }
+    }
 
     public bool ClimbObstacleValue
     {
@@ -101,9 +107,12 @@ public class ApostleInputHandler : MonoBehaviour
         patrolTransitionFloorList = new List<TransitionFloor>();
 
 
-        navigation.CalculatePath(startPointPatrolInfo.currentFloor, endPointPatrolInfo.currentFloor,
-            patrolTransitionFloorList);
-
+        var teste = new List<Floor>();
+        navigation.CalculatePath(startPointPatrolInfo.currentFloor, endPointPatrolInfo.currentFloor, teste);
+        foreach (var floor in teste)
+        {
+            Debug.Log(floor);
+        }
         currentAimNode = new NavigationNode(startPointTransform, TransitionFloorType.None, null);
 
         navigationNodes = new List<NavigationNode>
@@ -198,6 +207,16 @@ public class ApostleInputHandler : MonoBehaviour
             switch (currentAimNode.type)
             {
                 case TransitionFloorType.None:
+                    if (currentAimNode.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
+                    {
+                        attackPressValue = false;
+                        if (Physics2D.Raycast(transform.position,
+                                currentAimNode.transform.position - transform.position, rangeForAttack,
+                                LayerMask.GetMask("Player")).collider != null)
+                        {
+                            attackPressValue = true;
+                        }
+                    }
                     break;
                 case TransitionFloorType.Ladder:
                     break;
