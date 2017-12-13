@@ -10,9 +10,9 @@ public struct FloorInfo
     public Vector2 startPointY, endPointY;
 }
 
-public struct Floor
+public class Floor
 {
-    public int number;
+    public int number = -1;
     public Transform transform;
     public List<Floor> transitionFloors;
     public FloorInfo FloorInfo;
@@ -346,7 +346,7 @@ public class Navigation : MonoBehaviour
                         lambdaExpression.FloorInfo.startPointY.y <= navigationInfo.colliderBounds.bottomMid.y &&
                         lambdaExpression.FloorInfo.endPointY.y >= navigationInfo.colliderBounds.bottomMid.y);
 
-                    if (floorNumber1.number == -1 || floorNumber2.number == -1) continue;
+                    if (floorNumber1 == null || floorNumber2 == null) continue;
                     transitionFloorList.Add(new TransitionFloor(floorNumber1, floorNumber2,
                         navigationInfo.transform, navigationInfo.colliderBounds,
                         TransitionFloorType.Ladder));
@@ -376,7 +376,7 @@ public class Navigation : MonoBehaviour
                         floorNumber2 = this.floorList.Find(lambdaExpression =>
                             lambdaExpression.transform == navigationInfo.transform);
 
-                        if (floorNumber1.number == -1 || floorNumber2.number == -1) continue;
+                        if (floorNumber1 == null || floorNumber2 == null) continue;
 
                         transitionFloorList.Add(new TransitionFloor(floorNumber1, floorNumber2,
                             boxCollider2D.transform,
@@ -410,7 +410,7 @@ public class Navigation : MonoBehaviour
                         lambdaExpression.FloorInfo.startPointY.y <= bounds2.min.y &&
                         lambdaExpression.FloorInfo.endPointY.y >= bounds2.max.y);
 
-                    if (floorNumber1.number == -1 || floorNumber2.number == -1) continue;
+                    if (floorNumber1 == null || floorNumber2 == null) continue;
 
                     transitionFloorList.Add(new TransitionFloor(floorNumber1, floorNumber2,
                         navigationInfo.transform, navigationInfo.colliderBounds,
@@ -479,7 +479,7 @@ public class Navigation : MonoBehaviour
             lambdaExpression.FloorInfo.endPointX.x >= transform.position.x &&
             lambdaExpression.FloorInfo.startPointY.y <= transform.position.y &&
             lambdaExpression.FloorInfo.endPointY.y >= transform.position.y);
-        Floor currentFloorForTest = new Floor(-1);
+        Floor currentFloorForTest = null;
         Collider2D[] colliders2D = new Collider2D[5];
         foreach (var temporaryFloor in temporaryFloors)
         {
@@ -490,10 +490,11 @@ public class Navigation : MonoBehaviour
             {
                 currentFloorForTest = temporaryFloor;
             }
-            if (currentFloorForTest.number != 0)
+
+            if (currentFloorForTest != null)
                 break;
         }
-        if (currentFloorForTest.number == -1) return;
+        if (currentFloorForTest == null) return;
         if (!MathHelpers.Approximately(currentFloorForTest.transform.rotation.z, 0, float.Epsilon))
         {
             var raycastHit2D = Physics2D
@@ -514,7 +515,7 @@ public class Navigation : MonoBehaviour
             lambdaExpression.FloorInfo.startPointY.y <= transform.position.y &&
             lambdaExpression.FloorInfo.endPointY.y >= transform.position.y &&
             lambdaExpression.collider2D == floorCollider2D);
-        if (temporaryFloor.number == -1) return;
+        if (temporaryFloor == null) return;
 
         currentTransitionFloor = new TransitionFloor();
         currentFloor = temporaryFloor;
@@ -585,7 +586,7 @@ public class Navigation : MonoBehaviour
 
     public List<TransitionFloor> CalculatePath(Floor currentFloor, Floor aimFloor, List<Floor> transitionFloors)
     {
-        if (currentFloor.number == -1 || aimFloor.number == -1) return null;
+        if (currentFloor == null || aimFloor == null) return null;
         if (currentFloor.number == aimFloor.number) return new List<TransitionFloor>();
         Queue<int> queue = new Queue<int>(floorsGraph.vertex);
         Floor[] parent = new Floor[floorsGraph.vertex];
